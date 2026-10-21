@@ -1,0 +1,543 @@
+<Window x:Class="NotchMusic.Views.TodoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:NotchMusic.Helpers"
+        Title="DRANOTCH - To-Do List"
+        Width="430" Height="520" MinWidth="340" MinHeight="360"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="{Binding Settings.AlwaysOnTop}"
+        ShowInTaskbar="False"
+        WindowStartupLocation="Manual">
+
+    <Window.Resources>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+
+        <!-- Small Pill Button Style -->
+        <Style x:Key="SmallPillButton" TargetType="Button">
+            <Setter Property="Background" Value="#221C2E"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="7,3"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#322842"/>
+                                <Setter Property="Foreground" Value="#AF78FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Filter Pill Button Style -->
+        <Style x:Key="FilterPillStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1C1826"/>
+            <Setter Property="Foreground" Value="#888899"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PillBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#2E2840"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Custom CheckBox for To-Do -->
+        <Style x:Key="TodoCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="BoxBorder" Width="18" Height="18" CornerRadius="5"
+                                Background="#1C1829" BorderBrush="#4A3F63" BorderThickness="1.2">
+                            <Path x:Name="CheckMark" Data="M 3 8 L 7 12 L 14 4" Stroke="#FFFFFF" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BoxBorder" Property="Background" Value="#AF78FF"/>
+                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#AF78FF"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#AF78FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Delete Button for To-Do Item -->
+        <Style x:Key="TodoDeleteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#555566"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="DelBorder" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="DelBorder" Property="Background" Value="#33FF4D6D"/>
+                                <Setter Property="Foreground" Value="#FF6B8B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern TextBox for To-Do -->
+        <Style x:Key="TodoTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#161622"/>
+            <Setter Property="Foreground" Value="#EDEDF5"/>
+            <Setter Property="BorderBrush" Value="#3A2E50"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="CaretBrush" Value="#AF78FF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="TxtBorder" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="TxtBorder" Property="BorderBrush" Value="#AF78FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Dark Category ComboBox Style -->
+        <Style x:Key="DarkCategoryComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#161622"/>
+            <Setter Property="Foreground" Value="#D5B6FF"/>
+            <Setter Property="BorderBrush" Value="#3A2E50"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="Border" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="18"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="PART_EditableTextBox"
+                                             Background="Transparent"
+                                             Foreground="{TemplateBinding Foreground}"
+                                             BorderThickness="0"
+                                             Padding="6,2,0,2"
+                                             FontSize="{TemplateBinding FontSize}"
+                                             VerticalContentAlignment="Center"
+                                             CaretBrush="#AF78FF"/>
+                                    <ToggleButton Grid.Column="1"
+                                                  Focusable="False"
+                                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                  ClickMode="Press"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Cursor="Hand">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <Path Data="M 0 0 L 3.5 3.5 L 7 0 Z" Fill="#8A75B0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+
+                            <!-- Popup Dropdown List -->
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom" PopupAnimation="Slide">
+                                <Border Background="#1A1826" BorderBrush="#443460" BorderThickness="1" CornerRadius="8"
+                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        MaxHeight="160" Padding="3" Margin="0,2,0,0">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#7754B5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#E2E2EA"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="Padding" Value="6,4"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ComboBoxItem">
+                                    <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="#32224A"/>
+                                            <Setter Property="Foreground" Value="#AF78FF"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="#412966"/>
+                                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Border x:Name="TodoContainerBorder"
+                Background="#101014"
+                BorderBrush="#382E4D"
+                BorderThickness="1.2"
+                CornerRadius="20"
+                MouseDown="Border_MouseDown">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="4" BlurRadius="16" Opacity="0.65"/>
+            </Border.Effect>
+
+            <Grid Margin="16,14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Header -->
+                    <RowDefinition Height="Auto"/> <!-- Filter Tabs & Categories -->
+                    <RowDefinition Height="Auto"/> <!-- Input New Task -->
+                    <RowDefinition Height="*"/>    <!-- Task List -->
+                </Grid.RowDefinitions>
+
+                <!-- Header: Judul, Ringkasan, Sinkronisasi, Pasang Kembali, Tutup -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="✓" Foreground="#AF78FF" FontSize="16" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="To-Do List" Foreground="#FFFFFF" FontSize="14.5" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Border Background="#231A36" CornerRadius="8" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding TodoSummaryText}" Foreground="#D0B5FF" FontSize="10.5" FontWeight="Medium"/>
+                        </Border>
+
+                        <!-- Tombol Sinkronisasi Google Drive -->
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding SyncGoogleDriveCommand}"
+                                ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="5,2" Margin="6,0,0,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="☁" FontSize="11" Margin="0,0,3,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#7E7294"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                    <Setter Property="Foreground" Value="#AF78FF"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Text="Sync" FontSize="10" Foreground="#D5C5EE"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Tombol Pasang Kembali ke Panel Musik -->
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachTodoCommand}"
+                                ToolTip="Pasang kembali To-Do List ke panel utama" Margin="0,0,4,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⇲" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Pasang ke Musik" FontSize="10.5" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Tombol Tutup / Sembunyikan -->
+                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click"
+                                Content="✕" ToolTip="Tutup jendela To-Do (dapat dibuka kembali via pengaturan atau panel)"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Filter Tabs & Actions -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Filter Tabs -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <Button Style="{StaticResource FilterPillStyle}" Command="{Binding SetTodoFilterCommand}" CommandParameter="All">
+                                <TextBlock Text="Semua">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsAllFilterSelected}" Value="True">
+                                                    <Setter Property="Foreground" Value="#AF78FF"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button>
+                            <Button Style="{StaticResource FilterPillStyle}" Command="{Binding SetTodoFilterCommand}" CommandParameter="Active">
+                                <TextBlock Text="Aktif">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActiveFilterSelected}" Value="True">
+                                                    <Setter Property="Foreground" Value="#AF78FF"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button>
+                            <Button Style="{StaticResource FilterPillStyle}" Command="{Binding SetTodoFilterCommand}" CommandParameter="Completed">
+                                <TextBlock Text="Selesai">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCompletedFilterSelected}" Value="True">
+                                                    <Setter Property="Foreground" Value="#AF78FF"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Bersihkan Tugas Selesai -->
+                        <Button Grid.Column="1" Style="{StaticResource SmallPillButton}" Command="{Binding ClearCompletedTodosCommand}" 
+                                Visibility="{Binding HasCompletedTodos, Converter={StaticResource BoolToVis}}"
+                                ToolTip="Hapus semua tugas yang selesai" Padding="6,2">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🗑" FontSize="10" Margin="0,0,3,0"/>
+                                <TextBlock Text="Bersihkan Selesai" FontSize="10.5"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Kategori Filter Chips -->
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                  Visibility="{Binding HasCategories, Converter={StaticResource BoolToVis}}" Margin="0,5,0,0">
+                        <ItemsControl ItemsSource="{Binding AvailableCategories}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource FilterPillStyle}"
+                                            Command="{Binding DataContext.SetCategoryFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}" Margin="0,0,4,0" Padding="6,1.5">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="#" Foreground="#AF78FF" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding}" FontSize="10" Foreground="#B0B0C0"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+
+                <!-- Input Tugas Baru -->
+                <Grid Grid.Row="2" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <!-- Dropdown / Input Kategori -->
+                        <ColumnDefinition Width="105"/>
+                        <!-- Input Teks Tugas -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Tombol Tambah (+) -->
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox Grid.Column="0" 
+                              IsEditable="True"
+                              ItemsSource="{Binding ExistingCategories}"
+                              Text="{Binding NewTodoCategory, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource DarkCategoryComboBoxStyle}"
+                              Margin="0,0,5,0" VerticalAlignment="Center"
+                              ToolTip="Pilih atau ketik kategori/tag tugas (misal: KERJA)"/>
+
+                    <Grid Grid.Column="1" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <TextBox x:Name="NewTodoTextBox" 
+                                 Text="{Binding NewTodoTitle, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource TodoTextBoxStyle}" VerticalAlignment="Center">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Return" Command="{Binding AddTodoCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+
+                        <!-- Watermark -->
+                        <TextBlock Text="Tulis tugas lalu Enter..." Foreground="#666677" FontSize="11"
+                                   IsHitTestVisible="False" Margin="8,0,0,0" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=NewTodoTextBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <Button Grid.Column="2" Command="{Binding AddTodoCommand}" ToolTip="Tambah Tugas"
+                            Background="#AF78FF" Foreground="#101014" Width="28" Height="28" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <TextBlock Text="+" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                               FontWeight="Bold" FontSize="15" Foreground="#101014"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#C296FF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+
+                <!-- Daftar Tugas (Scrollable) -->
+                <Border Grid.Row="3" Background="#0C0C12" CornerRadius="10" Padding="6,4">
+                    <Grid>
+                        <!-- Tampilan saat kosong -->
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Visibility="{Binding FilteredTodos.IsEmpty, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="🎉" FontSize="20" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                            <TextBlock Text="Tidak ada tugas saat ini" Foreground="#666677" FontSize="11.5" HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- List Item -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False">
+                            <ItemsControl ItemsSource="{Binding FilteredTodos}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#14141C" CornerRadius="8" Padding="7,6" Margin="0,2,0,2">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#1C1C28"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Checkbox -->
+                                                <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                                                          Style="{StaticResource TodoCheckBoxStyle}"
+                                                          VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                                                <!-- Judul Tugas & Kategori Tag -->
+                                                <DockPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
+                                                            Background="#2C1D42" BorderBrush="#7754B5" BorderThickness="1"
+                                                            CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Category}" Foreground="#D6B5FF" FontSize="9.5" FontWeight="Bold"/>
+                                                    </Border>
+
+                                                    <TextBlock Text="{Binding TaskText}" VerticalAlignment="Center"
+                                                               FontSize="11.5" TextWrapping="Wrap">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#E2E2EA"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#666677"/>
+                                                                        <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DockPanel>
+
+                                                <!-- Tombol Hapus -->
+                                                <Button Grid.Column="2" Command="{Binding DeleteCommand}"
+                                                        Style="{StaticResource TodoDeleteButtonStyle}"
+                                                        ToolTip="Hapus tugas" Width="20" Height="20" VerticalAlignment="Center">
+                                                    <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

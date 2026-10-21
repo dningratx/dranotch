@@ -1,0 +1,331 @@
+<Window x:Class="NotchMusic.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:NotchMusic.Helpers"
+        Title="Pengaturan DRANOTCH" Height="580" Width="520"
+        WindowStartupLocation="CenterScreen"
+        Background="#18181C" Foreground="#EEEEEE"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,6"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Pengaturan DRANOTCH" FontSize="20" FontWeight="Bold" Foreground="#AF78FF"/>
+            <TextBlock Text="Sesuaikan panel DRANOTCH dan integrasi lirik" Margin="0,4,0,0" Foreground="#888888"/>
+        </StackPanel>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- YouTube Music Player -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Pemutar YouTube Music (Built-in WebView2)" FontWeight="SemiBold" Foreground="#E0E0FF" Margin="0,0,0,6"/>
+                        <TextBlock Text="Login dan putar YouTube Music langsung di dalam aplikasi. Login akun Google tersimpan permanen dan kontrol media otomatis tersambung ke DRANOTCH." 
+                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,10"/>
+                        <Button Content="Buka Pemutar YouTube Music" Click="OpenYouTubeMusic_Click" 
+                                Background="#381D2A" Foreground="#FFADC2" BorderThickness="0" Padding="12,6"
+                                HorizontalAlignment="Left" Cursor="Hand"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tampilan & Perilaku -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Tampilan &amp; Perilaku" FontWeight="SemiBold" Foreground="#E0E0FF" Margin="0,0,0,8"/>
+                        <CheckBox Content="Jalankan otomatis saat login Windows" IsChecked="{Binding StartWithWindows}"/>
+                        <CheckBox Content="Always On Top (Selalu di atas jendela lain)" IsChecked="{Binding AlwaysOnTop}"/>
+                        <CheckBox Content="Perluas panel otomatis saat mouse diarahkan (Hover)" IsChecked="{Binding ExpandOnHover}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Komponen Tampilan (Musik & To-Do List) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Komponen Tampilan" FontWeight="SemiBold" Foreground="#E0E0FF" Margin="0,0,0,6"/>
+                        <TextBlock Text="Pilih komponen yang ingin ditampilkan pada panel DRANOTCH:" 
+                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,8"/>
+
+                        <RadioButton GroupName="ComponentModeGroup" Content="Musik &amp; To-Do List (Keduanya)"
+                                     IsChecked="{Binding IsComponentBoth}"/>
+                        <RadioButton GroupName="ComponentModeGroup" Content="Hanya Pemutar Musik"
+                                     IsChecked="{Binding IsComponentMusicOnly}"/>
+                        <RadioButton GroupName="ComponentModeGroup" Content="Hanya To-Do List"
+                                     IsChecked="{Binding IsComponentTodoOnly}"/>
+
+                        <!-- Opsi Lepas / Pisahkan To-Do List -->
+                        <Border Margin="0,8,0,0" Padding="10,8" Background="#161420" CornerRadius="6"
+                                Visibility="{Binding IsComponentMusicOnly, Converter={StaticResource InverseBoolToVis}}">
+                            <StackPanel>
+                                <CheckBox Content="Pisahkan To-Do List ke jendela terpisah (tidak menempel dengan musik)"
+                                          IsChecked="{Binding IsTodoDetached}" Margin="0"/>
+                                <TextBlock Text="To-Do List akan muncul sebagai jendela melayang tersendiri yang dapat dipindahkan ke mana saja."
+                                           FontSize="11" Foreground="#888899" TextWrapping="Wrap" Margin="22,3,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Lirik -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Lirik &amp; Integrasi LRCLIB" FontWeight="SemiBold" Foreground="#E0E0FF" Margin="0,0,0,8"/>
+                        <CheckBox Content="Cari lirik otomatis di LRCLIB saat lagu berganti" IsChecked="{Binding AutoSearchLyrics}"/>
+                        
+                        <TextBlock Text="Catatan privasi: Pencarian mengirim metadata lagu (judul, artis, album) ke API publik LRCLIB." 
+                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,4,0,10"/>
+
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Ukuran font lirik (Mode Lyrics):" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding LyricsFontSize, StringFormat={}{0:0} pt}" FontWeight="Bold" Foreground="#AF78FF"/>
+                        </Grid>
+                        <Slider Minimum="12" Maximum="32" Value="{Binding LyricsFontSize}" Margin="0,2,0,8"/>
+
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Transparansi latar belakang lirik:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding LyricsOpacity, StringFormat={}{0:P0}}" FontWeight="Bold" Foreground="#AF78FF"/>
+                        </Grid>
+                        <Slider Minimum="0.3" Maximum="1.0" Value="{Binding LyricsOpacity}" Margin="0,2,0,8"/>
+
+                        <Button Content="Bersihkan Cache Lirik" Command="{Binding ClearCacheCommand}" 
+                                Background="#322842" Foreground="#D5B0FF" BorderThickness="0" Padding="10,6" Margin="0,6,0,0"
+                                HorizontalAlignment="Left" Cursor="Hand"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Integrasi Google Drive (To-Do List Cloud Sync) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Sinkronisasi Google Drive (To-Do List)" FontWeight="SemiBold" Foreground="#E0E0FF"/>
+                                <TextBlock Text="Sinkronkan to-do list antar komputer / laptop lewat Google Drive" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            
+                            <!-- Status Indicator Badge -->
+                            <Border Grid.Column="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#2D2233"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                <Setter Property="Background" Value="#173822"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Belum Terhubung"/>
+                                            <Setter Property="Foreground" Value="#FFAEAE"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                    <Setter Property="Text" Value="✓ Terhubung"/>
+                                                    <Setter Property="Foreground" Value="#81C784"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </Grid>
+
+                        <!-- Saat SUDAH Terhubung -->
+                        <StackPanel Visibility="{Binding IsGoogleDriveConnected, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                            <TextBlock Text="{Binding GoogleDriveUserEmail, StringFormat='Akun Google: {0}'}" FontWeight="Medium" Foreground="#E2D2FF" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding GoogleDriveLastSyncFormatted, StringFormat='Terakhir sinkron: {0}'}" FontSize="11" Foreground="#888899" Margin="0,0,0,10"/>
+
+                            <CheckBox Content="Otomatis sinkronkan saat ada perubahan tugas" IsChecked="{Binding GoogleDriveAutoSync}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="Sinkronkan Sekarang" Command="{Binding SyncGoogleDriveNowCommand}"
+                                        Background="#322842" Foreground="#D5B0FF" BorderThickness="0" Padding="12,6" Margin="0,0,8,0" Cursor="Hand"/>
+                                <Button Content="Putuskan Sambungan" Command="{Binding DisconnectGoogleDriveCommand}"
+                                        Background="#3A2026" Foreground="#FF99AA" BorderThickness="0" Padding="12,6" Cursor="Hand"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Saat BELUM Terhubung -->
+                        <StackPanel Visibility="{Binding IsGoogleDriveConnected, Converter={StaticResource InverseBoolToVis}}" Margin="0,6,0,0">
+                            <TextBlock Text="Cukup login dengan akun Google/Gmail Anda untuk menyinkronkan tugas secara otomatis antar perangkat." 
+                                       FontSize="11.5" Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                            <Button Content="Hubungkan Akun Google" Command="{Binding ConnectGoogleDriveCommand}"
+                                    IsEnabled="{Binding IsGoogleDriveConfigured}"
+                                    Background="#5D3A9B" Foreground="#FFFFFF" FontWeight="SemiBold" BorderThickness="0" Padding="16,8"
+                                    HorizontalAlignment="Left" Cursor="Hand"/>
+
+                            <TextBlock Text="{Binding GoogleDriveSyncStatus}" Foreground="#BA98F5" FontSize="11" Margin="0,6,0,8"/>
+
+                            <!-- Opsi Kredensial Kustom (Opsional) -->
+                            <Button Content="Opsi Lanjutan: Gunakan Kredensial Kustom ▾" Command="{Binding ToggleCustomCredentialsCommand}"
+                                    Background="Transparent" Foreground="#888899" BorderThickness="0" Padding="0,4"
+                                    HorizontalAlignment="Left" Cursor="Hand" FontSize="11"/>
+
+                            <StackPanel Visibility="{Binding ShowCustomCredentials, Converter={StaticResource BoolToVis}}" Margin="0,6,0,0">
+                                <TextBlock Text="Impor file credentials.json atau masukkan Client ID sendiri jika ingin menggunakan project Google Cloud pribadi:" 
+                                           FontSize="10.5" Foreground="#888888" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                <Button Content="Impor File credentials.json" Command="{Binding ImportCredentialsCommand}"
+                                        Background="#362C4A" Foreground="#E0C2FF" BorderThickness="0" Padding="10,5"
+                                        HorizontalAlignment="Left" Cursor="Hand" Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Client ID Kustom:" FontSize="10.5" Foreground="#888899" Margin="0,2"/>
+                                <TextBox Text="{Binding GoogleDriveClientId, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
+
+                                <TextBlock Text="Client Secret Kustom:" FontSize="10.5" Foreground="#888899" Margin="0,2"/>
+                                <TextBox Text="{Binding GoogleDriveClientSecret, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Hotkey Global -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Hotkey Global" FontWeight="SemiBold" Foreground="#E0E0FF" Margin="0,0,0,8"/>
+                        
+                        <TextBlock Text="Tampilkan / Sembunyikan Panel:" Margin="0,2"/>
+                        <TextBox Text="{Binding ToggleVisibilityHotkey, UpdateSourceTrigger=PropertyChanged}" 
+                                 Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="6" Margin="0,2,0,8"/>
+
+                        <TextBlock Text="Ganti Mode Lirik (Lyrics Mode):" Margin="0,2"/>
+                        <TextBox Text="{Binding ToggleLyricsHotkey, UpdateSourceTrigger=PropertyChanged}" 
+                                 Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="6" Margin="0,2,0,8"/>
+
+                        <TextBlock Text="Contoh kombinasi: Ctrl+Alt+N, Ctrl+Shift+M" FontSize="11" Foreground="#777777"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Pembaruan Aplikasi (Auto-Update) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Pembaruan Aplikasi (Update)" FontWeight="SemiBold" Foreground="#E0E0FF"/>
+                                <TextBlock Text="{Binding CurrentVersion, StringFormat='Versi aplikasi saat ini: v{0}'}" 
+                                           FontSize="11.5" Foreground="#AF78FF" Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="Periksa Pembaruan" Command="{Binding CheckUpdateCommand}"
+                                    IsEnabled="{Binding IsCheckingUpdate, Converter={StaticResource InverseBoolToVis}}"
+                                    Background="#322842" Foreground="#D5B0FF" BorderThickness="0" Padding="12,6" Cursor="Hand" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <CheckBox Content="Periksa pembaruan otomatis saat aplikasi dijalankan" IsChecked="{Binding AutoCheckUpdates}"/>
+
+                        <!-- Status Text -->
+                        <TextBlock Text="{Binding UpdateStatus}" Foreground="#CCCCCC" FontSize="11.5" Margin="0,4,0,4" TextWrapping="Wrap"/>
+
+                        <!-- Update Tersedia Panel -->
+                        <Border Visibility="{Binding HasAvailableUpdate, Converter={StaticResource BoolToVis}}"
+                                Background="#2A1C36" BorderBrush="#8A4FA8" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,6,0,0">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding AvailableUpdate.Title}" FontWeight="Bold" Foreground="#FFFFFF" FontSize="13"/>
+                                        <TextBlock Text="{Binding AvailableUpdate.UpdateTypeLabel}" FontSize="11" Foreground="#FFAEF2" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding AvailableUpdate.Version, StringFormat='v{0}'}" 
+                                               FontWeight="Bold" Foreground="#D199FF" FontSize="14" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <!-- Changelog -->
+                                <TextBlock Text="Catatan Pembaruan:" FontSize="11" Foreground="#AAAABB" Margin="0,4,0,2"/>
+                                <Border Background="#161220" CornerRadius="4" Padding="8" MaxHeight="100" Margin="0,0,0,8">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <TextBlock Text="{Binding AvailableUpdate.Changelog}" FontSize="11" Foreground="#DDDDDD" TextWrapping="Wrap"/>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <!-- Download Progress Bar -->
+                                <StackPanel Visibility="{Binding IsDownloadingUpdate, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8">
+                                    <Grid Margin="0,0,0,3">
+                                        <TextBlock Text="Mengunduh installer pembaruan..." FontSize="11" Foreground="#CCCCCC"/>
+                                        <TextBlock Text="{Binding DownloadProgress, StringFormat='{}{0:0}%'}" FontSize="11" FontWeight="Bold" Foreground="#AF78FF" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100" Height="6" Foreground="#AF78FF" Background="#161220" BorderThickness="0"/>
+                                </StackPanel>
+
+                                <!-- Tombol Aksi Update -->
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <Button Content="Update Sekarang (Unduh &amp; Pasang)" Command="{Binding DownloadAndInstallUpdateCommand}"
+                                            IsEnabled="{Binding IsDownloadingUpdate, Converter={StaticResource InverseBoolToVis}}"
+                                            Background="#8A4FA8" Foreground="#FFFFFF" FontWeight="SemiBold" BorderThickness="0" Padding="14,6" Margin="0,0,8,0" Cursor="Hand"/>
+                                    <Button Content="Buka Halaman Rilis" Command="{Binding OpenReleasePageCommand}"
+                                            Background="#362C4A" Foreground="#E0C2FF" BorderThickness="0" Padding="12,6" Cursor="Hand"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Opsi Lanjutan: URL Server Pembaruan Kustom -->
+                        <Button Content="Opsi Lanjutan: URL Server Pembaruan (Hosting Sendiri) ▾" Command="{Binding ToggleCustomUpdateUrlCommand}"
+                                Background="Transparent" Foreground="#888899" BorderThickness="0" Padding="0,4"
+                                HorizontalAlignment="Left" Cursor="Hand" FontSize="11" Margin="0,6,0,0"/>
+
+                        <StackPanel Visibility="{Binding ShowCustomUpdateUrl, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                            <TextBlock Text="Masukkan URL manifest version.json (contoh: https://dralogy.com/dranotch/version.json). Kosongkan untuk menggunakan rilis resmi GitHub:" 
+                                       FontSize="10.5" Foreground="#888888" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding CustomUpdateUrl, UpdateSourceTrigger=PropertyChanged}" 
+                                     Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="6" Margin="0,0,0,4"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Margin="0,14,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,16,0"/>
+            <Button Content="Tutup" Click="CloseButton_Click" Background="#AF78FF" Foreground="#121216" 
+                    FontWeight="SemiBold" BorderThickness="0" Padding="18,6" Cursor="Hand"/>
+        </StackPanel>
+    </Grid>
+</Window>

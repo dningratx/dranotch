@@ -1,0 +1,170 @@
+<Window x:Class="NotchMusic.Views.YouTubeMusicWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="YouTube Music - DRANOTCH Player"
+        Width="1080" Height="720" MinWidth="480" MinHeight="360"
+        WindowStartupLocation="CenterScreen"
+        Background="#0E0E12" Foreground="#EEEEEE">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="42" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#252533"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#353548"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#555566"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WindowCaptionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#262636"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CloseWindowButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowCaptionButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E81123"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="42"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Custom Dark Title Bar -->
+        <Border Grid.Row="0" Background="#14141B" BorderBrush="#252535" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: App Branding & Navigation -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                    <!-- YouTube Music Icon badge -->
+                    <Border Width="24" Height="24" CornerRadius="12" Background="#FF0033" Margin="0,0,8,0">
+                        <TextBlock Text="▶" Foreground="#FFFFFF" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/>
+                    </Border>
+                    <TextBlock Text="YouTube Music" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <Border Background="#2C203E" CornerRadius="4" Padding="5,2" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <TextBlock Text="DRANOTCH Player" Foreground="#AF78FF" FontSize="10" FontWeight="SemiBold"/>
+                    </Border>
+
+                    <!-- Nav Controls -->
+                    <StackPanel Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Button x:Name="BackButton" Style="{StaticResource NavButtonStyle}" Content="◀" ToolTip="Kembali" Click="BackButton_Click"/>
+                        <Button x:Name="ForwardButton" Style="{StaticResource NavButtonStyle}" Content="▶" ToolTip="Maju" Click="ForwardButton_Click"/>
+                        <Button Style="{StaticResource NavButtonStyle}" Content="⟳" ToolTip="Muat Ulang (Refresh)" Click="ReloadButton_Click"/>
+                        <Button Style="{StaticResource NavButtonStyle}" Content="🏠" ToolTip="Beranda YouTube Music" Click="HomeButton_Click"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Center: Drag Area & URL / Status indicator -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock x:Name="StatusText" Text="Tersambung ke DRANOTCH" Foreground="#77778C" FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Right: Window Caption Controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource WindowCaptionButtonStyle}" Content="🗕" ToolTip="Minimize" Click="MinimizeButton_Click"/>
+                    <Button x:Name="MaximizeButton" Style="{StaticResource WindowCaptionButtonStyle}" Content="🗖" ToolTip="Maximize" Click="MaximizeButton_Click"/>
+                    <Button Style="{StaticResource CloseWindowButtonStyle}" Content="✕" ToolTip="Tutup ke latar belakang (Lagu tetap jalan)" Click="CloseButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Tip Notice Banner -->
+        <Border Grid.Row="1" Background="#1A1826" BorderBrush="#302B45" BorderThickness="0,0,0,1" Padding="12,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="💡 Info:" Foreground="#AF78FF" FontWeight="Bold" FontSize="11" Margin="0,0,6,0"/>
+                    <TextBlock Text="Silakan login ke akun Google / YouTube Music Anda. Sesi login akan tersimpan otomatis. Saat lagu diputar, lirik dan kontrol akan sinkron ke DRANOTCH." 
+                               Foreground="#C4BED8" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Sembunyikan Pesan" Click="DismissTip_Click" Background="Transparent" Foreground="#8888AA" BorderThickness="0" FontSize="11" Cursor="Hand" Margin="8,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area: WebView2 -->
+        <Grid Grid.Row="2">
+            <!-- Loading Indicator before WebView2 is ready -->
+            <StackPanel x:Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
+                <TextBlock Text="Memuat YouTube Music..." Foreground="#AF78FF" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <ProgressBar IsIndeterminate="True" Width="180" Height="4" Foreground="#AF78FF" Background="#22222E" BorderThickness="0"/>
+            </StackPanel>
+
+            <wv2:WebView2 x:Name="webView"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Visibility="Hidden"/>
+        </Grid>
+    </Grid>
+</Window>

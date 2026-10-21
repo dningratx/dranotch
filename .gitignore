@@ -1,0 +1,20 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+dist/
+
+# Visual Studio / Rider / VSCode
+.vs/
+*.user
+*.suo
+.idea/
+.vscode/
+
+# Temporary / Log files
+*.tmp
+*.log
+crash.log
