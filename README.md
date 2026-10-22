@@ -48,6 +48,11 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - 🎵 **Hanya Pemutar Musik**: Tampilan murni pemutar musik tanpa elemen To-Do.
 - ✅ **Hanya To-Do List**: Transformasi DRANOTCH menjadi widget produktivitas murni dengan notch ringkas dan ticker tugas.
 
+### 🖤 5. Tampilan Estetik OLED Monokrom & Kontrol Mandiri *(Baru di v1.2.1)*
+- **Deep Black Palette**: Desain antarmuka bernuansa hitam pekat (*true dark / OLED*) yang ramping, ramah di mata untuk penggunaan malam hari, dan hemat daya.
+- **Kontras Tinggi & Bersih**: Aksen monokrom putih dan abu-abu terang yang tajam pada tombol kontrol, teks, dan status lagu.
+- **Tombol Minimize Mandiri**: Saat mode To-Do List terpisah (*detached*), tombol minimize (`▴`) tetap tersedia secara independen di kedua jendela (Musik dan To-Do) untuk fleksibilitas maksimal.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -56,7 +61,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 | :--- | :--- |
 | **Compact Notch** | Menampilkan artwork album, status lagu/lirik berjalan, ticker tugas aktif, dan tombol putar/jeda. |
 | **Expanded Panel** | Panel gabungan kontrol musik lengkap, progress seekbar, lirik, dan daftar tugas To-Do. |
-| **Detached To-Do** | Jendela To-Do mandiri dengan tema gelap elegan, dukungan drag & drop bebas, dan auto-save posisi. |
+| **Detached To-Do** | Jendela To-Do mandiri dengan tema gelap OLED monokrom, kontrol minimize independen, drag & drop bebas, dan auto-save posisi. |
 | **Lyrics Overlay** | Tampilan lirik berukuran besar dengan scrolling halus otomatis mengikuti vokal lagu. |
 
 ---
