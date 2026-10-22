@@ -41,4 +41,5 @@ public class AppSettings
     public double TodoWindowTop { get; set; } = -1;
     public double TodoWindowWidth { get; set; } = 420;
     public double TodoWindowHeight { get; set; } = 480;
+    public bool IsTodoWindowCompact { get; set; } = false;
 }

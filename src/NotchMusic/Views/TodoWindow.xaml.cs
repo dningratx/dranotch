@@ -22,6 +22,14 @@ public partial class TodoWindow : Window
         Loaded += TodoWindow_Loaded;
         LocationChanged += TodoWindow_LocationChanged;
         SizeChanged += TodoWindow_SizeChanged;
+
+        _viewModel.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(MainViewModel.IsTodoWindowCompact))
+            {
+                Dispatcher.Invoke(() => UpdateCompactMode(_viewModel.IsTodoWindowCompact));
+            }
+        };
     }
 
     private void TodoWindow_Loaded(object sender, RoutedEventArgs e)
@@ -45,10 +53,38 @@ public partial class TodoWindow : Window
             }
         }
 
-        if (s.TodoWindowWidth >= MinWidth) Width = s.TodoWindowWidth;
-        if (s.TodoWindowHeight >= MinHeight) Height = s.TodoWindowHeight;
+        UpdateCompactMode(_viewModel.IsTodoWindowCompact);
 
         WindowHelper.EnsureInVisibleScreen(this);
+    }
+
+    private void UpdateCompactMode(bool isCompact)
+    {
+        if (isCompact)
+        {
+            if (ActualWidth >= 300 && ActualHeight >= 200)
+            {
+                _settingsService.CurrentSettings.TodoWindowWidth = ActualWidth;
+                _settingsService.CurrentSettings.TodoWindowHeight = ActualHeight;
+                _settingsService.Save();
+            }
+
+            MinWidth = 280;
+            MinHeight = 0;
+            Width = 380;
+            Height = 72;
+        }
+        else
+        {
+            MinWidth = 340;
+            MinHeight = 360;
+
+            var s = _settingsService.CurrentSettings;
+            Width = s.TodoWindowWidth >= 340 ? s.TodoWindowWidth : 420;
+            Height = s.TodoWindowHeight >= 360 ? s.TodoWindowHeight : 480;
+        }
+
+        Dispatcher.InvokeAsync(() => WindowHelper.EnsureInVisibleScreen(this));
     }
 
     private void TodoWindow_LocationChanged(object? sender, EventArgs e)
@@ -63,7 +99,7 @@ public partial class TodoWindow : Window
 
     private void TodoWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (WindowState == WindowState.Normal && ActualWidth >= MinWidth && ActualHeight >= MinHeight)
+        if (!_viewModel.IsTodoWindowCompact && WindowState == WindowState.Normal && ActualWidth >= MinWidth && ActualHeight >= MinHeight)
         {
             _settingsService.CurrentSettings.TodoWindowWidth = ActualWidth;
             _settingsService.CurrentSettings.TodoWindowHeight = ActualHeight;

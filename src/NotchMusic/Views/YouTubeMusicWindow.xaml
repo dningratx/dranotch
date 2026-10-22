@@ -110,8 +110,8 @@
                         <TextBlock Text="▶" Foreground="#FFFFFF" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/>
                     </Border>
                     <TextBlock Text="YouTube Music" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <Border Background="#2C203E" CornerRadius="4" Padding="5,2" Margin="0,0,12,0" VerticalAlignment="Center">
-                        <TextBlock Text="DRANOTCH Player" Foreground="#AF78FF" FontSize="10" FontWeight="SemiBold"/>
+                    <Border Background="#1E1E24" BorderBrush="#2E2E36" BorderThickness="1" CornerRadius="4" Padding="5,2" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <TextBlock Text="DRANOTCH Player" Foreground="#CCCCCC" FontSize="10" FontWeight="SemiBold"/>
                     </Border>
 
                     <!-- Nav Controls -->
@@ -138,16 +138,16 @@
         </Border>
 
         <!-- Tip Notice Banner -->
-        <Border Grid.Row="1" Background="#1A1826" BorderBrush="#302B45" BorderThickness="0,0,0,1" Padding="12,6">
+        <Border Grid.Row="1" Background="#141418" BorderBrush="#24242A" BorderThickness="0,0,0,1" Padding="12,6">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="💡 Info:" Foreground="#AF78FF" FontWeight="Bold" FontSize="11" Margin="0,0,6,0"/>
+                    <TextBlock Text="💡 Info:" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11" Margin="0,0,6,0"/>
                     <TextBlock Text="Silakan login ke akun Google / YouTube Music Anda. Sesi login akan tersimpan otomatis. Saat lagu diputar, lirik dan kontrol akan sinkron ke DRANOTCH." 
-                               Foreground="#C4BED8" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                               Foreground="#CCCCCC" FontSize="11" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
                 <Button Grid.Column="1" Content="Sembunyikan Pesan" Click="DismissTip_Click" Background="Transparent" Foreground="#8888AA" BorderThickness="0" FontSize="11" Cursor="Hand" Margin="8,0,0,0"/>
             </Grid>
@@ -157,8 +157,8 @@
         <Grid Grid.Row="2">
             <!-- Loading Indicator before WebView2 is ready -->
             <StackPanel x:Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
-                <TextBlock Text="Memuat YouTube Music..." Foreground="#AF78FF" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                <ProgressBar IsIndeterminate="True" Width="180" Height="4" Foreground="#AF78FF" Background="#22222E" BorderThickness="0"/>
+                <TextBlock Text="Memuat YouTube Music..." Foreground="#FFFFFF" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <ProgressBar IsIndeterminate="True" Width="180" Height="4" Foreground="#FFFFFF" Background="#22222E" BorderThickness="0"/>
             </StackPanel>
 
             <wv2:WebView2 x:Name="webView"

@@ -124,7 +124,25 @@ public class MainViewModel : ViewModelBase
     public bool ShowTodoSection => ComponentDisplayMode != "MusicOnly";
     public bool ShowTodoTicker => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly");
     public bool ShowTodoSectionInMainWindow => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly");
+    public bool ShowMusicMinimizeButton => !ShowTodoSectionInMainWindow;
     public bool ShowSplitter => ShowMusicSection && ShowTodoSectionInMainWindow;
+
+    public bool IsTodoWindowCompact
+    {
+        get => Settings.IsTodoWindowCompact;
+        set
+        {
+            if (Settings.IsTodoWindowCompact != value)
+            {
+                Settings.IsTodoWindowCompact = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsTodoWindowCompact));
+                OnPropertyChanged(nameof(IsTodoWindowExpanded));
+            }
+        }
+    }
+
+    public bool IsTodoWindowExpanded => !IsTodoWindowCompact;
 
     public bool ShowCompactMusicView => IsCompactMode && ShowMusicSection;
     public bool ShowCompactTodoOnlyView => IsCompactMode && !ShowMusicSection && ShowTodoSection;
@@ -398,6 +416,8 @@ public class MainViewModel : ViewModelBase
     public ICommand SyncGoogleDriveCommand { get; }
     public ICommand DetachTodoCommand { get; }
     public ICommand AttachTodoCommand { get; }
+    public ICommand MinimizeTodoWindowCommand { get; }
+    public ICommand ExpandTodoWindowCommand { get; }
 
     public MainViewModel(
         IMediaSessionService mediaService,
@@ -523,6 +543,8 @@ public class MainViewModel : ViewModelBase
 
         DetachTodoCommand = new RelayCommand(() => IsTodoDetached = true);
         AttachTodoCommand = new RelayCommand(() => IsTodoDetached = false);
+        MinimizeTodoWindowCommand = new RelayCommand(() => IsTodoWindowCompact = true);
+        ExpandTodoWindowCommand = new RelayCommand(() => IsTodoWindowCompact = false);
 
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
@@ -545,6 +567,7 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowTodoSection));
         OnPropertyChanged(nameof(ShowTodoTicker));
         OnPropertyChanged(nameof(ShowTodoSectionInMainWindow));
+        OnPropertyChanged(nameof(ShowMusicMinimizeButton));
         OnPropertyChanged(nameof(ShowSplitter));
         OnPropertyChanged(nameof(ShowCompactMusicView));
         OnPropertyChanged(nameof(ShowCompactTodoOnlyView));

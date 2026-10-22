@@ -74,7 +74,7 @@
 
         <!-- Filter Pill for To-Do -->
         <Style x:Key="FilterPillStyle" TargetType="Button">
-            <Setter Property="Background" Value="#1C1828"/>
+            <Setter Property="Background" Value="#16161A"/>
             <Setter Property="Foreground" Value="#888899"/>
             <Setter Property="FontSize" Value="10.5"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -89,7 +89,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="PillBorder" Property="Background" Value="#2E2840"/>
+                                <Setter TargetName="PillBorder" Property="Background" Value="#282830"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -105,19 +105,19 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <Border x:Name="BoxBorder" Width="18" Height="18" CornerRadius="5"
-                                Background="#1C1829" BorderBrush="#4A3F63" BorderThickness="1.2">
-                            <Path x:Name="CheckMark" Data="M 3 8 L 7 12 L 14 4" Stroke="#FFFFFF" StrokeThickness="1.8"
+                                Background="#16161A" BorderBrush="#383840" BorderThickness="1.2">
+                            <Path x:Name="CheckMark" Data="M 3 8 L 7 12 L 14 4" Stroke="#000000" StrokeThickness="1.8"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="BoxBorder" Property="Background" Value="#AF78FF"/>
-                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#AF78FF"/>
+                                <Setter TargetName="BoxBorder" Property="Background" Value="#FFFFFF"/>
+                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#FFFFFF"/>
                                 <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#AF78FF"/>
+                                <Setter TargetName="BoxBorder" Property="BorderBrush" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -150,13 +150,13 @@
 
         <!-- Modern TextBox for To-Do -->
         <Style x:Key="TodoTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="#161622"/>
+            <Setter Property="Background" Value="#141418"/>
             <Setter Property="Foreground" Value="#EDEDF5"/>
-            <Setter Property="BorderBrush" Value="#3A2E50"/>
+            <Setter Property="BorderBrush" Value="#2E2E36"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="CaretBrush" Value="#AF78FF"/>
+            <Setter Property="CaretBrush" Value="#FFFFFF"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -168,7 +168,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="TxtBorder" Property="BorderBrush" Value="#AF78FF"/>
+                                <Setter TargetName="TxtBorder" Property="BorderBrush" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -178,9 +178,9 @@
 
         <!-- Dark Category ComboBox Style -->
         <Style x:Key="DarkCategoryComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Background" Value="#161622"/>
-            <Setter Property="Foreground" Value="#D5B6FF"/>
-            <Setter Property="BorderBrush" Value="#3A2E50"/>
+            <Setter Property="Background" Value="#141418"/>
+            <Setter Property="Foreground" Value="#DDDDDD"/>
+            <Setter Property="BorderBrush" Value="#2E2E36"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Height" Value="28"/>
@@ -200,9 +200,9 @@
 
                                     <!-- Editable Text / Selected Value -->
                                     <TextBox x:Name="PART_EditableTextBox" Grid.Column="0"
-                                             Background="Transparent" Foreground="#D5B6FF"
+                                             Background="Transparent" Foreground="#DDDDDD"
                                              BorderThickness="0" Padding="6,3" VerticalAlignment="Center"
-                                             FontSize="11" CaretBrush="#AF78FF"/>
+                                             FontSize="11" CaretBrush="#FFFFFF"/>
 
                                     <!-- Placeholder when empty -->
                                     <TextBlock Grid.Column="0" Text="Kategori ▾" Foreground="#666677" FontSize="10.5"
@@ -226,7 +226,7 @@
                                         <ToggleButton.Template>
                                             <ControlTemplate TargetType="ToggleButton">
                                                 <Border Background="Transparent">
-                                                    <Path Data="M 0 0 L 3.5 3.5 L 7 0 Z" Fill="#8A75B0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Path Data="M 0 0 L 3.5 3.5 L 7 0 Z" Fill="#888888" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
                                             </ControlTemplate>
                                         </ToggleButton.Template>
@@ -237,7 +237,7 @@
                             <!-- Popup Dropdown List -->
                             <Popup x:Name="PART_Popup" AllowsTransparency="True" IsOpen="{TemplateBinding IsDropDownOpen}"
                                    Placement="Bottom" PopupAnimation="Slide">
-                                <Border Background="#1A1826" BorderBrush="#443460" BorderThickness="1" CornerRadius="8"
+                                <Border Background="#141418" BorderBrush="#2E2E36" BorderThickness="1" CornerRadius="8"
                                         MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
                                         MaxHeight="160" Padding="3" Margin="0,2,0,0">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -248,7 +248,7 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#7754B5"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#555560"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -269,11 +269,11 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="#32224A"/>
-                                            <Setter Property="Foreground" Value="#AF78FF"/>
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="#24242A"/>
+                                            <Setter Property="Foreground" Value="#FFFFFF"/>
                                         </Trigger>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="#412966"/>
+                                            <Setter TargetName="ItemBorder" Property="Background" Value="#32323A"/>
                                             <Setter Property="Foreground" Value="#FFFFFF"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
@@ -289,8 +289,8 @@
     <!-- Main Outer Container with DropShadow -->
     <Grid Margin="12">
         <Border x:Name="MainIslandBorder"
-                Background="#101014"
-                BorderBrush="#382E4D"
+                Background="#0A0A0C"
+                BorderBrush="#24242A"
                 BorderThickness="1.2"
                 CornerRadius="24"
                 MouseDown="Island_MouseDown">
@@ -311,9 +311,9 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Album Art / Placeholder -->
-                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Margin="2,0,8,0" ClipToBounds="True" Background="#282236">
+                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Margin="2,0,8,0" ClipToBounds="True" Background="#18181C">
                         <Grid>
-                            <TextBlock Text="♪" Foreground="#AF78FF" FontSize="16" FontWeight="Bold"
+                            <TextBlock Text="♪" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
                         </Grid>
@@ -324,7 +324,7 @@
                         <!-- Baris 1: Judul dan Artis -->
                         <DockPanel LastChildFill="True">
                             <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue=''}" 
-                                       Foreground="#8A7E99" FontSize="10.5" DockPanel.Dock="Right" 
+                                       Foreground="#888899" FontSize="10.5" DockPanel.Dock="Right" 
                                        VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" 
                                        Foreground="#F5F5FA" FontWeight="SemiBold" FontSize="12.5"
@@ -337,10 +337,10 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="♪" Foreground="#AF78FF" FontSize="10" FontWeight="Bold" 
+                            <TextBlock Grid.Column="0" Text="♪" Foreground="#888888" FontSize="10" FontWeight="Bold" 
                                        VerticalAlignment="Center" Margin="0,0,4,0"/>
                             <TextBlock Grid.Column="1" Text="{Binding StandbyLyric, FallbackValue='Siap memutar...'}" 
-                                       Foreground="#E2CAFF" FontSize="11.5" FontWeight="Medium"
+                                       Foreground="#DDDDDD" FontSize="11.5" FontWeight="Medium"
                                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>
@@ -348,13 +348,13 @@
                     <!-- Playing wave/activity indicator -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,6,0"
                                 Visibility="{Binding CurrentTrack.IsPlaying, Converter={StaticResource BoolToVis}}">
-                        <Rectangle Width="2" Height="10" Fill="#AF78FF" Margin="1,0"/>
-                        <Rectangle Width="2" Height="14" Fill="#AF78FF" Margin="1,0"/>
-                        <Rectangle Width="2" Height="8" Fill="#AF78FF" Margin="1,0"/>
+                        <Rectangle Width="2" Height="10" Fill="#FFFFFF" Margin="1,0"/>
+                        <Rectangle Width="2" Height="14" Fill="#FFFFFF" Margin="1,0"/>
+                        <Rectangle Width="2" Height="8" Fill="#FFFFFF" Margin="1,0"/>
                     </StackPanel>
 
                     <!-- To-Do Ticker Container (di samping kontrol musik saat minimize / compact) -->
-                    <Border Grid.Column="3" Background="#161222" BorderBrush="#3A2D52" BorderThickness="1.2"
+                    <Border Grid.Column="3" Background="#141418" BorderBrush="#24242A" BorderThickness="1.2"
                             CornerRadius="12" Height="32" Margin="4,0,6,0" Padding="6,2"
                             MinWidth="130" MaxWidth="220" Cursor="Hand"
                             Visibility="{Binding ShowTodoTicker, Converter={StaticResource BoolToVis}}"
@@ -379,27 +379,27 @@
                                     ToolTip="Tandai tugas ini selesai" Style="{StaticResource ControlButtonStyle}"
                                     Padding="0" Margin="0,0,4,0" Width="18" Height="18" VerticalAlignment="Center"
                                     Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                                <Border Width="16" Height="16" CornerRadius="4" Background="#261E38" BorderBrush="#7754B5" BorderThickness="1">
-                                    <TextBlock Text="✓" Foreground="#C8A5FF" FontSize="9.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border Width="16" Height="16" CornerRadius="4" Background="#1E1E22" BorderBrush="#36363C" BorderThickness="1">
+                                    <TextBlock Text="✓" Foreground="#FFFFFF" FontSize="9.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </Button>
 
                             <!-- Ikon ✓ jika tidak ada tugas tertunda -->
-                            <TextBlock Grid.Column="0" Text="✓" Foreground="#8A75B0" FontWeight="Bold" FontSize="11"
+                            <TextBlock Grid.Column="0" Text="✓" Foreground="#888888" FontWeight="Bold" FontSize="11"
                                        VerticalAlignment="Center" Margin="2,0,4,0"
                                        Visibility="{Binding HasPendingTodos, Converter={StaticResource InverseBoolToVis}}"/>
 
                             <!-- Badge Indeks (misal 1/3) -->
-                            <Border Grid.Column="1" Background="#2B1E44" CornerRadius="5" Padding="4,1" Margin="0,0,4,0"
+                            <Border Grid.Column="1" Background="#1E1E24" CornerRadius="5" Padding="4,1" Margin="0,0,4,0"
                                     VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#D5B6FF" FontSize="9.5" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="SemiBold"/>
                             </Border>
 
                             <!-- Badge Kategori / Tag pada Ticker jika ada -->
-                            <Border Grid.Column="2" Background="#381D4A" BorderBrush="#9E5FC9" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
+                            <Border Grid.Column="2" Background="#24242A" BorderBrush="#3A3A42" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
                                     VerticalAlignment="Center"
                                     Visibility="{Binding CurrentTickerItem.HasCategory, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#FFD1F5" FontSize="9" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#DDDDDD" FontSize="9" FontWeight="Bold"/>
                             </Border>
 
                             <!-- Teks Judul Tugas yang Berganti secara Ticker -->
@@ -424,10 +424,10 @@
                         <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" Width="28" Height="28" ToolTip="Putar / Jeda">
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <!-- Play icon (when paused) -->
-                                <Path Data="M 0 0 L 10 6 L 0 12 Z" Fill="#AF78FF" Margin="2,0,0,0"
+                                <Path Data="M 0 0 L 10 6 L 0 12 Z" Fill="#FFFFFF" Margin="2,0,0,0"
                                       Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
                                 <!-- Pause icon (when playing) -->
-                                <Path Data="M 0 0 H 3 V 11 H 0 Z M 5.5 0 H 8.5 V 11 H 5.5 Z" Fill="#AF78FF"
+                                <Path Data="M 0 0 H 3 V 11 H 0 Z M 5.5 0 H 8.5 V 11 H 5.5 Z" Fill="#FFFFFF"
                                       Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
                             </Grid>
                         </Button>
@@ -446,12 +446,12 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- To-Do Icon Badge -->
-                    <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Margin="2,0,8,0" Background="#261E38" BorderBrush="#7754B5" BorderThickness="1">
-                        <TextBlock Text="✓" Foreground="#C8A5FF" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Margin="2,0,8,0" Background="#1E1E22" BorderBrush="#36363C" BorderThickness="1">
+                        <TextBlock Text="✓" Foreground="#FFFFFF" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
                     <!-- Ticker Task Info (Click to Expand) -->
-                    <Border Grid.Column="1" Background="#161222" BorderBrush="#3A2D52" BorderThickness="1.2"
+                    <Border Grid.Column="1" Background="#141418" BorderBrush="#24242A" BorderThickness="1.2"
                             CornerRadius="12" Height="32" Margin="0,0,6,0" Padding="8,2" Cursor="Hand"
                             ToolTip="{Binding CurrentTickerText, StringFormat='To-Do: {0} (Klik untuk buka daftar)'}">
                         <Border.InputBindings>
@@ -465,15 +465,15 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- Badge Indeks -->
-                            <Border Grid.Column="0" Background="#2B1E44" CornerRadius="5" Padding="4,1" Margin="0,0,5,0"
+                            <Border Grid.Column="0" Background="#1E1E24" CornerRadius="5" Padding="4,1" Margin="0,0,5,0"
                                     VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#D5B6FF" FontSize="9.5" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="SemiBold"/>
                             </Border>
 
                             <!-- Badge Kategori jika ada -->
-                            <Border Grid.Column="1" Background="#381D4A" BorderBrush="#9E5FC9" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
+                            <Border Grid.Column="1" Background="#24242A" BorderBrush="#3A3A42" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
                                     VerticalAlignment="Center" Visibility="{Binding CurrentTickerItem.HasCategory, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#FFD1F5" FontSize="9" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#DDDDDD" FontSize="9" FontWeight="Bold"/>
                             </Border>
 
                             <TextBlock Grid.Column="2" Text="{Binding CurrentTickerText}" Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
@@ -486,8 +486,8 @@
                             ToolTip="Tandai tugas selesai" Style="{StaticResource ControlButtonStyle}"
                             Width="26" Height="26" VerticalAlignment="Center" Margin="0,0,4,0"
                             Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                        <Border Width="22" Height="22" CornerRadius="6" Background="#261E38" BorderBrush="#7754B5" BorderThickness="1">
-                            <TextBlock Text="✓" Foreground="#C8A5FF" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Width="22" Height="22" CornerRadius="6" Background="#1E1E22" BorderBrush="#36363C" BorderThickness="1">
+                            <TextBlock Text="✓" Foreground="#FFFFFF" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </Button>
 
@@ -529,7 +529,7 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- Album art -->
-                            <Border Grid.Column="0" Width="52" Height="52" CornerRadius="12" ClipToBounds="True" Background="#22222E" Margin="0,0,12,0">
+                            <Border Grid.Column="0" Width="52" Height="52" CornerRadius="12" ClipToBounds="True" Background="#18181C" Margin="0,0,12,0">
                                 <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
                             </Border>
 
@@ -538,7 +538,7 @@
                                 <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='Tidak ada lagu'}" 
                                            Foreground="#FFFFFF" FontSize="15" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                                 <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue='-'}" 
-                                           Foreground="#D0B5FF" FontSize="13" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                           Foreground="#CCCCCC" FontSize="13" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
                                 <TextBlock Text="{Binding SessionStatus}" 
                                            Foreground="#777788" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
                             </StackPanel>
@@ -549,14 +549,14 @@
                                         Command="{Binding OpenUpdateCommand}" 
                                         Visibility="{Binding HasAvailableUpdate, Converter={StaticResource BoolToVis}}" 
                                         ToolTip="Versi baru tersedia! Klik untuk memperbarui DRANOTCH" 
-                                        Background="#4D1D4A" Margin="0,0,4,0">
+                                        Background="#222228" Margin="0,0,4,0">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="✨" FontSize="10" Margin="0,0,3,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding AvailableUpdateVersion, StringFormat='Update {0}'}" 
-                                                   Foreground="#FFAEF2" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                                                   Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}" ToolTip="Buka Pemutar YouTube Music" Background="#361E2E">
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}" ToolTip="Buka Pemutar YouTube Music" Background="#20181C">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="9" Margin="0,0,4,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="YT Music" Foreground="#FFD0DD" FontSize="11" VerticalAlignment="Center"/>
@@ -571,7 +571,7 @@
                                                     <Setter Property="Foreground" Value="#888899"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                                                            <Setter Property="Foreground" Value="#AF78FF"/>
+                                                            <Setter Property="Foreground" Value="#FFFFFF"/>
                                                             <Setter Property="FontWeight" Value="SemiBold"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -582,14 +582,16 @@
                                 </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Lyrics" Content="Lirik" ToolTip="Mode Layar Lirik Penuh"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="▴" ToolTip="Tutup ke Compact"
+                                        Visibility="{Binding ShowMusicMinimizeButton, Converter={StaticResource BoolToVis}}" Margin="2,0,0,0"/>
                             </StackPanel>
                         </Grid>
 
                         <!-- Synced 3-Line Lyrics Preview -->
-                        <Border Grid.Row="1" Background="#181822" CornerRadius="10" Padding="10,8" Margin="0,4,0,8">
+                        <Border Grid.Row="1" Background="#141418" CornerRadius="10" Padding="10,8" Margin="0,4,0,8">
                             <StackPanel>
                                 <TextBlock Text="{Binding PreviousLyric}" Foreground="#555566" FontSize="12" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
-                                <TextBlock Text="{Binding ActiveLyric}" Foreground="#E4C8FF" FontSize="14" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" Margin="0,2"/>
+                                <TextBlock Text="{Binding ActiveLyric}" Foreground="#FFFFFF" FontSize="14" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" Margin="0,2"/>
                                 <TextBlock Text="{Binding NextLyric}" Foreground="#555566" FontSize="12" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
@@ -616,13 +618,13 @@
                             </Button>
                             <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" 
                                     Width="44" Height="44" Margin="12,0" Padding="0" ToolTip="Putar / Jeda">
-                                <Border Width="40" Height="40" CornerRadius="20" Background="#AF78FF">
+                                <Border Width="40" Height="40" CornerRadius="20" Background="#FFFFFF">
                                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <!-- Play icon (triangle) -->
-                                        <Path Data="M 0 0 L 13 8 L 0 16 Z" Fill="#121216" Margin="2,0,0,0"
+                                        <Path Data="M 0 0 L 13 8 L 0 16 Z" Fill="#000000" Margin="2,0,0,0"
                                               Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
                                         <!-- Pause icon (two bars) -->
-                                        <Path Data="M 0 0 H 4 V 14 H 0 Z M 7 0 H 11 V 14 H 7 Z" Fill="#121216"
+                                        <Path Data="M 0 0 H 4 V 14 H 0 Z M 7 0 H 11 V 14 H 7 Z" Fill="#000000"
                                               Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
                                     </Grid>
                                 </Border>
@@ -644,7 +646,7 @@
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="Offset:" Foreground="#777788" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetSubtractCommand}" Content="-0.5s" ToolTip="Lirik terlambat (geser mundur)"/>
-                                <TextBlock Text="{Binding ManualOffsetSeconds, StringFormat='{}{0:0.0}s'}" Foreground="#AF78FF" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
+                                <TextBlock Text="{Binding ManualOffsetSeconds, StringFormat='{}{0:0.0}s'}" Foreground="#FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetAddCommand}" Content="+0.5s" ToolTip="Lirik terlalu cepat (geser maju)"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetResetCommand}" Content="Reset" ToolTip="Reset offset ke 0s"/>
                             </StackPanel>
@@ -657,7 +659,7 @@
                     </Grid>
 
                     <!-- ===== PEMISAH VERTIKAL ===== -->
-                    <Border Grid.Column="1" Width="1" Background="#282136" Margin="14,2,14,2"
+                    <Border Grid.Column="1" Width="1" Background="#222228" Margin="14,2,14,2"
                             Visibility="{Binding ShowSplitter, Converter={StaticResource BoolToVis}}"/>
 
                     <!-- ===== SISI KANAN: TO-DO LIST ===== -->
@@ -677,10 +679,10 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="✓" Foreground="#AF78FF" FontSize="15" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="✓" Foreground="#FFFFFF" FontSize="15" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="To-Do List" Foreground="#FFFFFF" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                <Border Background="#231A36" CornerRadius="8" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding TodoSummaryText}" Foreground="#D0B5FF" FontSize="10.5" FontWeight="Medium"/>
+                                <Border Background="#1A1A20" CornerRadius="8" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TodoSummaryText}" Foreground="#CCCCCC" FontSize="10.5" FontWeight="Medium"/>
                                 </Border>
 
                                 <!-- Tombol Sinkronisasi Google Drive -->
@@ -690,16 +692,16 @@
                                         <TextBlock Text="☁" FontSize="11" Margin="0,0,3,0">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#7E7294"/>
+                                                    <Setter Property="Foreground" Value="#777788"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
-                                                            <Setter Property="Foreground" Value="#AF78FF"/>
+                                                            <Setter Property="Foreground" Value="#FFFFFF"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                        <TextBlock Text="Sync" FontSize="10" Foreground="#D5C5EE"/>
+                                        <TextBlock Text="Sync" FontSize="10" Foreground="#CCCCCC"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -743,7 +745,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsAllFilterSelected}" Value="True">
-                                                        <Setter Property="Foreground" Value="#AF78FF"/>
+                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
                                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -757,7 +759,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsActiveFilterSelected}" Value="True">
-                                                        <Setter Property="Foreground" Value="#AF78FF"/>
+                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
                                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -771,7 +773,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsCompletedFilterSelected}" Value="True">
-                                                        <Setter Property="Foreground" Value="#AF78FF"/>
+                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
                                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -796,7 +798,7 @@
                                                     Command="{Binding DataContext.SetCategoryFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     CommandParameter="{Binding}" Margin="0,0,4,0" Padding="6,1.5">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="#" Foreground="#AF78FF" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="#" Foreground="#888888" FontSize="9" Margin="0,0,2,0" VerticalAlignment="Center"/>
                                                     <TextBlock Text="{Binding}" FontSize="10" Foreground="#B0B0C0"/>
                                                 </StackPanel>
                                             </Button>
@@ -854,16 +856,16 @@
 
                             <!-- Tombol Tambah (+) -->
                             <Button Grid.Column="2" Command="{Binding AddTodoCommand}" ToolTip="Tambah Tugas"
-                                    Background="#AF78FF" Foreground="#101014" Width="28" Height="28" Cursor="Hand">
+                                    Background="#FFFFFF" Foreground="#000000" Width="28" Height="28" Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}" CornerRadius="8">
                                             <TextBlock Text="+" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                       FontWeight="Bold" FontSize="15" Foreground="#101014"/>
+                                                       FontWeight="Bold" FontSize="15" Foreground="#000000"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#C296FF"/>
+                                                <Setter Property="Background" Value="#E0E0E0"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -872,7 +874,7 @@
                         </Grid>
 
                         <!-- Daftar Tugas (Scrollable) -->
-                        <Border Grid.Row="3" Background="#0C0C12" CornerRadius="10" Padding="6,4" Height="172">
+                        <Border Grid.Row="3" Background="#0E0E12" CornerRadius="10" Padding="6,4" Height="172">
                             <Grid>
                                 <!-- Tampilan saat kosong -->
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -886,12 +888,12 @@
                                     <ItemsControl ItemsSource="{Binding FilteredTodos}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="#14141C" CornerRadius="8" Padding="6,5" Margin="0,2,0,2">
+                                                <Border Background="#141418" CornerRadius="8" Padding="6,5" Margin="0,2,0,2">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
                                                             <Style.Triggers>
                                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#1C1C28"/>
+                                                                    <Setter Property="Background" Value="#1C1C22"/>
                                                                 </Trigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -912,9 +914,9 @@
                                                         <DockPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,6,0">
                                                             <!-- Tag / Kategori Badge -->
                                                             <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
-                                                                    Background="#2C1D42" BorderBrush="#7754B5" BorderThickness="1"
+                                                                    Background="#1E1E24" BorderBrush="#363640" BorderThickness="1"
                                                                     CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding Category}" Foreground="#D6B5FF" FontSize="9.5" FontWeight="Bold"/>
+                                                                <TextBlock Text="{Binding Category}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="Bold"/>
                                                             </Border>
 
                                                             <!-- Teks Tugas -->
@@ -967,7 +969,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" FontWeight="Bold" FontSize="14" Foreground="#AF78FF" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" FontWeight="Bold" FontSize="14" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue='-'}" FontSize="11" Foreground="#9999AA" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
 
@@ -979,7 +981,7 @@
                     </Grid>
 
                     <!-- Big Central Focused Lyrics -->
-                    <Border Grid.Row="1" Background="#0A0A0E" CornerRadius="12" Padding="14">
+                    <Border Grid.Row="1" Background="#0A0A0C" BorderBrush="#24242A" BorderThickness="1" CornerRadius="12" Padding="14">
                         <Grid VerticalAlignment="Center">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="{Binding PreviousLyric}" FontSize="14" Foreground="#444455" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,0,10"/>
@@ -1001,9 +1003,9 @@
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding PreviousCommand}" Content="⏮" Width="30"/>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePlayPauseCommand}" Width="36" Height="24" ToolTip="Putar / Jeda">
                                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path Data="M 0 0 L 9 5.5 L 0 11 Z" Fill="#AF78FF" Margin="1.5,0,0,0"
+                                    <Path Data="M 0 0 L 9 5.5 L 0 11 Z" Fill="#FFFFFF" Margin="1.5,0,0,0"
                                           Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
-                                    <Path Data="M 0 0 H 2.5 V 10 H 0 Z M 5 0 H 7.5 V 10 H 5 Z" Fill="#AF78FF"
+                                    <Path Data="M 0 0 H 2.5 V 10 H 0 Z M 5 0 H 7.5 V 10 H 5 Z" Fill="#FFFFFF"
                                           Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
                                 </Grid>
                             </Button>
@@ -1014,7 +1016,7 @@
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetSubtractCommand}" Content="-0.5s"/>
-                            <TextBlock Text="{Binding ManualOffsetSeconds, StringFormat='{}{0:0.0}s'}" Foreground="#AF78FF" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
+                            <TextBlock Text="{Binding ManualOffsetSeconds, StringFormat='{}{0:0.0}s'}" Foreground="#FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetAddCommand}" Content="+0.5s"/>
                         </StackPanel>
                     </Grid>

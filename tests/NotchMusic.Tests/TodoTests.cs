@@ -622,6 +622,63 @@ public class TodoTests
     }
 
     [Fact]
+    public void MainViewModel_ShowMusicMinimizeButton_UpdatesCorrectlyWhenSeparated()
+    {
+        var settingsService = new FakeSettingsService();
+        var mainVm = new MainViewModel(
+            new FakeMediaSessionService(),
+            new FakeLyricsService(),
+            settingsService);
+
+        // Initially both combined: Music does not need separate minimize button (To-Do section at right has it)
+        Assert.True(mainVm.ShowTodoSectionInMainWindow);
+        Assert.False(mainVm.ShowMusicMinimizeButton);
+
+        // When To-Do is detached / separated: Music component MUST have minimize button
+        mainVm.DetachTodoCommand.Execute(null);
+        Assert.True(mainVm.IsTodoDetached);
+        Assert.False(mainVm.ShowTodoSectionInMainWindow);
+        Assert.True(mainVm.ShowMusicMinimizeButton);
+
+        // When To-Do is re-attached: Music minimize button returns to combined mode
+        mainVm.AttachTodoCommand.Execute(null);
+        Assert.False(mainVm.IsTodoDetached);
+        Assert.True(mainVm.ShowTodoSectionInMainWindow);
+        Assert.False(mainVm.ShowMusicMinimizeButton);
+
+        // When ComponentDisplayMode is MusicOnly: Music component has minimize button
+        mainVm.ComponentDisplayMode = "MusicOnly";
+        Assert.False(mainVm.ShowTodoSectionInMainWindow);
+        Assert.True(mainVm.ShowMusicMinimizeButton);
+    }
+
+    [Fact]
+    public void MainViewModel_TodoWindowCompactCommands_ToggleCorrectly()
+    {
+        var settingsService = new FakeSettingsService();
+        var mainVm = new MainViewModel(
+            new FakeMediaSessionService(),
+            new FakeLyricsService(),
+            settingsService);
+
+        // Default: expanded
+        Assert.False(mainVm.IsTodoWindowCompact);
+        Assert.True(mainVm.IsTodoWindowExpanded);
+
+        // Minimize command -> compact
+        mainVm.MinimizeTodoWindowCommand.Execute(null);
+        Assert.True(mainVm.IsTodoWindowCompact);
+        Assert.False(mainVm.IsTodoWindowExpanded);
+        Assert.True(settingsService.CurrentSettings.IsTodoWindowCompact);
+
+        // Expand command -> expanded
+        mainVm.ExpandTodoWindowCommand.Execute(null);
+        Assert.False(mainVm.IsTodoWindowCompact);
+        Assert.True(mainVm.IsTodoWindowExpanded);
+        Assert.False(settingsService.CurrentSettings.IsTodoWindowCompact);
+    }
+
+    [Fact]
     public void TodoWindow_InitializesWithoutErrors()
     {
         Exception? caught = null;
