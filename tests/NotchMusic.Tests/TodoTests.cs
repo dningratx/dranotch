@@ -27,6 +27,7 @@ public class TodoTests
         public Task InitializeAsync() => Task.CompletedTask;
         public void SelectSession(string sessionId) { }
         public Task TogglePlayPauseAsync() => Task.CompletedTask;
+        public Task PauseAsync() => Task.CompletedTask;
         public Task PreviousAsync() => Task.CompletedTask;
         public Task NextAsync() => Task.CompletedTask;
         public Task SeekAsync(TimeSpan position) => Task.CompletedTask;

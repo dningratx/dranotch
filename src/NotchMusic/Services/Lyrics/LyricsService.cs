@@ -74,12 +74,15 @@ public class LyricsService : ILyricsService
         // Check local cache first
         var cacheKey = MetadataNormalizer.CreateCacheKey(cleanTitle, cleanArtist, duration);
         var cachedLyrics = TryGetFromCache(cacheKey);
-        if (cachedLyrics != null)
+        if (cachedLyrics != null && (cachedLyrics.IsSynced || cachedLyrics.Source.Contains("Instrumental") || cachedLyrics.Source.StartsWith("Local")))
         {
             return cachedLyrics;
         }
 
-        // Try LRCLIB /api/get endpoint
+        // Keep cached plain lyrics as fallback if available, while attempting to fetch synced lyrics online
+        SongLyrics? fallbackPlainLyrics = cachedLyrics;
+
+        // 1. Try LRCLIB /api/get endpoint (exact match)
         try
         {
             var durSec = (int)Math.Round(duration.TotalSeconds);
@@ -100,9 +103,16 @@ public class LyricsService : ILyricsService
                 var item = JsonSerializer.Deserialize<LrcLibSearchResult>(json);
                 if (item != null)
                 {
-                    var result = ParseLrcLibItem(item, cleanTitle, cleanArtist);
-                    SaveToCache(cacheKey, result);
-                    return result;
+                    if (item.Instrumental == true || !string.IsNullOrWhiteSpace(item.SyncedLyrics))
+                    {
+                        var result = ParseLrcLibItem(item, cleanTitle, cleanArtist);
+                        SaveToCache(cacheKey, result);
+                        return result;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(item.PlainLyrics))
+                    {
+                        fallbackPlainLyrics = ParseLrcLibItem(item, cleanTitle, cleanArtist);
+                    }
                 }
             }
         }
@@ -115,7 +125,7 @@ public class LyricsService : ILyricsService
             // Fall back to /api/search
         }
 
-        // Try search endpoint if exact get didn't match
+        // 2. Try search endpoint to find synced lyrics (or if exact get didn't have synced lyrics)
         try
         {
             var searchUrl = $"https://lrclib.net/api/search?q={Uri.EscapeDataString($"{cleanTitle} {cleanArtist}".Trim())}";
@@ -126,15 +136,30 @@ public class LyricsService : ILyricsService
                 var items = JsonSerializer.Deserialize<List<LrcLibSearchResult>>(json);
                 if (items != null && items.Count > 0)
                 {
-                    // Pick the best match (favor synced lyrics and closest duration)
-                    var best = items
-                        .OrderByDescending(i => !string.IsNullOrEmpty(i.SyncedLyrics))
-                        .ThenBy(i => duration.TotalSeconds > 0 && i.Duration.HasValue ? Math.Abs(i.Duration.Value - duration.TotalSeconds) : 0)
-                        .First();
+                    // Look for synced lyrics or instrumental first
+                    var syncedItems = items.Where(i => i.Instrumental == true || !string.IsNullOrWhiteSpace(i.SyncedLyrics)).ToList();
+                    if (syncedItems.Count > 0)
+                    {
+                        var bestSynced = syncedItems
+                            .OrderBy(i => duration.TotalSeconds > 0 && i.Duration.HasValue ? Math.Abs(i.Duration.Value - duration.TotalSeconds) : 0)
+                            .First();
 
-                    var result = ParseLrcLibItem(best, cleanTitle, cleanArtist);
-                    SaveToCache(cacheKey, result);
-                    return result;
+                        var result = ParseLrcLibItem(bestSynced, cleanTitle, cleanArtist);
+                        SaveToCache(cacheKey, result);
+                        return result;
+                    }
+
+                    if (fallbackPlainLyrics == null)
+                    {
+                        var plainItems = items.Where(i => !string.IsNullOrWhiteSpace(i.PlainLyrics)).ToList();
+                        if (plainItems.Count > 0)
+                        {
+                            var bestPlain = plainItems
+                                .OrderBy(i => duration.TotalSeconds > 0 && i.Duration.HasValue ? Math.Abs(i.Duration.Value - duration.TotalSeconds) : 0)
+                                .First();
+                            fallbackPlainLyrics = ParseLrcLibItem(bestPlain, cleanTitle, cleanArtist);
+                        }
+                    }
                 }
             }
         }
@@ -145,6 +170,12 @@ public class LyricsService : ILyricsService
         catch
         {
             // API network failure
+        }
+
+        if (fallbackPlainLyrics != null)
+        {
+            SaveToCache(cacheKey, fallbackPlainLyrics);
+            return fallbackPlainLyrics;
         }
 
         return SongLyrics.Empty("Lirik belum tersedia");
@@ -162,7 +193,12 @@ public class LyricsService : ILyricsService
             {
                 var json = await resp.Content.ReadAsStringAsync(cancellationToken);
                 var items = JsonSerializer.Deserialize<List<LrcLibSearchResult>>(json);
-                return items ?? new List<LrcLibSearchResult>();
+                if (items != null)
+                {
+                    return items
+                        .OrderByDescending(i => !string.IsNullOrEmpty(i.SyncedLyrics) || i.Instrumental == true)
+                        .ToList();
+                }
             }
         }
         catch

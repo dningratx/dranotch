@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, dan **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive.
+Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.2.1)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.3.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -53,16 +53,25 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Kontras Tinggi & Bersih**: Aksen monokrom putih dan abu-abu terang yang tajam pada tombol kontrol, teks, dan status lagu.
 - **Tombol Minimize Mandiri**: Saat mode To-Do List terpisah (*detached*), tombol minimize (`▴`) tetap tersedia secara independen di kedua jendela (Musik dan To-Do) untuk fleksibilitas maksimal.
 
+### 🕌 6. Waktu Sholat & Pengingat Otomatis *(Baru di v1.3.0)*
+- **Jadwal Sholat Presisi & Kalender Hijriah**: Perhitungan astronomis offline presisi standar Kemenag RI / MABIMS untuk Imsak, Subuh, Terbit, Dzuhur, Ashar, Maghrib, dan Isya.
+- **Pilihan 40+ Kota & Deteksi Lokasi (IP)**: Pilihan kota-kota besar di seluruh Indonesia (WIB, WITA, WIT) serta tombol deteksi otomatis koordinat lokasi via IP.
+- **Pengingat Sebelum Masuk Waktu**: Peringatan bersiap (5, 10, 15, 20, atau 30 menit sebelumnya) untuk mengambil wudhu dan menuju masjid.
+- **Pengingat Tepat Waktu (Adzan) & Jeda Musik Otomatis**: Kartu notifikasi melayang di Dynamic Island, notifikasi Windows, nada dering bel chime yang tenang, dan fitur jeda musik otomatis (*auto-pause*) saat adzan berkumandang.
+- **Pengingat Sesudah Sholat**: Notifikasi konfirmasi ramah (*"Sudahkah Anda sholat?"*) setelah waktu sholat berlalu agar ibadah tidak terlewat.
+- **Pill Ringkas di Compact Notch & Kartu Lengkap**: Pantau hitung mundur sholat berikutnya langsung dari notch (`🕌 Dzuhur 11:39 (-15m)`) dan buka jadwal harian lengkap kapan saja dengan sekali klik tombol **`🕌 Sholat`**.
+
 ---
 
 ## 📸 Tampilan Antarmuka
 
 | Mode | Deskripsi |
 | :--- | :--- |
-| **Compact Notch** | Menampilkan artwork album, status lagu/lirik berjalan, ticker tugas aktif, dan tombol putar/jeda. |
+| **Compact Notch** | Menampilkan artwork album, status lagu/lirik berjalan, ticker tugas aktif, pill waktu sholat, dan tombol putar/jeda. |
 | **Expanded Panel** | Panel gabungan kontrol musik lengkap, progress seekbar, lirik, dan daftar tugas To-Do. |
 | **Detached To-Do** | Jendela To-Do mandiri dengan tema gelap OLED monokrom, kontrol minimize independen, drag & drop bebas, dan auto-save posisi. |
 | **Lyrics Overlay** | Tampilan lirik berukuran besar dengan scrolling halus otomatis mengikuti vokal lagu. |
+| **Prayer Card** | Kartu jadwal sholat harian lengkap, kalender Hijriah, hitung mundur real-time, dan status adzan. |
 
 ---
 
@@ -80,7 +89,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.2.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.3.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

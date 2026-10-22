@@ -10,6 +10,7 @@ using NotchMusic.Helpers;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.Media;
+using NotchMusic.Services.Prayer;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Sync;
 using NotchMusic.Services.Todo;
@@ -25,7 +26,13 @@ public class MainViewModel : ViewModelBase
     private readonly ITodoService _todoService;
     private readonly IGoogleDriveSyncService _googleDriveSyncService;
     private readonly IUpdateService _updateService;
+    private readonly IPrayerService _prayerService;
+    private readonly IPrayerReminderService _prayerReminderService;
     private readonly DispatcherTimer _interpolationTimer;
+
+    private PrayerNotificationEvent? _activePrayerNotification;
+    private DispatcherTimer? _notificationDismissTimer;
+    private bool _isPrayerPanelOpen;
 
     private readonly ICollectionView _filteredTodos;
     private string _todoFilter = "All";
@@ -67,6 +74,7 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenSettings;
     public event Action? RequestOpenYouTubeMusic;
     public event Action? RequestComponentLayoutChanged;
+    public event Action<string, string>? RequestShowTrayNotification;
 
     public PanelMode CurrentMode
     {
@@ -149,10 +157,29 @@ public class MainViewModel : ViewModelBase
 
     public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(420) : new System.Windows.GridLength(0);
 
+    public bool IsPrayerPanelOpen
+    {
+        get => _isPrayerPanelOpen;
+        set
+        {
+            if (SetProperty(ref _isPrayerPanelOpen, value))
+            {
+                OnPropertyChanged(nameof(ShowNormalExpandedContent));
+                OnPropertyChanged(nameof(ShowPrayerExpandedContent));
+                OnPropertyChanged(nameof(ExpandedPanelWidth));
+            }
+        }
+    }
+
+    public bool ShowNormalExpandedContent => !IsPrayerPanelOpen;
+    public bool ShowPrayerExpandedContent => IsPrayerPanelOpen;
+
     public double ExpandedPanelWidth
     {
         get
         {
+            if (IsPrayerPanelOpen)
+                return 440;
             if (ShowMusicSection && ShowTodoSectionInMainWindow)
                 return 760;
             if (ShowMusicSection)
@@ -179,8 +206,16 @@ public class MainViewModel : ViewModelBase
     public SongLyrics? CurrentLyrics
     {
         get => _currentLyrics;
-        private set => SetProperty(ref _currentLyrics, value);
+        private set
+        {
+            if (SetProperty(ref _currentLyrics, value))
+            {
+                OnPropertyChanged(nameof(IsLyricsSynced));
+            }
+        }
     }
+
+    public bool IsLyricsSynced => CurrentLyrics?.IsSynced == true;
 
     public bool IsPinned
     {
@@ -390,6 +425,34 @@ public class MainViewModel : ViewModelBase
         ? $"Google Drive ({_googleDriveSyncService.UserEmail}): {_googleDriveSyncService.SyncStatus} (Klik untuk sinkronkan)"
         : "Google Drive belum terhubung (Buka Pengaturan)";
 
+    // Prayer Times & Reminders Properties
+    public IPrayerService PrayerService => _prayerService;
+    public IPrayerReminderService PrayerReminderService => _prayerReminderService;
+    public PrayerSchedule CurrentPrayerSchedule => _prayerReminderService.CurrentSchedule;
+
+    public bool EnablePrayerTimes => Settings.EnablePrayerTimes;
+    public bool ShowCompactPrayerPill => Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch && CurrentPrayerSchedule?.NextPrayer != null;
+
+    public string NextPrayerName => CurrentPrayerSchedule?.NextPrayer?.Name ?? string.Empty;
+    public string NextPrayerTimeFormatted => CurrentPrayerSchedule?.NextPrayer?.FormattedTime ?? string.Empty;
+    public string NextPrayerCountdownBadge => CurrentPrayerSchedule?.NextPrayer?.CountdownText ?? string.Empty;
+    public string PrayerScheduleTooltip => CurrentPrayerSchedule != null
+        ? $"Jadwal Sholat ({CurrentPrayerSchedule.CityName}): {CurrentPrayerSchedule.CountdownSummary}\nKlik untuk melihat jadwal lengkap hari ini"
+        : "Waktu Sholat";
+
+    public bool HasActivePrayerNotification => _activePrayerNotification != null;
+    public PrayerNotificationEvent? ActivePrayerNotification
+    {
+        get => _activePrayerNotification;
+        private set
+        {
+            if (SetProperty(ref _activePrayerNotification, value))
+            {
+                OnPropertyChanged(nameof(HasActivePrayerNotification));
+            }
+        }
+    }
+
     // Commands
     public ICommand TogglePlayPauseCommand { get; }
     public ICommand PreviousCommand { get; }
@@ -418,6 +481,9 @@ public class MainViewModel : ViewModelBase
     public ICommand AttachTodoCommand { get; }
     public ICommand MinimizeTodoWindowCommand { get; }
     public ICommand ExpandTodoWindowCommand { get; }
+    public ICommand TogglePrayerPanelCommand { get; }
+    public ICommand OpenPrayerScheduleCommand { get; }
+    public ICommand DismissPrayerNotificationCommand { get; }
 
     public MainViewModel(
         IMediaSessionService mediaService,
@@ -425,7 +491,9 @@ public class MainViewModel : ViewModelBase
         ISettingsService settingsService,
         ITodoService? todoService = null,
         IGoogleDriveSyncService? googleDriveSyncService = null,
-        IUpdateService? updateService = null)
+        IUpdateService? updateService = null,
+        IPrayerService? prayerService = null,
+        IPrayerReminderService? prayerReminderService = null)
     {
         _mediaService = mediaService;
         _lyricsService = lyricsService;
@@ -433,6 +501,31 @@ public class MainViewModel : ViewModelBase
         _todoService = todoService ?? new TodoService(settingsService);
         _googleDriveSyncService = googleDriveSyncService ?? new GoogleDriveSyncService(settingsService);
         _updateService = updateService ?? new UpdateService(settingsService);
+        _prayerService = prayerService ?? new PrayerService(settingsService);
+        _prayerReminderService = prayerReminderService ?? new PrayerReminderService(_prayerService, settingsService);
+
+        TogglePrayerPanelCommand = new RelayCommand(() => IsPrayerPanelOpen = !IsPrayerPanelOpen);
+        OpenPrayerScheduleCommand = new RelayCommand(() =>
+        {
+            CurrentMode = PanelMode.Expanded;
+            IsPrayerPanelOpen = true;
+        });
+        DismissPrayerNotificationCommand = new RelayCommand(() =>
+        {
+            _notificationDismissTimer?.Stop();
+            ActivePrayerNotification = null;
+        });
+
+        _prayerReminderService.ReminderTriggered += OnPrayerReminderTriggered;
+        _prayerReminderService.ScheduleUpdated += (sch) =>
+        {
+            OnPropertyChanged(nameof(CurrentPrayerSchedule));
+            OnPropertyChanged(nameof(ShowCompactPrayerPill));
+            OnPropertyChanged(nameof(NextPrayerName));
+            OnPropertyChanged(nameof(NextPrayerTimeFormatted));
+            OnPropertyChanged(nameof(NextPrayerCountdownBadge));
+            OnPropertyChanged(nameof(PrayerScheduleTooltip));
+        };
 
         OpenUpdateCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
 
@@ -573,12 +666,45 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
         OnPropertyChanged(nameof(MusicColumnWidth));
         OnPropertyChanged(nameof(ExpandedPanelWidth));
+        OnPropertyChanged(nameof(EnablePrayerTimes));
+        OnPropertyChanged(nameof(ShowCompactPrayerPill));
+        OnPropertyChanged(nameof(CurrentPrayerSchedule));
+        OnPropertyChanged(nameof(NextPrayerName));
+        OnPropertyChanged(nameof(NextPrayerTimeFormatted));
+        OnPropertyChanged(nameof(NextPrayerCountdownBadge));
+        OnPropertyChanged(nameof(PrayerScheduleTooltip));
+        _prayerReminderService.RefreshSchedule();
         RequestComponentLayoutChanged?.Invoke();
+    }
+
+    private void OnPrayerReminderTriggered(PrayerNotificationEvent evt)
+    {
+        System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+        {
+            ActivePrayerNotification = evt;
+            RequestShowTrayNotification?.Invoke(evt.Title, evt.Message);
+
+            if (evt.AutoPauseRequested && IsPlaying)
+            {
+                _ = _mediaService.PauseAsync();
+            }
+
+            // Auto dismiss notification banner after 20 seconds
+            _notificationDismissTimer?.Stop();
+            _notificationDismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(20) };
+            _notificationDismissTimer.Tick += (s, e) =>
+            {
+                _notificationDismissTimer?.Stop();
+                ActivePrayerNotification = null;
+            };
+            _notificationDismissTimer.Start();
+        });
     }
 
     public async Task InitializeAsync()
     {
         await _mediaService.InitializeAsync();
+        _prayerReminderService.Start();
 
         if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync)
         {

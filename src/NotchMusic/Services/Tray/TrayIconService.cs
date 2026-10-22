@@ -12,6 +12,7 @@ public interface ITrayIconService : IDisposable
     event Action? OpenSettingsRequested;
     event Action? ToggleClickThroughRequested;
     event Action? ExitRequested;
+    void ShowNotification(string title, string message, ToolTipIcon icon = ToolTipIcon.Info);
 }
 
 public class TrayIconService : ITrayIconService
@@ -123,6 +124,18 @@ public class TrayIconService : ITrayIconService
 
         _notifyIcon.ContextMenuStrip = contextMenu;
         _notifyIcon.DoubleClick += (s, e) => ToggleVisibilityRequested?.Invoke();
+    }
+
+    public void ShowNotification(string title, string message, ToolTipIcon icon = ToolTipIcon.Info)
+    {
+        try
+        {
+            if (_notifyIcon != null && _notifyIcon.Visible)
+            {
+                _notifyIcon.ShowBalloonTip(5000, title, message, icon);
+            }
+        }
+        catch { }
     }
 
     public void Dispose()

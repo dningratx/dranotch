@@ -38,6 +38,7 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenSettings += OpenSettings;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(UpdateTodoWindowState);
+        _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
         SizeChanged += (s, ev) =>
         {
@@ -206,7 +207,7 @@ public partial class MainWindow : Window
 
     private void OpenSettings()
     {
-        var settingsVm = new SettingsViewModel(_settingsService, _ => SetupHotkeys(), _viewModel.GoogleDriveSyncService, _viewModel.UpdateService);
+        var settingsVm = new SettingsViewModel(_settingsService, _ => SetupHotkeys(), _viewModel.GoogleDriveSyncService, _viewModel.UpdateService, _viewModel.PrayerService);
         if (_viewModel.HasAvailableUpdate && _viewModel.AvailableUpdateInfo != null)
         {
             settingsVm.AvailableUpdate = _viewModel.AvailableUpdateInfo;

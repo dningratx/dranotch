@@ -42,4 +42,19 @@ public class AppSettings
     public double TodoWindowWidth { get; set; } = 420;
     public double TodoWindowHeight { get; set; } = 480;
     public bool IsTodoWindowCompact { get; set; } = false;
+
+    // Waktu Sholat & Pengingat (Prayer Times & Reminders)
+    public bool EnablePrayerTimes { get; set; } = true;
+    public string PrayerCity { get; set; } = "Jakarta";
+    public double PrayerLatitude { get; set; } = -6.2088;
+    public double PrayerLongitude { get; set; } = 106.8456;
+    public double PrayerTimezone { get; set; } = 7.0;
+    public bool RemindBeforePrayer { get; set; } = true;
+    public int RemindBeforeMinutes { get; set; } = 10;
+    public bool RemindAtPrayerTime { get; set; } = true;
+    public bool RemindAfterPrayer { get; set; } = true;
+    public int RemindAfterMinutes { get; set; } = 15;
+    public bool PrayerSoundAlert { get; set; } = true;
+    public bool PrayerAutoPauseMusic { get; set; } = true;
+    public bool ShowPrayerInCompactNotch { get; set; } = true;
 }

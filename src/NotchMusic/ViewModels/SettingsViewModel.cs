@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using NotchMusic.Helpers;
 using NotchMusic.Models;
+using NotchMusic.Services.Prayer;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Sync;
 using NotchMusic.Services.Todo;
@@ -15,6 +16,7 @@ public class SettingsViewModel : ViewModelBase
     private readonly ISettingsService _settingsService;
     private readonly IGoogleDriveSyncService _syncService;
     private readonly IUpdateService _updateService;
+    private readonly IPrayerService _prayerService;
     private readonly Action<string> _onHotkeyUpdated;
 
     public AppSettings Settings => _settingsService.CurrentSettings;
@@ -340,6 +342,245 @@ public class SettingsViewModel : ViewModelBase
         set => SetProperty(ref _statusMessage, value);
     }
 
+    // Waktu Sholat & Pengingat Properties
+    public bool EnablePrayerTimes
+    {
+        get => Settings.EnablePrayerTimes;
+        set
+        {
+            if (Settings.EnablePrayerTimes != value)
+            {
+                Settings.EnablePrayerTimes = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TodayPrayerSchedule));
+            }
+        }
+    }
+
+    public List<CityLocation> IndonesianCities { get; } = CityLocation.GetIndonesianCities();
+
+    public CityLocation? SelectedCity
+    {
+        get => IndonesianCities.FirstOrDefault(c => c.Name.Equals(Settings.PrayerCity, StringComparison.OrdinalIgnoreCase))
+               ?? IndonesianCities.FirstOrDefault();
+        set
+        {
+            if (value != null && Settings.PrayerCity != value.Name)
+            {
+                Settings.PrayerCity = value.Name;
+                Settings.PrayerLatitude = value.Latitude;
+                Settings.PrayerLongitude = value.Longitude;
+                Settings.PrayerTimezone = value.Timezone;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(PrayerCity));
+                OnPropertyChanged(nameof(PrayerLatitude));
+                OnPropertyChanged(nameof(PrayerLongitude));
+                OnPropertyChanged(nameof(PrayerTimezone));
+                OnPropertyChanged(nameof(TodayPrayerSchedule));
+            }
+        }
+    }
+
+    public string PrayerCity
+    {
+        get => Settings.PrayerCity;
+        set
+        {
+            if (Settings.PrayerCity != value)
+            {
+                Settings.PrayerCity = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedCity));
+                OnPropertyChanged(nameof(TodayPrayerSchedule));
+            }
+        }
+    }
+
+    public double PrayerLatitude
+    {
+        get => Settings.PrayerLatitude;
+        set
+        {
+            if (Math.Abs(Settings.PrayerLatitude - value) > 0.0001)
+            {
+                Settings.PrayerLatitude = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TodayPrayerSchedule));
+            }
+        }
+    }
+
+    public double PrayerLongitude
+    {
+        get => Settings.PrayerLongitude;
+        set
+        {
+            if (Math.Abs(Settings.PrayerLongitude - value) > 0.0001)
+            {
+                Settings.PrayerLongitude = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TodayPrayerSchedule));
+            }
+        }
+    }
+
+    public double PrayerTimezone
+    {
+        get => Settings.PrayerTimezone;
+        set
+        {
+            if (Math.Abs(Settings.PrayerTimezone - value) > 0.01)
+            {
+                Settings.PrayerTimezone = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TodayPrayerSchedule));
+            }
+        }
+    }
+
+    public bool RemindBeforePrayer
+    {
+        get => Settings.RemindBeforePrayer;
+        set
+        {
+            if (Settings.RemindBeforePrayer != value)
+            {
+                Settings.RemindBeforePrayer = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int RemindBeforeMinutes
+    {
+        get => Settings.RemindBeforeMinutes;
+        set
+        {
+            if (Settings.RemindBeforeMinutes != value)
+            {
+                Settings.RemindBeforeMinutes = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public List<int> AvailableMinutesOptions { get; } = new() { 5, 10, 15, 20, 30 };
+
+    public bool RemindAtPrayerTime
+    {
+        get => Settings.RemindAtPrayerTime;
+        set
+        {
+            if (Settings.RemindAtPrayerTime != value)
+            {
+                Settings.RemindAtPrayerTime = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool RemindAfterPrayer
+    {
+        get => Settings.RemindAfterPrayer;
+        set
+        {
+            if (Settings.RemindAfterPrayer != value)
+            {
+                Settings.RemindAfterPrayer = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int RemindAfterMinutes
+    {
+        get => Settings.RemindAfterMinutes;
+        set
+        {
+            if (Settings.RemindAfterMinutes != value)
+            {
+                Settings.RemindAfterMinutes = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool PrayerSoundAlert
+    {
+        get => Settings.PrayerSoundAlert;
+        set
+        {
+            if (Settings.PrayerSoundAlert != value)
+            {
+                Settings.PrayerSoundAlert = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool PrayerAutoPauseMusic
+    {
+        get => Settings.PrayerAutoPauseMusic;
+        set
+        {
+            if (Settings.PrayerAutoPauseMusic != value)
+            {
+                Settings.PrayerAutoPauseMusic = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ShowPrayerInCompactNotch
+    {
+        get => Settings.ShowPrayerInCompactNotch;
+        set
+        {
+            if (Settings.ShowPrayerInCompactNotch != value)
+            {
+                Settings.ShowPrayerInCompactNotch = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public PrayerSchedule TodayPrayerSchedule => _prayerService.GetTodaySchedule();
+
+    private bool _isDetectingLocation;
+    public bool IsDetectingLocation
+    {
+        get => _isDetectingLocation;
+        set => SetProperty(ref _isDetectingLocation, value);
+    }
+
+    private string _locationDetectStatus = string.Empty;
+    public string LocationDetectStatus
+    {
+        get => _locationDetectStatus;
+        set => SetProperty(ref _locationDetectStatus, value);
+    }
+
+    private string _testNotificationStatus = string.Empty;
+    public string TestNotificationStatus
+    {
+        get => _testNotificationStatus;
+        set => SetProperty(ref _testNotificationStatus, value);
+    }
+
     public ICommand ClearCacheCommand { get; }
     public ICommand ConnectGoogleDriveCommand { get; }
     public ICommand DisconnectGoogleDriveCommand { get; }
@@ -350,17 +591,68 @@ public class SettingsViewModel : ViewModelBase
     public ICommand CheckUpdateCommand { get; }
     public ICommand DownloadAndInstallUpdateCommand { get; }
     public ICommand OpenReleasePageCommand { get; }
+    public ICommand DetectLocationCommand { get; }
+    public ICommand TestPrayerChimeCommand { get; }
 
     public SettingsViewModel(
         ISettingsService settingsService,
         Action<string> onHotkeyUpdated,
         IGoogleDriveSyncService? syncService = null,
-        IUpdateService? updateService = null)
+        IUpdateService? updateService = null,
+        IPrayerService? prayerService = null)
     {
         _settingsService = settingsService;
         _onHotkeyUpdated = onHotkeyUpdated;
         _syncService = syncService ?? new GoogleDriveSyncService(settingsService);
         _updateService = updateService ?? new UpdateService(settingsService);
+        _prayerService = prayerService ?? new PrayerService(settingsService);
+
+        DetectLocationCommand = new RelayCommand(async () =>
+        {
+            if (IsDetectingLocation) return;
+            IsDetectingLocation = true;
+            LocationDetectStatus = "Mendeteksi lokasi via IP...";
+
+            try
+            {
+                var detected = await _prayerService.DetectLocationAsync();
+                if (detected != null)
+                {
+                    Settings.PrayerCity = detected.Name;
+                    Settings.PrayerLatitude = detected.Latitude;
+                    Settings.PrayerLongitude = detected.Longitude;
+                    Settings.PrayerTimezone = detected.Timezone;
+                    _settingsService.Save();
+
+                    OnPropertyChanged(nameof(PrayerCity));
+                    OnPropertyChanged(nameof(SelectedCity));
+                    OnPropertyChanged(nameof(PrayerLatitude));
+                    OnPropertyChanged(nameof(PrayerLongitude));
+                    OnPropertyChanged(nameof(PrayerTimezone));
+                    OnPropertyChanged(nameof(TodayPrayerSchedule));
+
+                    LocationDetectStatus = $"Lokasi terdeteksi: {detected.Name} ({detected.Latitude:F2}, {detected.Longitude:F2})";
+                }
+                else
+                {
+                    LocationDetectStatus = "Gagal mendeteksi lokasi otomatis. Silakan pilih kota manual.";
+                }
+            }
+            catch (Exception ex)
+            {
+                LocationDetectStatus = $"Gagal mendeteksi lokasi: {ex.Message}";
+            }
+            finally
+            {
+                IsDetectingLocation = false;
+            }
+        });
+
+        TestPrayerChimeCommand = new RelayCommand(() =>
+        {
+            PrayerAudioHelper.PlayChime();
+            TestNotificationStatus = "Suara pengingat sholat berbunyi ✓";
+        });
 
         ToggleCustomCredentialsCommand = new RelayCommand(() => ShowCustomCredentials = !ShowCustomCredentials);
         ToggleCustomUpdateUrlCommand = new RelayCommand(() => ShowCustomUpdateUrl = !ShowCustomUpdateUrl);

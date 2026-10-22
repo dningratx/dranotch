@@ -55,3 +55,20 @@ public class CountToVisibilityConverter : IValueConverter
         throw new NotSupportedException();
     }
 }
+
+public class StringNotEmptyToVisibilityConverter : IValueConverter
+{
+    public bool Invert { get; set; }
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        bool hasText = !string.IsNullOrWhiteSpace(value as string);
+        if (Invert) hasText = !hasText;
+        return hasText ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}

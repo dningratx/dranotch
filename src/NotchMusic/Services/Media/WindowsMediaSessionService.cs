@@ -26,6 +26,7 @@ public interface IMediaSessionService : IDisposable
     Task InitializeAsync();
     void SelectSession(string sessionId);
     Task TogglePlayPauseAsync();
+    Task PauseAsync();
     Task PreviousAsync();
     Task NextAsync();
     Task SeekAsync(TimeSpan position);
@@ -369,6 +370,18 @@ public class WindowsMediaSessionService : IMediaSessionService
             try
             {
                 await _currentSession.TryTogglePlayPauseAsync();
+            }
+            catch { }
+        }
+    }
+
+    public async Task PauseAsync()
+    {
+        if (_currentSession != null)
+        {
+            try
+            {
+                await _currentSession.TryPauseAsync();
             }
             catch { }
         }
