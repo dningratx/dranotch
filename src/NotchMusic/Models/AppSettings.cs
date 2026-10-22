@@ -45,6 +45,12 @@ public class AppSettings
 
     // Waktu Sholat & Pengingat (Prayer Times & Reminders)
     public bool EnablePrayerTimes { get; set; } = true;
+    public bool IsPrayerDetached { get; set; } = false;
+    public double PrayerWindowLeft { get; set; } = -1;
+    public double PrayerWindowTop { get; set; } = -1;
+    public double PrayerWindowWidth { get; set; } = 360;
+    public double PrayerWindowHeight { get; set; } = 460;
+    public bool IsPrayerWindowCompact { get; set; } = false;
     public string PrayerCity { get; set; } = "Jakarta";
     public double PrayerLatitude { get; set; } = -6.2088;
     public double PrayerLongitude { get; set; } = 106.8456;

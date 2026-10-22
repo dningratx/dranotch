@@ -342,6 +342,16 @@
 
                                     <CheckBox Content="Tampilkan jadwal sholat berikutnya di mode compact notch" 
                                               IsChecked="{Binding ShowPrayerInCompactNotch}" Margin="0,4"/>
+
+                                    <!-- Opsi Pisahkan Waktu Sholat -->
+                                    <Border Margin="0,6,0,0" Padding="10,8" Background="#181820" CornerRadius="6">
+                                        <StackPanel>
+                                            <CheckBox Content="Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"
+                                                      IsChecked="{Binding IsPrayerDetached}" Margin="0"/>
+                                            <TextBlock Text="Waktu Sholat akan muncul sebagai widget melayang tersendiri yang dapat dipindahkan ke mana saja."
+                                                       FontSize="11" Foreground="#888899" TextWrapping="Wrap" Margin="22,3,0,0"/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
                             </Border>
 
@@ -475,10 +485,15 @@
         </ScrollViewer>
 
         <!-- Footer -->
-        <StackPanel Grid.Row="2" Margin="0,14,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
-            <TextBlock Text="{Binding StatusMessage}" Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,16,0"/>
-            <Button Content="Tutup" Click="CloseButton_Click" Background="#FFFFFF" Foreground="#000000" 
-                    FontWeight="SemiBold" BorderThickness="0" Padding="18,6" Cursor="Hand"/>
-        </StackPanel>
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+            <Button Content="Keluar dari DRANOTCH" Command="{Binding ExitApplicationCommand}"
+                    HorizontalAlignment="Left" Background="#281418" Foreground="#FF6B6B" BorderBrush="#552228" BorderThickness="1"
+                    Padding="14,6" Cursor="Hand" ToolTip="Tutup dan hentikan aplikasi DRANOTCH sepenuhnya"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#4CAF50" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <Button Content="Tutup Pengaturan" Click="CloseButton_Click" Background="#FFFFFF" Foreground="#000000" 
+                        FontWeight="SemiBold" BorderThickness="0" Padding="18,6" Cursor="Hand"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.3.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.4.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -61,6 +61,15 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Pengingat Sesudah Sholat**: Notifikasi konfirmasi ramah (*"Sudahkah Anda sholat?"*) setelah waktu sholat berlalu agar ibadah tidak terlewat.
 - **Pill Ringkas di Compact Notch & Kartu Lengkap**: Pantau hitung mundur sholat berikutnya langsung dari notch (`🕌 Dzuhur 11:39 (-15m)`) dan buka jadwal harian lengkap kapan saja dengan sekali klik tombol **`🕌 Sholat`**.
 
+### 🧩 7. Desain Modular 3-Komponen, Drag & Drop To-Do, & Keamanan Terpercaya *(Baru di v1.4.0)*
+- **Urutan Modular Terintegrasi**: Dynamic Notch default menempel di tengah atas layar dengan 3 bagian rapi bergaris pemisah modern:
+  `[ Pemutar Musik ]` ╎ `[ Waktu Sholat ]` ╎ `[ To-Do List ]`
+- **Waktu Sholat Dapat Dilepas (*Detachable*)**: Komponen waktu sholat kini bisa dilepas menjadi jendela melayang mandiri (`PrayerWindow`) atau dipasang kembali ke Dynamic Notch kapan saja.
+- **Drag & Drop Urutan To-Do**: Susun prioritas tugas secara visual cukup dengan menarik ikon `⋮⋮` ke atas atau ke bawah. Perubahan urutan langsung tersimpan dan otomatis tersinkronisasi ke Google Drive.
+- **Continuous Live Ticker**: Teks berjalan di mode compact mengalir lancar dari kanan ke kiri tanpa jeda pergantian kategori, lengkap dengan jeda pintar saat kursor diarahkan (*pause on hover*).
+- **Akses Cepat Keluar / Tutup Aplikasi**: Tombol `✕` di header notch (dengan efek hover merah elegan), opsi *Tutup Aplikasi* pada klik kanan notch capsule, dan tombol keluar di pengaturan.
+- **Digital Code Signing & 1-Click Trusted Certificate**: Installer dan binary ditandatangani secara digital dengan SHA-256 dan stempel waktu resmi DigiCert, disertai script `Install-Certificate.bat` untuk menghilangkan peringatan Windows SmartScreen.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -89,9 +98,16 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.3.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.4.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
+
+> **🛡️ Notifikasi Keamanan Windows SmartScreen ("Windows protected your PC"):**  
+> Karena DRANOTCH adalah proyek independen yang ditandatangani secara digital dengan *Self-Signed Certificate*, Windows SmartScreen mungkin menampilkan layar biru peringatan.  
+> Anda dapat melewatinya dengan salah satu cara berikut:
+> - **Cara Cepat**: Klik **"More info"** (*Info selengkapnya*) lalu klik **"Run anyway"** (*Tetap jalankan*).
+> - **Atau Buka Blokir**: Klik kanan file installer -> **Properties** -> centang **"Unblock"** -> **OK**.
+> - **Permanen Tepercaya**: Jalankan berkas **`Install-Certificate.bat`** (yang disertakan di folder rilis/dist) sekali saja untuk mendaftarkan sertifikat DRANOTCH ke *Trusted Root Certification Authorities* di komputer Anda.
 
 > **Catatan Sistem**: Memerlukan Windows 10 (versi 1809 atau lebih baru) atau Windows 11 (64-bit).
 

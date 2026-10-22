@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly ITrayIconService _trayService;
     private YouTubeMusicWindow? _ytMusicWindow;
     private TodoWindow? _todoWindow;
+    private PrayerWindow? _prayerWindow;
     private HotkeyManager? _hotkeyManager;
     private bool _isRealExit;
 
@@ -37,7 +38,12 @@ public partial class MainWindow : Window
         _viewModel.RequestCollapse += () => _viewModel.CurrentMode = PanelMode.Compact;
         _viewModel.RequestOpenSettings += OpenSettings;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
-        _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(UpdateTodoWindowState);
+        _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
+        _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
+        {
+            UpdateTodoWindowState();
+            UpdatePrayerWindowState();
+        });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
         SizeChanged += (s, ev) =>
@@ -59,7 +65,7 @@ public partial class MainWindow : Window
 
         // Position window top-center by default or restore saved position
         var settings = _settingsService.CurrentSettings;
-        if (settings.PanelLeft > 0 && settings.PanelTop > 0)
+        if (settings.PanelLeft > 0 && settings.PanelTop >= 0)
         {
             Left = settings.PanelLeft;
             Top = settings.PanelTop;
@@ -71,7 +77,7 @@ public partial class MainWindow : Window
             {
                 var workArea = primary.WorkingArea;
                 Left = workArea.Left + (workArea.Width - ActualWidth) / 2.0;
-                Top = workArea.Top + 14;
+                Top = workArea.Top - 6;
             }
         }
 
@@ -87,6 +93,7 @@ public partial class MainWindow : Window
         };
 
         UpdateTodoWindowState();
+        UpdatePrayerWindowState();
 
         await _viewModel.InitializeAsync();
     }
@@ -102,6 +109,7 @@ public partial class MainWindow : Window
                 {
                     Hide();
                     _todoWindow?.Hide();
+                    _prayerWindow?.Hide();
                 }
                 else
                 {
@@ -111,6 +119,10 @@ public partial class MainWindow : Window
                     if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection)
                     {
                         _todoWindow?.Show();
+                    }
+                    if (_viewModel.IsPrayerDetached && _viewModel.EnablePrayerTimes)
+                    {
+                        _prayerWindow?.Show();
                     }
                 }
             });
@@ -162,6 +174,7 @@ public partial class MainWindow : Window
                 {
                     Hide();
                     _todoWindow?.Hide();
+                    _prayerWindow?.Hide();
                 }
                 else
                 {
@@ -170,6 +183,10 @@ public partial class MainWindow : Window
                     if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection)
                     {
                         _todoWindow?.Show();
+                    }
+                    if (_viewModel.IsPrayerDetached && _viewModel.EnablePrayerTimes)
+                    {
+                        _prayerWindow?.Show();
                     }
                 }
             }, out _);
@@ -205,6 +222,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdatePrayerWindowState()
+    {
+        if (_viewModel.IsPrayerDetached && _viewModel.EnablePrayerTimes)
+        {
+            if (_prayerWindow == null)
+            {
+                _prayerWindow = new PrayerWindow(_viewModel, _settingsService);
+                _prayerWindow.Closed += (s, e) => _prayerWindow = null;
+            }
+            if (!_prayerWindow.IsVisible)
+            {
+                _prayerWindow.Show();
+            }
+        }
+        else
+        {
+            _prayerWindow?.Hide();
+        }
+    }
+
     private void OpenSettings()
     {
         var settingsVm = new SettingsViewModel(_settingsService, _ => SetupHotkeys(), _viewModel.GoogleDriveSyncService, _viewModel.UpdateService, _viewModel.PrayerService);
@@ -218,6 +255,7 @@ public partial class MainWindow : Window
         win.ShowDialog();
         _viewModel.RefreshComponentLayout();
         UpdateTodoWindowState();
+        UpdatePrayerWindowState();
     }
 
     public void OpenYouTubeMusic()
@@ -287,6 +325,12 @@ public partial class MainWindow : Window
         WindowHelper.SetClickThrough(this, _viewModel.IsClickThrough);
     }
 
+    public void ExitApplication()
+    {
+        _isRealExit = true;
+        Close();
+    }
+
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
         if (!_isRealExit)
@@ -298,6 +342,7 @@ public partial class MainWindow : Window
 
         _ytMusicWindow?.ForceClose();
         _todoWindow?.ForceClose();
+        _prayerWindow?.Close();
         _hotkeyManager?.Dispose();
         _trayService.Dispose();
         base.OnClosing(e);

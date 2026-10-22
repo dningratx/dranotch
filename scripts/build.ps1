@@ -111,6 +111,13 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "Portable build published successfully to: $publishDir" -ForegroundColor Green
 
+# 6b. Sign published application binary
+$signScript = Join-Path $PSScriptRoot "sign.ps1"
+if (Test-Path $signScript) {
+    Write-Host "Signing published application binary..." -ForegroundColor Yellow
+    & "$signScript" -FilePath "$publishDir\NotchMusic.exe"
+}
+
 # 7. Inno Setup Compiler
 if (-not $SkipInstaller) {
     $isccPaths = @(
@@ -134,6 +141,12 @@ if (-not $SkipInstaller) {
         if ($LASTEXITCODE -eq 0) {
             $expectedInstaller = Join-Path $installerDir "DRANOTCH-Setup-$targetVersion.exe"
             Write-Host "Installer created successfully: $expectedInstaller" -ForegroundColor Green
+
+            # Sign installer executable with DRANOTCH certificate
+            if (Test-Path $signScript) {
+                Write-Host "Signing Inno Setup installer..." -ForegroundColor Yellow
+                & "$signScript" -FilePath $expectedInstaller -ExportCert
+            }
 
             # Generate version.json manifest for update service
             $versionMetadata = @{

@@ -39,7 +39,6 @@ public class MainViewModel : ViewModelBase
     private string _newTodoTitle = string.Empty;
 
     // Ticker Fields for Minimized / Compact Mode
-    private readonly DispatcherTimer _todoTickerTimer;
     private int _currentTickerIndex = 0;
     private string _currentTickerText = "Belum ada tugas";
     private string _currentTickerBadge = string.Empty;
@@ -124,6 +123,20 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    public bool IsPrayerDetached
+    {
+        get => Settings.IsPrayerDetached;
+        set
+        {
+            if (Settings.IsPrayerDetached != value)
+            {
+                Settings.IsPrayerDetached = value;
+                _settingsService.Save();
+                RefreshComponentLayout();
+            }
+        }
+    }
+
     public bool IsComponentBoth => ComponentDisplayMode == "Both";
     public bool IsComponentMusicOnly => ComponentDisplayMode == "MusicOnly";
     public bool IsComponentTodoOnly => ComponentDisplayMode == "TodoOnly";
@@ -152,8 +165,28 @@ public class MainViewModel : ViewModelBase
 
     public bool IsTodoWindowExpanded => !IsTodoWindowCompact;
 
+    public bool IsPrayerWindowCompact
+    {
+        get => Settings.IsPrayerWindowCompact;
+        set
+        {
+            if (Settings.IsPrayerWindowCompact != value)
+            {
+                Settings.IsPrayerWindowCompact = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsPrayerWindowCompact));
+                OnPropertyChanged(nameof(IsPrayerWindowExpanded));
+            }
+        }
+    }
+
+    public bool IsPrayerWindowExpanded => !IsPrayerWindowCompact;
+
     public bool ShowCompactMusicView => IsCompactMode && ShowMusicSection;
     public bool ShowCompactTodoOnlyView => IsCompactMode && !ShowMusicSection && ShowTodoSection;
+
+    public bool ShowPrayerDivider1 => ShowMusicSection && ShowCompactPrayerPill;
+    public bool ShowPrayerDivider2 => ShowTodoTicker && (ShowMusicSection || ShowCompactPrayerPill);
 
     public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(420) : new System.Windows.GridLength(0);
 
@@ -431,7 +464,7 @@ public class MainViewModel : ViewModelBase
     public PrayerSchedule CurrentPrayerSchedule => _prayerReminderService.CurrentSchedule;
 
     public bool EnablePrayerTimes => Settings.EnablePrayerTimes;
-    public bool ShowCompactPrayerPill => Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch && CurrentPrayerSchedule?.NextPrayer != null;
+    public bool ShowCompactPrayerPill => Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch && !IsPrayerDetached && CurrentPrayerSchedule?.NextPrayer != null;
 
     public string NextPrayerName => CurrentPrayerSchedule?.NextPrayer?.Name ?? string.Empty;
     public string NextPrayerTimeFormatted => CurrentPrayerSchedule?.NextPrayer?.FormattedTime ?? string.Empty;
@@ -481,9 +514,16 @@ public class MainViewModel : ViewModelBase
     public ICommand AttachTodoCommand { get; }
     public ICommand MinimizeTodoWindowCommand { get; }
     public ICommand ExpandTodoWindowCommand { get; }
+    public ICommand DetachPrayerCommand { get; }
+    public ICommand AttachPrayerCommand { get; }
+    public ICommand MinimizePrayerWindowCommand { get; }
+    public ICommand ExpandPrayerWindowCommand { get; }
     public ICommand TogglePrayerPanelCommand { get; }
     public ICommand OpenPrayerScheduleCommand { get; }
     public ICommand DismissPrayerNotificationCommand { get; }
+    public ICommand ExitApplicationCommand { get; }
+
+    public event Action? RequestExit;
 
     public MainViewModel(
         IMediaSessionService mediaService,
@@ -515,6 +555,7 @@ public class MainViewModel : ViewModelBase
             _notificationDismissTimer?.Stop();
             ActivePrayerNotification = null;
         });
+        ExitApplicationCommand = new RelayCommand(() => RequestExit?.Invoke());
 
         _prayerReminderService.ReminderTriggered += OnPrayerReminderTriggered;
         _prayerReminderService.ScheduleUpdated += (sch) =>
@@ -577,13 +618,6 @@ public class MainViewModel : ViewModelBase
         CompleteCurrentTickerCommand = new RelayCommand(CompleteCurrentTicker);
         SyncGoogleDriveCommand = new RelayCommand(async () => await SyncWithGoogleDriveAsync());
 
-        _todoTickerTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(3.5)
-        };
-        _todoTickerTimer.Tick += OnTodoTickerTick;
-        _todoTickerTimer.Start();
-
         UpdateTicker();
 
         TogglePlayPauseCommand = new RelayCommand(async () => await _mediaService.TogglePlayPauseAsync());
@@ -639,6 +673,11 @@ public class MainViewModel : ViewModelBase
         MinimizeTodoWindowCommand = new RelayCommand(() => IsTodoWindowCompact = true);
         ExpandTodoWindowCommand = new RelayCommand(() => IsTodoWindowCompact = false);
 
+        DetachPrayerCommand = new RelayCommand(() => IsPrayerDetached = true);
+        AttachPrayerCommand = new RelayCommand(() => IsPrayerDetached = false);
+        MinimizePrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = true);
+        ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false);
+
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
         _mediaService.SessionsChanged += (s, list) => OnPropertyChanged(nameof(AvailableSessions));
@@ -653,6 +692,7 @@ public class MainViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(ComponentDisplayMode));
         OnPropertyChanged(nameof(IsTodoDetached));
+        OnPropertyChanged(nameof(IsPrayerDetached));
         OnPropertyChanged(nameof(IsComponentBoth));
         OnPropertyChanged(nameof(IsComponentMusicOnly));
         OnPropertyChanged(nameof(IsComponentTodoOnly));
@@ -664,6 +704,8 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowSplitter));
         OnPropertyChanged(nameof(ShowCompactMusicView));
         OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
+        OnPropertyChanged(nameof(ShowPrayerDivider1));
+        OnPropertyChanged(nameof(ShowPrayerDivider2));
         OnPropertyChanged(nameof(MusicColumnWidth));
         OnPropertyChanged(nameof(ExpandedPanelWidth));
         OnPropertyChanged(nameof(EnablePrayerTimes));
@@ -1176,13 +1218,36 @@ public class MainViewModel : ViewModelBase
         _todoService.SaveTodos(Todos.Select(t => t.ToModel()));
         _filteredTodos?.Refresh();
         UpdateTicker();
+        ScheduleAutoSync();
+    }
 
-        if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync)
+    private System.Threading.Timer? _autoSyncDebounceTimer;
+    private readonly object _autoSyncLock = new();
+
+    private void ScheduleAutoSync()
+    {
+        if (!_googleDriveSyncService.IsConnected || !Settings.GoogleDriveAutoSync) return;
+
+        // Snapshot daftar todo pada UI thread untuk memastikan thread safety
+        var snapshot = Todos.Select(t => t.ToModel()).ToList();
+
+        lock (_autoSyncLock)
         {
-            _ = Task.Run(async () =>
+            _autoSyncDebounceTimer?.Dispose();
+            _autoSyncDebounceTimer = new System.Threading.Timer(async _ =>
             {
-                await _googleDriveSyncService.UploadTodosAsync(Todos.Select(t => t.ToModel()));
-            });
+                try
+                {
+                    if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync)
+                    {
+                        await _googleDriveSyncService.UploadTodosAsync(snapshot);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"AutoSync error: {ex.Message}");
+                }
+            }, null, TimeSpan.FromMilliseconds(700), Timeout.InfiniteTimeSpan);
         }
     }
 
@@ -1249,19 +1314,6 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private void OnTodoTickerTick(object? sender, EventArgs e)
-    {
-        var pending = Todos.Where(t => !t.IsCompleted).ToList();
-        if (pending.Count <= 1)
-        {
-            UpdateTicker();
-            return;
-        }
-
-        _currentTickerIndex = (_currentTickerIndex + 1) % pending.Count;
-        UpdateTicker();
-    }
-
     public void NextTicker()
     {
         var pending = Todos.Where(t => !t.IsCompleted).ToList();
@@ -1282,11 +1334,26 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    public void MoveTodo(TodoItemViewModel source, TodoItemViewModel target)
+    {
+        if (source == target) return;
+
+        int oldIndex = Todos.IndexOf(source);
+        int newIndex = Todos.IndexOf(target);
+
+        if (oldIndex >= 0 && newIndex >= 0)
+        {
+            Todos.Move(oldIndex, newIndex);
+            UpdateTodoCountsAndPersist();
+        }
+    }
+
     private void CompleteCurrentTicker()
     {
-        if (_currentTickerItem != null)
+        var firstPending = Todos.FirstOrDefault(t => !t.IsCompleted);
+        if (firstPending != null)
         {
-            _currentTickerItem.IsCompleted = true;
+            firstPending.IsCompleted = true;
         }
     }
 
@@ -1316,10 +1383,11 @@ public class MainViewModel : ViewModelBase
             }
 
             _currentTickerItem = pending[_currentTickerIndex];
-            _currentTickerBadge = $"{_currentTickerIndex + 1}/{pending.Count}";
-            _currentTickerText = _currentTickerItem.HasCategory
-                ? _currentTickerItem.TaskText
-                : _currentTickerItem.Title;
+            _currentTickerBadge = $"{pending.Count}";
+
+            // Aliran teks berjalan bersambung dari kanan ke kiri lintas kategori
+            var parts = pending.Select(t => t.HasCategory ? $"[{t.Category}] {t.TaskText}" : t.Title);
+            _currentTickerText = string.Join("     •     ", parts);
         }
 
         OnPropertyChanged(nameof(CurrentTickerText));

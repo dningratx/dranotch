@@ -211,32 +211,17 @@ public class TodoTests
             mainVm.AddTodoCommand.Execute(null);
 
             Assert.True(mainVm.HasPendingTodos);
-            Assert.Equal("Beli Susu", mainVm.CurrentTickerText);
-            Assert.Equal("1/3", mainVm.CurrentTickerBadge);
+            Assert.Contains("Beli Susu", mainVm.CurrentTickerText);
+            Assert.Contains("Meeting Project", mainVm.CurrentTickerText);
+            Assert.Contains("Olahraga", mainVm.CurrentTickerText);
+            Assert.Equal("3", mainVm.CurrentTickerBadge);
 
-            // Rotate Next
-            mainVm.NextTickerCommand.Execute(null);
-            Assert.Equal("Meeting Project", mainVm.CurrentTickerText);
-            Assert.Equal("2/3", mainVm.CurrentTickerBadge);
-
-            mainVm.NextTickerCommand.Execute(null);
-            Assert.Equal("Olahraga", mainVm.CurrentTickerText);
-            Assert.Equal("3/3", mainVm.CurrentTickerBadge);
-
-            // Wrap around
-            mainVm.NextTickerCommand.Execute(null);
-            Assert.Equal("Beli Susu", mainVm.CurrentTickerText);
-            Assert.Equal("1/3", mainVm.CurrentTickerBadge);
-
-            // Rotate Previous
-            mainVm.PreviousTickerCommand.Execute(null);
-            Assert.Equal("Olahraga", mainVm.CurrentTickerText);
-            Assert.Equal("3/3", mainVm.CurrentTickerBadge);
-
-            // Complete current item ("Olahraga")
+            // Complete current item
             mainVm.CompleteCurrentTickerCommand.Execute(null);
             Assert.Equal(2, mainVm.PendingTodosCount);
             Assert.Equal(1, mainVm.CompletedTodosCount);
+            Assert.DoesNotContain("Beli Susu", mainVm.CurrentTickerText);
+            Assert.Contains("Meeting Project", mainVm.CurrentTickerText);
 
             // Complete remaining tasks
             mainVm.CompleteCurrentTickerCommand.Execute(null);
@@ -325,13 +310,18 @@ public class TodoTests
         public string UserEmail { get; set; } = "user@gmail.com";
         public DateTime? LastSyncTime { get; set; } = DateTime.Now;
         public string SyncStatus { get; set; } = "Tersambung";
+        public int UploadCallCount { get; set; }
 
         public event Action? StatusChanged;
         public event Action<List<TodoItem>>? TodosSynced;
 
         public Task<bool> AuthenticateAsync(CancellationToken ct = default) => Task.FromResult(true);
         public Task DisconnectAsync() => Task.CompletedTask;
-        public Task<bool> UploadTodosAsync(IEnumerable<TodoItem> todos, CancellationToken ct = default) => Task.FromResult(true);
+        public Task<bool> UploadTodosAsync(IEnumerable<TodoItem> todos, CancellationToken ct = default)
+        {
+            UploadCallCount++;
+            return Task.FromResult(true);
+        }
         public Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default) => Task.FromResult<List<TodoItem>?>(new List<TodoItem>());
         public Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, CancellationToken ct = default)
         {
@@ -466,12 +456,10 @@ public class TodoTests
             var allFiltered = mainVm.FilteredTodos.Cast<TodoItemViewModel>().ToList();
             Assert.Equal(4, allFiltered.Count);
 
-            // Verify Ticker displays TaskText instead of repeating Category
+            // Verify Ticker displays Category and TaskText in continuous stream
             mainVm.UpdateTicker();
             Assert.NotNull(mainVm.CurrentTickerItem);
-            Assert.True(mainVm.CurrentTickerItem!.HasCategory);
-            Assert.Equal("MARIBON", mainVm.CurrentTickerItem.Category);
-            Assert.Equal("twibbon hari santri", mainVm.CurrentTickerText);
+            Assert.Contains("[MARIBON] twibbon hari santri", mainVm.CurrentTickerText);
         }
         finally
         {
@@ -693,6 +681,133 @@ public class TodoTests
                     new FakeLyricsService(),
                     settings);
                 var window = new Views.TodoWindow(mainVm, settings);
+            }
+            catch (Exception ex)
+            {
+                caught = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        bool finished = thread.Join(5000);
+
+        Assert.True(finished);
+        Assert.Null(caught);
+    }
+
+    [Fact]
+    public async Task MainViewModel_AutoSync_TriggersUploadOnTodoChanges()
+    {
+        var settingsService = new FakeSettingsService();
+        settingsService.CurrentSettings.GoogleDriveAutoSync = true;
+        var syncService = new FakeGoogleDriveSyncService { IsConnected = true };
+
+        var tempFile = Path.Combine(Path.GetTempPath(), $"dranotch_autosync_{Guid.NewGuid():N}.json");
+        try
+        {
+            var todoService = new TodoService(tempFile);
+            var mainVm = new MainViewModel(
+                new FakeMediaSessionService(),
+                new FakeLyricsService(),
+                settingsService,
+                todoService: todoService,
+                googleDriveSyncService: syncService);
+
+            Assert.Equal(0, syncService.UploadCallCount);
+
+            // Add a todo
+            mainVm.NewTodoTitle = "Tugas Autosync";
+            mainVm.AddTodoCommand.Execute(null);
+
+            // Wait for debounce timer (700ms)
+            await Task.Delay(1100);
+            Assert.True(syncService.UploadCallCount >= 1, "Upload should be called after adding todo");
+
+            int previousCount = syncService.UploadCallCount;
+
+            // Toggle completion
+            mainVm.Todos[0].IsCompleted = true;
+            await Task.Delay(1100);
+            Assert.True(syncService.UploadCallCount > previousCount, "Upload should be called after toggling completion");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
+
+    [Fact]
+    public void MainViewModel_MoveTodo_ReordersAndPersists()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"dranotch_reorder_{Guid.NewGuid():N}.json");
+        try
+        {
+            var todoService = new TodoService(tempFile);
+            var settingsService = new FakeSettingsService();
+            var mainVm = new MainViewModel(
+                new FakeMediaSessionService(),
+                new FakeLyricsService(),
+                settingsService,
+                todoService: todoService);
+
+            mainVm.NewTodoTitle = "Task A";
+            mainVm.AddTodoCommand.Execute(null);
+            mainVm.NewTodoTitle = "Task B";
+            mainVm.AddTodoCommand.Execute(null);
+            mainVm.NewTodoTitle = "Task C";
+            mainVm.AddTodoCommand.Execute(null);
+
+            Assert.Equal("Task A", mainVm.Todos[0].Title);
+            Assert.Equal("Task B", mainVm.Todos[1].Title);
+            Assert.Equal("Task C", mainVm.Todos[2].Title);
+
+            // Move Task C to index 0 (drag naik ke paling atas)
+            var itemC = mainVm.Todos[2];
+            var itemA = mainVm.Todos[0];
+            mainVm.MoveTodo(itemC, itemA);
+
+            Assert.Equal("Task C", mainVm.Todos[0].Title);
+            Assert.Equal("Task A", mainVm.Todos[1].Title);
+            Assert.Equal("Task B", mainVm.Todos[2].Title);
+
+            // Reload from service to verify persistence
+            var reloaded = todoService.LoadTodos().ToList();
+            Assert.Equal("Task C", reloaded[0].Title);
+            Assert.Equal("Task A", reloaded[1].Title);
+            Assert.Equal("Task B", reloaded[2].Title);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
+
+    [Fact]
+    public void MarqueeTextBlock_InitializesInSTA()
+    {
+        Exception? caught = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var marquee = new Helpers.MarqueeTextBlock
+                {
+                    Text = "Tugas Marquee Kiri ke Kanan",
+                    FontSize = 12,
+                    Speed = 40
+                };
+                marquee.Measure(new System.Windows.Size(200, 30));
+                marquee.Arrange(new System.Windows.Rect(0, 0, 200, 30));
+                marquee.RestartAnimation(initialStartAtZero: true);
+                marquee.Pause();
+                marquee.Resume();
+                marquee.StopAnimation();
             }
             catch (Exception ex)
             {

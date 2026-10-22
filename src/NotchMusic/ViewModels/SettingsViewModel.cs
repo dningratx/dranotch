@@ -558,6 +558,20 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    public bool IsPrayerDetached
+    {
+        get => Settings.IsPrayerDetached;
+        set
+        {
+            if (Settings.IsPrayerDetached != value)
+            {
+                Settings.IsPrayerDetached = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public PrayerSchedule TodayPrayerSchedule => _prayerService.GetTodaySchedule();
 
     private bool _isDetectingLocation;
@@ -593,6 +607,7 @@ public class SettingsViewModel : ViewModelBase
     public ICommand OpenReleasePageCommand { get; }
     public ICommand DetectLocationCommand { get; }
     public ICommand TestPrayerChimeCommand { get; }
+    public ICommand ExitApplicationCommand { get; }
 
     public SettingsViewModel(
         ISettingsService settingsService,
@@ -809,6 +824,21 @@ public class SettingsViewModel : ViewModelBase
             {
                 StatusMessage = $"Sinkronisasi gagal: {_syncService.SyncStatus}";
             }
+        });
+
+        ExitApplicationCommand = new RelayCommand(() =>
+        {
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                if (System.Windows.Application.Current.MainWindow is MainWindow mw)
+                {
+                    mw.ExitApplication();
+                }
+                else
+                {
+                    System.Windows.Application.Current.Shutdown();
+                }
+            });
         });
     }
 }

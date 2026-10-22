@@ -305,24 +305,18 @@
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Badge Indeks -->
+                            <!-- Badge Jumlah Tugas -->
                             <Border Grid.Column="0" Background="#222228" CornerRadius="5" Padding="4,1" Margin="0,0,5,0"
                                     VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#CCCCCC" FontSize="9.5" FontWeight="SemiBold"/>
                             </Border>
 
-                            <!-- Badge Kategori jika ada -->
-                            <Border Grid.Column="1" Background="#1E1E24" BorderBrush="#363640" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
-                                    VerticalAlignment="Center" Visibility="{Binding CurrentTickerItem.HasCategory, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#CCCCCC" FontSize="9" FontWeight="Bold"/>
-                            </Border>
-
-                            <TextBlock Grid.Column="2" Text="{Binding CurrentTickerText}" Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
-                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            <helpers:MarqueeTextBlock Grid.Column="1" Text="{Binding CurrentTickerText}" 
+                                                      Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
+                                                      Speed="36" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
@@ -579,7 +573,8 @@
                             <ItemsControl ItemsSource="{Binding FilteredTodos}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="#141418" CornerRadius="8" Padding="7,6" Margin="0,2,0,2">
+                                        <Border Background="#141418" CornerRadius="8" Padding="7,6" Margin="0,2,0,2"
+                                                helpers:TodoDragDropBehavior.IsEnabled="True">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
@@ -591,18 +586,30 @@
                                             </Border.Style>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
+                                                    <!-- Drag Handle Grip -->
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <!-- Checkbox -->
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <!-- Judul Tugas & Kategori Tag -->
                                                     <ColumnDefinition Width="*"/>
+                                                    <!-- Tombol Hapus -->
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
+                                                <!-- Drag Grip Handle ⋮⋮ -->
+                                                <Border Grid.Column="0" Width="14" Height="20" Background="Transparent" Cursor="SizeAll"
+                                                        VerticalAlignment="Center" Margin="0,0,4,0" ToolTip="Tahan dan geser naik/turun untuk ubah urutan">
+                                                    <TextBlock Text="⋮⋮" Foreground="#555566" FontSize="11" FontWeight="Bold"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+
                                                 <!-- Checkbox -->
-                                                <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                                                <CheckBox Grid.Column="1" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
                                                           Style="{StaticResource TodoCheckBoxStyle}"
                                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
 
                                                 <!-- Judul Tugas & Kategori Tag -->
-                                                <DockPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0">
                                                     <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
                                                             Background="#1E1E24" BorderBrush="#363640" BorderThickness="1"
                                                             CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center">
@@ -626,7 +633,7 @@
                                                 </DockPanel>
 
                                                 <!-- Tombol Hapus -->
-                                                <Button Grid.Column="2" Command="{Binding DeleteCommand}"
+                                                <Button Grid.Column="3" Command="{Binding DeleteCommand}"
                                                         Style="{StaticResource TodoDeleteButtonStyle}"
                                                         ToolTip="Hapus tugas" Width="20" Height="20" VerticalAlignment="Center">
                                                     <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>

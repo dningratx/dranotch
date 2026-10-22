@@ -9,7 +9,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <AssemblyTitle>DRANOTCH</AssemblyTitle>
     <Product>DRANOTCH</Product>
     <Company>DRANOTCH</Company>

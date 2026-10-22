@@ -284,6 +284,14 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="CloseAppButtonStyle" TargetType="Button" BasedOn="{StaticResource SmallPillButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#C42B1C"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <!-- Main Outer Container with DropShadow -->
@@ -294,6 +302,17 @@
                 BorderThickness="1.2"
                 CornerRadius="24"
                 MouseDown="Island_MouseDown">
+            <Border.ContextMenu>
+                <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
+                    <MenuItem Header="Perluas Panel" Command="{Binding SetModeCommand}" CommandParameter="Expanded" 
+                              Foreground="#FFFFFF" Visibility="{Binding IsCompactMode, Converter={StaticResource BoolToVis}}"/>
+                    <MenuItem Header="Perkecil ke Notch" Command="{Binding SetModeCommand}" CommandParameter="Compact"
+                              Foreground="#FFFFFF" Visibility="{Binding IsExpandedMode, Converter={StaticResource BoolToVis}}"/>
+                    <MenuItem Header="Pengaturan" Command="{Binding OpenSettingsCommand}" Foreground="#FFFFFF"/>
+                    <Separator Background="#282834"/>
+                    <MenuItem Header="Tutup / Keluar Aplikasi" Command="{Binding ExitApplicationCommand}" Foreground="#FF6666"/>
+                </ContextMenu>
+            </Border.ContextMenu>
             <Border.Effect>
                 <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="4" BlurRadius="16" Opacity="0.6"/>
             </Border.Effect>
@@ -301,62 +320,112 @@
             <Grid>
                 <!-- ================= MODE 1A: COMPACT (MUSIC & OPTIONAL TO-DO TICKER) ================= -->
                 <Grid x:Name="CompactView" Visibility="{Binding ShowCompactMusicView, Converter={StaticResource BoolToVis}}" 
-                      Height="48" MinWidth="340" MaxWidth="680" Margin="8,4">
+                      Height="48" MaxWidth="760" Margin="8,4">
                     <Grid.ColumnDefinitions>
+                        <!-- Kolom 0: Komponen Musik (Album art, Track info & Standby lyrics, Wave, & Tombol Play/Pause) -->
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <!-- Kolom 1: Pembatas Garis Musik | Waktu Sholat -->
                         <ColumnDefinition Width="Auto"/>
+                        <!-- Kolom 2: Komponen Waktu Sholat -->
                         <ColumnDefinition Width="Auto"/>
+                        <!-- Kolom 3: Pembatas Garis Waktu Sholat | To-Do -->
                         <ColumnDefinition Width="Auto"/>
+                        <!-- Kolom 4: Komponen To-Do List -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Kolom 5: Tombol Perluas (Expand ▾) -->
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Album Art / Placeholder -->
-                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Margin="2,0,8,0" ClipToBounds="True" Background="#18181C">
-                        <Grid>
-                            <TextBlock Text="♪" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
-                        </Grid>
+                    <!-- KOMPONEN 1: MUSIC PLAYER (Termasuk Play/Pause di sebelah kiri Waktu Sholat) -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Album Art / Placeholder -->
+                        <Border Width="34" Height="34" CornerRadius="17" Margin="2,0,8,0" ClipToBounds="True" Background="#18181C">
+                            <Grid>
+                                <TextBlock Text="♪" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Track Title & Live Standby Lyrics -->
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,6,0" MaxWidth="210">
+                            <!-- Baris 1: Judul dan Artis -->
+                            <DockPanel LastChildFill="True">
+                                <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue=''}" 
+                                           Foreground="#888899" FontSize="10.5" DockPanel.Dock="Right" 
+                                           VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" 
+                                           Foreground="#F5F5FA" FontWeight="SemiBold" FontSize="12.5"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+
+                            <!-- Baris 2: Lirik Real-Time Saat Standby -->
+                            <Grid Margin="0,2,0,0" ToolTip="{Binding StandbyLyric}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="♪" Foreground="#888888" FontSize="10" FontWeight="Bold" 
+                                           VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding StandbyLyric, FallbackValue='Siap memutar...'}" 
+                                           Foreground="#DDDDDD" FontSize="11.5" FontWeight="Medium"
+                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Playing wave/activity indicator -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0,6,0"
+                                    Visibility="{Binding CurrentTrack.IsPlaying, Converter={StaticResource BoolToVis}}">
+                            <Rectangle Width="2" Height="10" Fill="#FFFFFF" Margin="1,0"/>
+                            <Rectangle Width="2" Height="14" Fill="#FFFFFF" Margin="1,0"/>
+                            <Rectangle Width="2" Height="8" Fill="#FFFFFF" Margin="1,0"/>
+                        </StackPanel>
+
+                        <!-- Tombol Play / Pause (di sebelah kiri Waktu Sholat) -->
+                        <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" 
+                                Width="28" Height="28" ToolTip="Putar / Jeda" VerticalAlignment="Center" Margin="0,0,2,0">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Play icon (when paused) -->
+                                <Path Data="M 0 0 L 10 6 L 0 12 Z" Fill="#FFFFFF" Margin="2,0,0,0"
+                                      Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
+                                <!-- Pause icon (when playing) -->
+                                <Path Data="M 0 0 H 3 V 11 H 0 Z M 5.5 0 H 8.5 V 11 H 5.5 Z" Fill="#FFFFFF"
+                                      Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- PEMBATAS GARIS 1 (Snap Divider): Musik | Waktu Sholat -->
+                    <Border Grid.Column="1" Width="1.2" Height="22" Background="#282834" Margin="5,0" VerticalAlignment="Center"
+                            Visibility="{Binding ShowPrayerDivider1, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Batas modular komponen Musik &amp; Waktu Sholat"/>
+
+                    <!-- KOMPONEN 2: WAKTU SHOLAT -->
+                    <Border Grid.Column="2" Background="#141418" BorderBrush="#24242A" BorderThickness="1.2"
+                            CornerRadius="12" Height="32" Margin="2,0,2,0" Padding="8,2" Cursor="Hand"
+                            Visibility="{Binding ShowCompactPrayerPill, Converter={StaticResource BoolToVis}}"
+                            ToolTip="{Binding PrayerScheduleTooltip}">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
+                        </Border.InputBindings>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="🕌" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Border Background="#1E1E24" CornerRadius="4" Padding="4,1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#AAAAAA" FontSize="9.5"/>
+                            </Border>
+                        </StackPanel>
                     </Border>
 
-                    <!-- Track Title & Live Standby Lyrics -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                        <!-- Baris 1: Judul dan Artis -->
-                        <DockPanel LastChildFill="True">
-                            <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue=''}" 
-                                       Foreground="#888899" FontSize="10.5" DockPanel.Dock="Right" 
-                                       VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" 
-                                       Foreground="#F5F5FA" FontWeight="SemiBold" FontSize="12.5"
-                                       TextTrimming="CharacterEllipsis"/>
-                        </DockPanel>
+                    <!-- PEMBATAS GARIS 2 (Snap Divider): Waktu Sholat | To-Do List -->
+                    <Border Grid.Column="3" Width="1.2" Height="22" Background="#282834" Margin="5,0" VerticalAlignment="Center"
+                            Visibility="{Binding ShowPrayerDivider2, Converter={StaticResource BoolToVis}}"
+                            ToolTip="Batas modular komponen Waktu Sholat &amp; To-Do"/>
 
-                        <!-- Baris 2: Lirik Real-Time Saat Standby -->
-                        <Grid Margin="0,2,0,0" ToolTip="{Binding StandbyLyric}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="♪" Foreground="#888888" FontSize="10" FontWeight="Bold" 
-                                       VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <TextBlock Grid.Column="1" Text="{Binding StandbyLyric, FallbackValue='Siap memutar...'}" 
-                                       Foreground="#DDDDDD" FontSize="11.5" FontWeight="Medium"
-                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                        </Grid>
-                    </StackPanel>
-
-                    <!-- Playing wave/activity indicator -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,6,0"
-                                Visibility="{Binding CurrentTrack.IsPlaying, Converter={StaticResource BoolToVis}}">
-                        <Rectangle Width="2" Height="10" Fill="#FFFFFF" Margin="1,0"/>
-                        <Rectangle Width="2" Height="14" Fill="#FFFFFF" Margin="1,0"/>
-                        <Rectangle Width="2" Height="8" Fill="#FFFFFF" Margin="1,0"/>
-                    </StackPanel>
-
-                    <!-- To-Do Ticker Container (di samping kontrol musik saat minimize / compact) -->
-                    <Border Grid.Column="3" Background="#141418" BorderBrush="#24242A" BorderThickness="1.2"
-                            CornerRadius="12" Height="32" Margin="4,0,6,0" Padding="6,2"
+                    <!-- KOMPONEN 3: TO-DO LIST (Ticker) -->
+                    <Border Grid.Column="4" Background="#141418" BorderBrush="#24242A" BorderThickness="1.2"
+                            CornerRadius="12" Height="32" Margin="2,0,4,0" Padding="6,2"
                             MinWidth="130" MaxWidth="220" Cursor="Hand"
                             Visibility="{Binding ShowTodoTicker, Converter={StaticResource BoolToVis}}"
                             ToolTip="{Binding CurrentTickerText, StringFormat='To-Do: {0} (Klik untuk buka panel)'}">
@@ -367,17 +436,15 @@
                             <Grid.ColumnDefinitions>
                                 <!-- Checkmark / Quick Complete Button -->
                                 <ColumnDefinition Width="Auto"/>
-                                <!-- Badge Nomor Tugas (misal: 1/3) -->
+                                <!-- Badge Jumlah Tugas Tertunda (misal: 3) -->
                                 <ColumnDefinition Width="Auto"/>
-                                <!-- Badge Kategori / Tag jika ada -->
-                                <ColumnDefinition Width="Auto"/>
-                                <!-- Teks Ticker Berjalan/Berganti -->
+                                <!-- Teks Ticker Berjalan Bersambung Lintas Kategori -->
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <!-- Tombol Cepat Selesai jika ada tugas tertunda -->
                             <Button Grid.Column="0" Command="{Binding CompleteCurrentTickerCommand}"
-                                    ToolTip="Tandai tugas ini selesai" Style="{StaticResource ControlButtonStyle}"
+                                    ToolTip="Tandai tugas pertama selesai" Style="{StaticResource ControlButtonStyle}"
                                     Padding="0" Margin="0,0,4,0" Width="18" Height="18" VerticalAlignment="Center"
                                     Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
                                 <Border Width="16" Height="16" CornerRadius="4" Background="#1E1E22" BorderBrush="#36363C" BorderThickness="1">
@@ -390,68 +457,22 @@
                                        VerticalAlignment="Center" Margin="2,0,4,0"
                                        Visibility="{Binding HasPendingTodos, Converter={StaticResource InverseBoolToVis}}"/>
 
-                            <!-- Badge Indeks (misal 1/3) -->
-                            <Border Grid.Column="1" Background="#1E1E24" CornerRadius="5" Padding="4,1" Margin="0,0,4,0"
+                            <!-- Badge Jumlah Tugas (misal 3) -->
+                            <Border Grid.Column="1" Background="#1E1E24" CornerRadius="5" Padding="4,1" Margin="0,0,5,0"
                                     VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="SemiBold"/>
                             </Border>
 
-                            <!-- Badge Kategori / Tag pada Ticker jika ada -->
-                            <Border Grid.Column="2" Background="#24242A" BorderBrush="#3A3A42" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding CurrentTickerItem.HasCategory, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#DDDDDD" FontSize="9" FontWeight="Bold"/>
-                            </Border>
-
-                            <!-- Teks Judul Tugas yang Berganti secara Ticker -->
-                            <TextBlock Grid.Column="3" Text="{Binding CurrentTickerText, NotifyOnTargetUpdated=True}" 
-                                       Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
-                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
-                                <TextBlock.Triggers>
-                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.2" To="1.0" Duration="0:0:0.35"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </TextBlock.Triggers>
-                            </TextBlock>
+                            <!-- Teks Judul Tugas yang Berjalan dari Kanan ke Kiri Terus Bersambung Lintas Kategori -->
+                            <helpers:MarqueeTextBlock Grid.Column="2" Text="{Binding CurrentTickerText}" 
+                                                      Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
+                                                      Speed="36" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
-                    <!-- Prayer Times Pill (Compact Mode) -->
-                    <Border Grid.Column="4" Background="#141418" BorderBrush="#24242A" BorderThickness="1.2"
-                            CornerRadius="12" Height="32" Margin="3,0,5,0" Padding="7,2" Cursor="Hand"
-                            Visibility="{Binding ShowCompactPrayerPill, Converter={StaticResource BoolToVis}}"
-                            ToolTip="{Binding PrayerScheduleTooltip}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="🕌" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,3,0"/>
-                            <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                            <Border Background="#1E1E24" CornerRadius="4" Padding="3,1" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#AAAAAA" FontSize="9.5"/>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Play / Pause Button & Expand trigger -->
-                    <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" Width="28" Height="28" ToolTip="Putar / Jeda">
-                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <!-- Play icon (when paused) -->
-                                <Path Data="M 0 0 L 10 6 L 0 12 Z" Fill="#FFFFFF" Margin="2,0,0,0"
-                                      Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
-                                <!-- Pause icon (when playing) -->
-                                <Path Data="M 0 0 H 3 V 11 H 0 Z M 5.5 0 H 8.5 V 11 H 5.5 Z" Fill="#FFFFFF"
-                                      Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
-                            </Grid>
-                        </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Expanded" Content="▾" ToolTip="Perluas Panel"/>
-                    </StackPanel>
+                    <!-- TOMBOL PERLUAS PANEL (Expand ▾) -->
+                    <Button Grid.Column="5" Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" 
+                            CommandParameter="Expanded" Content="▾" ToolTip="Perluas Panel" VerticalAlignment="Center" Margin="2,0,2,0"/>
                 </Grid>
 
                 <!-- ================= MODE 1B: COMPACT (TODO ONLY NOTCH) ================= -->
@@ -480,24 +501,18 @@
                         <Grid VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Badge Indeks -->
+                            <!-- Badge Jumlah Tugas -->
                             <Border Grid.Column="0" Background="#1E1E24" CornerRadius="5" Padding="4,1" Margin="0,0,5,0"
                                     VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
                                 <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="SemiBold"/>
                             </Border>
 
-                            <!-- Badge Kategori jika ada -->
-                            <Border Grid.Column="1" Background="#24242A" BorderBrush="#3A3A42" BorderThickness="1" CornerRadius="4" Padding="4,1" Margin="0,0,5,0"
-                                    VerticalAlignment="Center" Visibility="{Binding CurrentTickerItem.HasCategory, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerItem.Category}" Foreground="#DDDDDD" FontSize="9" FontWeight="Bold"/>
-                            </Border>
-
-                            <TextBlock Grid.Column="2" Text="{Binding CurrentTickerText}" Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
-                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                            <helpers:MarqueeTextBlock Grid.Column="1" Text="{Binding CurrentTickerText}" 
+                                                      Foreground="#EDEDF5" FontSize="11.5" FontWeight="Medium"
+                                                      Speed="36" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
@@ -644,6 +659,8 @@
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Lyrics" Content="Lirik" ToolTip="Mode Layar Lirik Penuh"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="▴" ToolTip="Tutup ke Compact"
+                                        Visibility="{Binding ShowMusicMinimizeButton, Converter={StaticResource BoolToVis}}" Margin="2,0,0,0"/>
+                                <Button Style="{StaticResource CloseAppButtonStyle}" Command="{Binding ExitApplicationCommand}" Content="✕" ToolTip="Tutup Aplikasi DRANOTCH"
                                         Visibility="{Binding ShowMusicMinimizeButton, Converter={StaticResource BoolToVis}}" Margin="2,0,0,0"/>
                             </StackPanel>
                         </Grid>
@@ -809,7 +826,8 @@
                                         <TextBlock Text="Bersihkan" FontSize="10.5"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="▴" ToolTip="Tutup ke Compact"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="▴" ToolTip="Tutup ke Compact" Margin="0,0,3,0"/>
+                                <Button Style="{StaticResource CloseAppButtonStyle}" Command="{Binding ExitApplicationCommand}" Content="✕" ToolTip="Tutup Aplikasi DRANOTCH"/>
                             </StackPanel>
                         </Grid>
 
@@ -965,7 +983,8 @@
                                     <ItemsControl ItemsSource="{Binding FilteredTodos}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="#141418" CornerRadius="8" Padding="6,5" Margin="0,2,0,2">
+                                                <Border Background="#141418" CornerRadius="8" Padding="6,5" Margin="0,2,0,2"
+                                                        helpers:TodoDragDropBehavior.IsEnabled="True">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
                                                             <Style.Triggers>
@@ -977,18 +996,30 @@
                                                     </Border.Style>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
+                                                            <!-- Drag Handle Grip -->
                                                             <ColumnDefinition Width="Auto"/>
+                                                            <!-- Checkbox -->
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <!-- Judul Tugas & Kategori Tag -->
                                                             <ColumnDefinition Width="*"/>
+                                                            <!-- Tombol Hapus -->
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
+                                                        <!-- Drag Grip Handle ⋮⋮ -->
+                                                        <Border Grid.Column="0" Width="14" Height="20" Background="Transparent" Cursor="SizeAll"
+                                                                VerticalAlignment="Center" Margin="0,0,4,0" ToolTip="Tahan dan geser naik/turun untuk ubah urutan">
+                                                            <TextBlock Text="⋮⋮" Foreground="#555566" FontSize="11" FontWeight="Bold"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+
                                                         <!-- Checkbox -->
-                                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                                                        <CheckBox Grid.Column="1" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
                                                                   Style="{StaticResource TodoCheckBoxStyle}"
                                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
 
                                                         <!-- Judul Tugas & Kategori Tag -->
-                                                        <DockPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                        <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0">
                                                             <!-- Tag / Kategori Badge -->
                                                             <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
                                                                     Background="#1E1E24" BorderBrush="#363640" BorderThickness="1"
@@ -1014,7 +1045,7 @@
                                                         </DockPanel>
 
                                                         <!-- Tombol Hapus -->
-                                                        <Button Grid.Column="2" Command="{Binding DeleteCommand}"
+                                                        <Button Grid.Column="3" Command="{Binding DeleteCommand}"
                                                                 Style="{StaticResource TodoDeleteButtonStyle}"
                                                                 ToolTip="Hapus tugas" Width="20" Height="20" VerticalAlignment="Center">
                                                             <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
@@ -1058,6 +1089,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}" Content="⧉" ToolTip="Lepas Waktu Sholat ke Jendela Sendiri" Margin="0,0,4,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan Waktu Sholat" Margin="0,0,4,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePrayerPanelCommand}" Content="✕" ToolTip="Kembali ke Pemutar"/>
                         </StackPanel>
