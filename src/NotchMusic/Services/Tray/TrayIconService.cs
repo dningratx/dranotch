@@ -8,6 +8,7 @@ public interface ITrayIconService : IDisposable
     void Initialize();
     event Action? ToggleVisibilityRequested;
     event Action? OpenYouTubeMusicRequested;
+    event Action? OpenFloatingBrowserRequested;
     event Action<PanelMode>? ModeChangeRequested;
     event Action? OpenSettingsRequested;
     event Action? ToggleClickThroughRequested;
@@ -22,6 +23,7 @@ public class TrayIconService : ITrayIconService
 
     public event Action? ToggleVisibilityRequested;
     public event Action? OpenYouTubeMusicRequested;
+    public event Action? OpenFloatingBrowserRequested;
     public event Action<PanelMode>? ModeChangeRequested;
     public event Action? OpenSettingsRequested;
     public event Action? ToggleClickThroughRequested;
@@ -99,6 +101,9 @@ public class TrayIconService : ITrayIconService
 
         var ytMusicItem = new ToolStripMenuItem("Buka YouTube Music (Player)", null, (s, e) => OpenYouTubeMusicRequested?.Invoke());
         contextMenu.Items.Add(ytMusicItem);
+
+        var browserItem = new ToolStripMenuItem("Buka Browser Mengambang (Web / Video)", null, (s, e) => OpenFloatingBrowserRequested?.Invoke());
+        contextMenu.Items.Add(browserItem);
 
         var showHideItem = new ToolStripMenuItem("Tampilkan / Sembunyikan Panel", null, (s, e) => ToggleVisibilityRequested?.Invoke());
         contextMenu.Items.Add(showHideItem);

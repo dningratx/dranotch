@@ -65,4 +65,13 @@ public class AppSettings
     public bool PrayerSoundAlert { get; set; } = true;
     public bool PrayerAutoPauseMusic { get; set; } = true;
     public bool ShowPrayerInCompactNotch { get; set; } = true;
+
+    // Browser Mengambang (Floating Browser & Video Player)
+    public bool IsBrowserWindowOpen { get; set; } = false;
+    public double BrowserLeft { get; set; } = -1;
+    public double BrowserTop { get; set; } = -1;
+    public double BrowserWidth { get; set; } = 960;
+    public double BrowserHeight { get; set; } = 540;
+    public bool BrowserAlwaysOnTop { get; set; } = true;
+    public string BrowserLastUrl { get; set; } = "https://www.youtube.com";
 }

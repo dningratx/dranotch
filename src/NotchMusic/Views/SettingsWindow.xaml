@@ -55,6 +55,18 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Browser Mengambang & Video Streaming -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Browser Mengambang (Floating Browser &amp; Video Streaming)" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
+                        <TextBlock Text="Akses website apa saja (YouTube, LK21, Twitch, Netflix, dll) dalam jendela mengambang fleksibel yang selalu bisa digeser dan di-resize bebas, serta mendukung mode fullscreen di dalam jendela." 
+                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,10"/>
+                        <Button Content="Buka Browser Mengambang" Click="OpenFloatingBrowser_Click" 
+                                Background="#2D2248" Foreground="#E2D4FF" BorderThickness="1" BorderBrush="#8A2BE2" Padding="12,6"
+                                HorizontalAlignment="Left" Cursor="Hand"/>
+                    </StackPanel>
+                </Border>
+
                 <!-- Tampilan & Perilaku -->
                 <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
                     <StackPanel>

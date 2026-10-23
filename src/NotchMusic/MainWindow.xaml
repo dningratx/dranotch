@@ -658,6 +658,13 @@
                                         <TextBlock Text="YT Music" FontSize="11" Foreground="#CCCCCC" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenFloatingBrowserCommand}" 
+                                        ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)" Padding="6,3" Margin="0,0,3,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🌐" Foreground="#8A2BE2" FontSize="9.5" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Browser" FontSize="11" Foreground="#CCCCCC" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Lyrics" Content="Lirik" ToolTip="Mode Layar Lirik Penuh" Padding="6,3" Margin="0,0,3,0"/>
                                 
                                 <!-- Tombol Komponen (Hanya Simbol, tanpa tulisan komponen) -->
@@ -756,6 +763,30 @@
                                                 </Grid>
                                             </Border>
 
+                                            <!-- Item 3: Browser Mengambang (Komponen ke-4) -->
+                                            <Border Background="#0E0E12" BorderBrush="#202028" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,0,0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="🌐" FontSize="12" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="Browser Mengambang" Foreground="#FFFFFF" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding BrowserStatusSummary}" Foreground="#888899" FontSize="9.5" Margin="17,1,0,0"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleBrowserCommand}"
+                                                                ToolTip="Buka atau tutup jendela browser mengambang" Padding="8,3" Margin="2,0">
+                                                            <TextBlock Text="{Binding BrowserButtonActionText}" FontSize="10.5"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+
                                             <!-- Tombol Reset / Pulihkan Semua ke Notch -->
                                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding RestoreAllComponentsCommand}"
                                                     Background="#1F1F2A" Margin="0,2,0,0" Padding="8,5" HorizontalAlignment="Stretch">
@@ -780,15 +811,23 @@
                         <Border Grid.Row="1" Background="#141418" CornerRadius="10" Padding="10,8" Margin="0,4,0,8"
                                 MinHeight="68" MaxHeight="96">
                             <Grid>
-                                <!-- State 1: Tidak ada lagu yang diputar -> Tombol YT Music -->
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                <!-- State 1: Tidak ada lagu yang diputar -> Tombol YT Music & Browser -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Visibility="{Binding HasTrack, Converter={StaticResource InverseBoolToVis}}">
                                     <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
                                             ToolTip="Buka Pemutar YouTube Music" Background="#23171F" BorderBrush="#4A2534" BorderThickness="1.2"
-                                            Padding="16,8" Cursor="Hand">
+                                            Padding="14,8" Margin="0,0,8,0" Cursor="Hand">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="12" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                             <TextBlock Text="YT Music" Foreground="#FFD0DD" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenFloatingBrowserCommand}"
+                                            ToolTip="Buka Browser Mengambang (Streaming Film, YouTube, Web)" Background="#1C182A" BorderBrush="#43285E" BorderThickness="1.2"
+                                            Padding="14,8" Cursor="Hand">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="🌐" Foreground="#8A2BE2" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Browser" Foreground="#E2D4FF" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>

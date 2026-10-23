@@ -40,4 +40,23 @@ public partial class SettingsWindow : Window
             }
         }
     }
+
+    private void OpenFloatingBrowser_Click(object sender, RoutedEventArgs e)
+    {
+        if (Owner is MainWindow mainWin)
+        {
+            mainWin.OpenFloatingBrowser();
+        }
+        else
+        {
+            foreach (Window win in System.Windows.Application.Current.Windows)
+            {
+                if (win is MainWindow mw)
+                {
+                    mw.OpenFloatingBrowser();
+                    break;
+                }
+            }
+        }
+    }
 }

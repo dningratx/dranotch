@@ -72,6 +72,7 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestExpand;
     public event Action? RequestOpenSettings;
     public event Action? RequestOpenYouTubeMusic;
+    public event Action? RequestOpenFloatingBrowser;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
 
@@ -170,6 +171,28 @@ public class MainViewModel : ViewModelBase
     public bool HasClosedComponents => IsPrayerClosed || IsTodoClosed;
     public int ClosedComponentsCount => (IsPrayerClosed ? 1 : 0) + (IsTodoClosed ? 1 : 0);
     public string ComponentsButtonText => HasClosedComponents ? $"Komponen ({ClosedComponentsCount})" : "Komponen";
+
+    public bool IsBrowserWindowOpen
+    {
+        get => Settings.IsBrowserWindowOpen;
+        set
+        {
+            if (Settings.IsBrowserWindowOpen != value)
+            {
+                Settings.IsBrowserWindowOpen = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsBrowserWindowOpen));
+                OnPropertyChanged(nameof(IsBrowserClosed));
+                OnPropertyChanged(nameof(BrowserStatusSummary));
+                OnPropertyChanged(nameof(BrowserButtonActionText));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool IsBrowserClosed => !IsBrowserWindowOpen;
+    public string BrowserStatusSummary => IsBrowserWindowOpen ? "Jendela Melayang Aktif" : "Jendela Tertutup";
+    public string BrowserButtonActionText => IsBrowserWindowOpen ? "Tutup" : "Buka";
 
     public string ComponentsButtonSymbol
     {
@@ -600,6 +623,7 @@ public class MainViewModel : ViewModelBase
     public ICommand TogglePinCommand { get; }
     public ICommand OpenSettingsCommand { get; }
     public ICommand OpenYouTubeMusicCommand { get; }
+    public ICommand OpenFloatingBrowserCommand { get; }
     public ICommand ImportLyricsCommand { get; }
     public ICommand OffsetAddCommand { get; }
     public ICommand OffsetSubtractCommand { get; }
@@ -630,6 +654,9 @@ public class MainViewModel : ViewModelBase
     public ICommand DismissPrayerNotificationCommand { get; }
     public ICommand ToggleComponentsMenuCommand { get; }
     public ICommand RestoreAllComponentsCommand { get; }
+    public ICommand ToggleBrowserCommand { get; }
+    public ICommand OpenBrowserCommand { get; }
+    public ICommand CloseBrowserCommand { get; }
     public ICommand ExitApplicationCommand { get; }
 
     public event Action? RequestExit;
@@ -759,6 +786,7 @@ public class MainViewModel : ViewModelBase
         TogglePinCommand = new RelayCommand(() => IsPinned = !IsPinned);
         OpenSettingsCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
         OpenYouTubeMusicCommand = new RelayCommand(() => RequestOpenYouTubeMusic?.Invoke());
+        OpenFloatingBrowserCommand = new RelayCommand(() => RequestOpenFloatingBrowser?.Invoke());
         ImportLyricsCommand = new RelayCommand(ImportLocalLyrics);
         OffsetAddCommand = new RelayCommand(() => AdjustOffset(0.5));
         OffsetSubtractCommand = new RelayCommand(() => AdjustOffset(-0.5));
@@ -830,7 +858,24 @@ public class MainViewModel : ViewModelBase
             IsPrayerWindowOpen = true;
             IsTodoDetached = false;
             IsTodoWindowOpen = true;
+            IsBrowserWindowOpen = true;
             ComponentDisplayMode = "Both";
+            IsComponentsMenuOpen = false;
+        });
+
+        ToggleBrowserCommand = new RelayCommand(() =>
+        {
+            IsBrowserWindowOpen = !IsBrowserWindowOpen;
+            IsComponentsMenuOpen = false;
+        });
+        OpenBrowserCommand = new RelayCommand(() =>
+        {
+            IsBrowserWindowOpen = true;
+            IsComponentsMenuOpen = false;
+        });
+        CloseBrowserCommand = new RelayCommand(() =>
+        {
+            IsBrowserWindowOpen = false;
             IsComponentsMenuOpen = false;
         });
 

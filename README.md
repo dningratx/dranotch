@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.4.4)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.5.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -87,13 +87,21 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Deteksi Cerdas Metadata Cloud**: Memeriksa perubahan timestamp berkas cloud di latar belakang secara hemat daya dan hemat kuota tanpa mengunduh ulang jika tidak ada perubahan.
 - **Desain Tombol Pasang & Lepas Bersih**: Tombol Pasang (`⇲`) dan Lepas (`⧉`) kini tampil minimalis hanya dengan lambang ikon tanpa teks label panjang, membuat header jendela To-Do, Waktu Sholat, dan Notch terlihat jauh lebih rapi dan ringkas.
 
-### 🍱 11. Manajer Komponen Simbolik, Jendela Lepas Pas, & UI Anti-Terpotong *(Baru di v1.4.4)*
+### 🍱 11. Manajer Komponen Simbolik, Jendela Lepas Pas, & UI Anti-Terpotong *(v1.4.4)*
 - **Tombol Komponen Bersimbol Dinamis Tanpa Teks**: Tombol pengelola komponen di header notch kini tampil ultra-ramping hanya berupa simbol ikonik tanpa label teks yang memakan tempat. Menampilkan simbol dinamis (`🕌 ✓`, `🕌`, atau `✓`) saat ada komponen yang ditutup, memungkinkan pemulihan instan ke Notch atau jendela mengambang dalam 1 klik.
 - **Tutup Jendela Lepas Mandiri (*Decoupled Close*)**: Menutup jendela mengambang Waktu Sholat atau To-Do List dengan tombol `✕` tidak lagi memaksanya kembali menempel ke notch. Jendela tetap dalam status terlepas/tertutup hingga Anda memutuskan untuk memasangnya kembali melalui tombol pasang (`⇲`).
 - **Jendela Waktu Sholat Pas Vertikal (*Shrink-Wrap Fit*)**: Tampilan jendela lepas Waktu Sholat kini otomatis menyesuaikan tinggi konten secara presisi (*SizeToContent Height*), menghilangkan ruang kosong hitam di bagian bawah.
 - **Tata Letak Bebas Terpotong (*Zero-Clipping UI Guarantee*)**: Seluruh header dan tombol aksi kini menggunakan arsitektur `DockPanel` kanan yang terlindungi dari kelengkungan sudut notch (*corner radius*), memastikan tombol `✕`, tombol tambah `+`, dan ikon opsi tidak pernah terpotong.
 - **Desain Notch Simetris & Ikon Seragam**: Menghilangkan kekosongan ruang samping notch dengan proporsi simetris (1100px saat rapat) dan menyamakan ukuran ikon DRANOTCH saat expanded dengan mode minimize.
 - **Tombol Cepat YT Music & Scrollbar OLED**: Tombol `▶ YT Music` di barisan header atas untuk kemudahan mengganti lagu, serta scrollbar vertikal & horizontal kustom yang menyatu dengan tema gelap OLED.
+
+### 🌐 12. Komponen ke-4: Browser Mengambang & Pemutar Streaming *(Baru di v1.5.0)*
+- **4 Komponen Layar Modular**: DRANOTCH kini resmi memiliki 4 komponen mandiri yang fleksibel: **Pemutar Musik**, **Waktu Sholat**, **To-Do List**, dan **Browser Mengambang**.
+- **Akses Web & Video Streaming Bebas**: Buka YouTube, situs film streaming (LK21), Twitch, Netflix, atau alamat web apa pun langsung dari notch atau menu tray.
+- **Windowed Fullscreen**: Mode layar penuh video otomatis dibatasi di dalam jendela mengambang (*in-window fullscreen*), tidak akan menutupi seluruh layar monitor komputer Anda.
+- **Navigasi & Drag Selalu Aktif**: Dilengkapi grip geser khusus (`⋮⋮ Geser`) dan batas luar pelindung resize, menjamin jendela selalu bisa dipindahkan dan di-resize bebas kapan pun meski film sedang diputar fullscreen.
+- **Preset Ukuran 16:9 Instan (`📐`)**: Pilihan cepat ukuran rasio video standar sekali klik: Mini PiP (360×202), Kecil (480×270), Sedang (720×405), Standar (960×540), hingga HD (1280×720).
+- **Mode Mengambang (Always On Top 📌)**: Fitur pin yang membuat jendela video tetap melayang di atas aplikasi lain (coding, game, office, dll).
 
 ---
 
@@ -123,7 +131,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.4.4.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.5.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

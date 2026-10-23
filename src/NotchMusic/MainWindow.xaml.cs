@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly ISettingsService _settingsService;
     private readonly ITrayIconService _trayService;
     private YouTubeMusicWindow? _ytMusicWindow;
+    private FloatingBrowserWindow? _floatingBrowserWindow;
     private TodoWindow? _todoWindow;
     private PrayerWindow? _prayerWindow;
     private HotkeyManager? _hotkeyManager;
@@ -38,11 +39,13 @@ public partial class MainWindow : Window
         _viewModel.RequestCollapse += () => _viewModel.CurrentMode = PanelMode.Compact;
         _viewModel.RequestOpenSettings += OpenSettings;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
+        _viewModel.RequestOpenFloatingBrowser += OpenFloatingBrowser;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
             UpdateTodoWindowState();
             UpdatePrayerWindowState();
+            UpdateBrowserWindowState();
         });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
@@ -148,6 +151,7 @@ public partial class MainWindow : Window
         };
 
         _trayService.OpenYouTubeMusicRequested += () => Dispatcher.Invoke(OpenYouTubeMusic);
+        _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
         _trayService.ExitRequested += () =>
@@ -242,6 +246,18 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateBrowserWindowState()
+    {
+        if (_viewModel.IsBrowserWindowOpen)
+        {
+            OpenFloatingBrowser();
+        }
+        else
+        {
+            _floatingBrowserWindow?.Hide();
+        }
+    }
+
     private void OpenSettings()
     {
         var settingsVm = new SettingsViewModel(_settingsService, _ => SetupHotkeys(), _viewModel.GoogleDriveSyncService, _viewModel.UpdateService, _viewModel.PrayerService);
@@ -256,6 +272,7 @@ public partial class MainWindow : Window
         _viewModel.RefreshComponentLayout();
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
+        UpdateBrowserWindowState();
     }
 
     public void OpenYouTubeMusic()
@@ -334,6 +351,91 @@ public partial class MainWindow : Window
         }
     }
 
+    public void OpenFloatingBrowser()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsBrowserWindowOpen = true;
+
+            if (_floatingBrowserWindow == null)
+            {
+                _floatingBrowserWindow = new FloatingBrowserWindow(_viewModel, _settingsService);
+                _floatingBrowserWindow.Closed += (s, e) => _floatingBrowserWindow = null;
+
+                var saved = _settingsService.CurrentSettings;
+                if (saved.BrowserLeft > 0 && saved.BrowserTop >= 0 && saved.BrowserWidth >= _floatingBrowserWindow.MinWidth && saved.BrowserHeight >= _floatingBrowserWindow.MinHeight)
+                {
+                    _floatingBrowserWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                    _floatingBrowserWindow.Left = saved.BrowserLeft;
+                    _floatingBrowserWindow.Top = saved.BrowserTop;
+                    _floatingBrowserWindow.Width = saved.BrowserWidth;
+                    _floatingBrowserWindow.Height = saved.BrowserHeight;
+                }
+                else
+                {
+                    var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+                    var workingArea = screen.WorkingArea;
+
+                    var source = PresentationSource.FromVisual(this);
+                    double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                    double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+                    double areaLeft = workingArea.Left / dpiX;
+                    double areaTop = workingArea.Top / dpiY;
+                    double areaWidth = workingArea.Width / dpiX;
+                    double areaHeight = workingArea.Height / dpiY;
+
+                    double horizontalMargin = 20;
+                    double verticalMargin = 16;
+                    double targetWidth = Math.Min(960, areaWidth - (horizontalMargin * 2));
+                    if (targetWidth < _floatingBrowserWindow.MinWidth)
+                    {
+                        targetWidth = Math.Min(_floatingBrowserWindow.MinWidth, areaWidth - 10);
+                    }
+
+                    double notchHeight = 44;
+                    double notchBottom = Top + notchHeight;
+                    if (notchBottom < areaTop) notchBottom = areaTop;
+
+                    double targetTop = notchBottom + 8;
+                    double availableHeight = (areaTop + areaHeight) - targetTop - verticalMargin;
+                    double targetHeight = Math.Min(540, availableHeight);
+
+                    if (targetHeight < _floatingBrowserWindow.MinHeight)
+                    {
+                        targetHeight = Math.Min(_floatingBrowserWindow.MinHeight, areaHeight - 30);
+                        targetTop = Math.Max(areaTop + 4, (areaTop + areaHeight) - targetHeight - verticalMargin);
+                    }
+
+                    double targetLeft = areaLeft + (areaWidth - targetWidth) / 2.0;
+
+                    _floatingBrowserWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                    _floatingBrowserWindow.Left = targetLeft;
+                    _floatingBrowserWindow.Top = targetTop;
+                    _floatingBrowserWindow.Width = targetWidth;
+                    _floatingBrowserWindow.Height = targetHeight;
+                }
+            }
+
+            if (_floatingBrowserWindow.WindowState == WindowState.Minimized)
+            {
+                _floatingBrowserWindow.WindowState = WindowState.Normal;
+            }
+
+            _floatingBrowserWindow.Show();
+            _floatingBrowserWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka browser mengambang:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void Island_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
@@ -389,6 +491,7 @@ public partial class MainWindow : Window
         }
 
         _ytMusicWindow?.ForceClose();
+        _floatingBrowserWindow?.ForceClose();
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _hotkeyManager?.Dispose();
