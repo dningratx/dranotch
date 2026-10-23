@@ -719,6 +719,30 @@ public class MainViewModel : ViewModelBase
         _interpolationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(40) };
         _interpolationTimer.Tick += InterpolationTimer_Tick;
         _interpolationTimer.Start();
+
+        StartCloudSyncPollingTimer();
+    }
+
+    private DispatcherTimer? _cloudSyncPollingTimer;
+
+    private void StartCloudSyncPollingTimer()
+    {
+        if (System.Windows.Application.Current?.Dispatcher == null) return;
+
+        _cloudSyncPollingTimer?.Stop();
+        _cloudSyncPollingTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+        _cloudSyncPollingTimer.Tick += async (s, e) =>
+        {
+            try
+            {
+                if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync && !_googleDriveSyncService.IsSyncing)
+                {
+                    await _googleDriveSyncService.CheckForRemoteChangesAsync();
+                }
+            }
+            catch { }
+        };
+        _cloudSyncPollingTimer.Start();
     }
 
     public void RefreshComponentLayout()
@@ -1486,6 +1510,12 @@ public class MainViewModel : ViewModelBase
     {
         _isHovering = true;
         _expandHoverTimer?.Stop();
+
+        // Check for any cloud changes immediately when approaching the notch
+        if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync && !_googleDriveSyncService.IsSyncing)
+        {
+            _ = _googleDriveSyncService.CheckForRemoteChangesAsync();
+        }
 
         if (Settings.ExpandOnHover && CurrentMode == PanelMode.Compact && !IsPinned)
         {

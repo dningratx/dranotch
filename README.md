@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.4.2)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.4.3)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -77,10 +77,15 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Edit Tugas di Tempat (*Inline To-Do Editing*)**: Klik dua kali pada nama tugas (atau klik ikon pensil) untuk mengedit teks secara langsung. Tekan <kbd>Enter</kbd> untuk menyimpan perubahan atau <kbd>Esc</kbd> untuk membatalkan.
 - **Intelligent Hover Delay**: Peningkatan kenyamanan dengan jeda sengaja (650ms) saat mouse mendekati notch agar panel tidak terbuka secara tidak sengaja ketika kursor hanya melintas cepat.
 
-### 🌟 9. Logo DRANOTCH Terintegrasi & Waktu Sholat di Expanded Mode *(Baru di v1.4.2)*
+### 🌟 9. Logo DRANOTCH Terintegrasi & Waktu Sholat di Expanded Mode *(v1.4.2)*
 - **Logo Resmi DRANOTCH di Notch Capsule**: Menggantikan placeholder ikon musik `♪` dengan lambang resmi DRANOTCH saat notch dalam kondisi idle / standby, tampil estetik dan serasi dengan desain kapsul.
 - **Jadwal Waktu Sholat Terintegrasi di Expanded Mode**: Saat panel diperluas (*expanded*), jadwal waktu sholat kini tampil berdampingan secara otomatis di antara pemutar musik dan To-Do list, lengkap dengan kartu waktu sholat aktif, hitung mundur real-time, dan tombol lepas (*detach*).
 - **Pembaruan Ikon Desktop Otomatis**: Menjamin ikon shortcut desktop dan start menu langsung diperbarui ke desain ikon terbaru saat instalasi maupun saat update otomatis (*in-app update*), dengan pembersihan cache ikon Windows Shell secara instan.
+
+### 🔄 10. Auto-Sync Realtime Lintas Komputer & Desain Tombol Minimalis *(Baru di v1.4.3)*
+- **Sinkronisasi Otomatis Realtime Antar Komputer**: Jika DRANOTCH terpasang di 2 atau lebih komputer dengan akun Google Drive yang sama, perubahan tugas (tambah, edit, centang selesai, atau hapus) di salah satu komputer akan otomatis terupdate di komputer lain dalam hitungan detik tanpa harus menekan tombol sinkronisasi.
+- **Deteksi Cerdas Metadata Cloud**: Memeriksa perubahan timestamp berkas cloud di latar belakang secara hemat daya dan hemat kuota tanpa mengunduh ulang jika tidak ada perubahan.
+- **Desain Tombol Pasang & Lepas Bersih**: Tombol Pasang (`⇲`) dan Lepas (`⧉`) kini tampil minimalis hanya dengan lambang ikon tanpa teks label panjang, membuat header jendela To-Do, Waktu Sholat, dan Notch terlihat jauh lebih rapi dan ringkas.
 
 ---
 
@@ -110,7 +115,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.4.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.4.3.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

@@ -802,12 +802,7 @@
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}"
-                                        ToolTip="Lepas Waktu Sholat ke jendela terpisah" Margin="0,0,3,0">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="⧉" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Lepas" FontSize="10.5" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
+                                        Content="⧉" ToolTip="Lepas Waktu Sholat ke jendela terpisah" Margin="0,0,3,0"/>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan Waktu Sholat"/>
                             </StackPanel>
                         </Grid>
@@ -1007,12 +1002,7 @@
 
                                 <!-- Tombol Lepas Jendela To-Do ke jendela melayang tersendiri -->
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachTodoCommand}"
-                                        ToolTip="Lepas To-Do List ke jendela terpisah (tidak menempel dengan musik)" Margin="0,0,4,0">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="⧉" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Lepas" FontSize="10.5" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
+                                        Content="⧉" ToolTip="Lepas To-Do List ke jendela terpisah" Margin="0,0,4,0"/>
 
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding ClearCompletedTodosCommand}" 
                                         Visibility="{Binding HasCompletedTodos, Converter={StaticResource BoolToVis}}"

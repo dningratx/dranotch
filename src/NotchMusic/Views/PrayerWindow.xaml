@@ -135,12 +135,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                             <!-- Tombol Pasang Kembali ke Notch Utama -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachPrayerCommand}"
-                                    ToolTip="Pasang kembali Waktu Sholat ke notch utama" Margin="0,0,4,0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="⇲" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Pasang ke Notch" FontSize="10.5" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
+                                    Content="⇲" ToolTip="Pasang kembali Waktu Sholat ke notch utama" Margin="0,0,4,0"/>
 
                             <!-- Tombol Tutup ke Compact (Minimize) -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizePrayerWindowCommand}"

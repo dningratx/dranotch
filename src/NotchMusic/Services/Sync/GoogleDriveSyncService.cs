@@ -36,6 +36,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 
     private bool _isSyncing;
     private string _syncStatus = "Belum terhubung";
+    private DateTimeOffset? _lastKnownRemoteModifiedTime;
 
     public string EffectiveClientId =>
         !string.IsNullOrWhiteSpace(_settingsService.CurrentSettings.GoogleDriveClientId)
@@ -266,12 +267,68 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 
             using var reader = new StreamReader(stream, Encoding.UTF8);
             var json = await reader.ReadToEndAsync(ct);
+            _lastKnownRemoteModifiedTime = file.ModifiedTimeDateTimeOffset;
             return JsonSerializer.Deserialize<List<TodoItem>>(json);
         }
         catch (Exception ex)
         {
             _syncStatus = $"Gagal unduh dari Google Drive: {ex.Message}";
             StatusChanged?.Invoke();
+            return null;
+        }
+    }
+
+    public async Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default)
+    {
+        if (!IsConnected) return null;
+
+        lock (_syncLock)
+        {
+            if (_isSyncing) return null;
+        }
+
+        try
+        {
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null) return null;
+
+            var folderId = await GetOrCreateFolderAsync(service, ct);
+            var file = await FindTodoFileAsync(service, folderId, ct);
+            if (file == null) return null;
+
+            var remoteModTime = file.ModifiedTimeDateTimeOffset;
+            if (remoteModTime.HasValue && _lastKnownRemoteModifiedTime.HasValue && remoteModTime <= _lastKnownRemoteModifiedTime)
+            {
+                // File di Google Drive belum berubah sejak terakhir diperiksa
+                return null;
+            }
+
+            // File di Google Drive telah berubah oleh perangkat lain! Unduh otomatis
+            using var stream = new MemoryStream();
+            await service.Files.Get(file.Id).DownloadAsync(stream, ct);
+            stream.Position = 0;
+
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            var json = await reader.ReadToEndAsync(ct);
+            var remoteList = JsonSerializer.Deserialize<List<TodoItem>>(json);
+
+            _lastKnownRemoteModifiedTime = remoteModTime;
+            _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
+            _settingsService.Save();
+
+            _syncStatus = $"Tersinkron otomatis ({DateTime.Now:HH:mm})";
+            StatusChanged?.Invoke();
+
+            if (remoteList != null)
+            {
+                TodosSynced?.Invoke(remoteList);
+            }
+
+            return remoteList;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CheckForRemoteChanges error: {ex.Message}");
             return null;
         }
     }
@@ -301,7 +358,9 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
             if (existingFile != null)
             {
                 var updateReq = service.Files.Update(new Google.Apis.Drive.v3.Data.File(), existingFile.Id, stream, "application/json");
+                updateReq.Fields = "id, modifiedTime";
                 await updateReq.UploadAsync(ct);
+                _lastKnownRemoteModifiedTime = updateReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
             }
             else
             {
@@ -311,7 +370,9 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
                     Parents = new List<string> { folderId }
                 };
                 var createReq = service.Files.Create(metadata, stream, "application/json");
+                createReq.Fields = "id, modifiedTime";
                 await createReq.UploadAsync(ct);
+                _lastKnownRemoteModifiedTime = createReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
             }
 
             _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;

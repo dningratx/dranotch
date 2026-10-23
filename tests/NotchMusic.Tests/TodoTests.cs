@@ -316,6 +316,7 @@ public class TodoTests
         public event Action? StatusChanged;
         public event Action<List<TodoItem>>? TodosSynced;
         public void TriggerStatusChanged() => StatusChanged?.Invoke();
+        public void TriggerTodosSynced(List<TodoItem> items) => TodosSynced?.Invoke(items);
 
         public Task<bool> AuthenticateAsync(CancellationToken ct = default) => Task.FromResult(true);
         public Task DisconnectAsync() => Task.CompletedTask;
@@ -325,6 +326,7 @@ public class TodoTests
             return Task.FromResult(true);
         }
         public Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default) => Task.FromResult<List<TodoItem>?>(new List<TodoItem>());
+        public Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default) => Task.FromResult<List<TodoItem>?>(null);
         public Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, CancellationToken ct = default)
         {
             var list = localTodos.ToList();
@@ -360,6 +362,48 @@ public class TodoTests
             // Synced task should be in list
             Assert.Equal(2, mainVm.TotalTodosCount);
             Assert.Contains(mainVm.Todos, t => t.Title == "Cloud Synced Task");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task MainViewModel_GoogleDrive_DetectsRemoteChangesAutomatically()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"dranotch_gdrive_poll_{Guid.NewGuid():N}.json");
+        try
+        {
+            var todoService = new TodoService(tempFile);
+            var mediaService = new FakeMediaSessionService();
+            var lyricsService = new FakeLyricsService();
+            var settingsService = new FakeSettingsService();
+            var syncService = new FakeGoogleDriveSyncService();
+
+            var mainVm = new MainViewModel(mediaService, lyricsService, settingsService, todoService, syncService);
+
+            // Add local task
+            mainVm.NewTodoTitle = "Local Task 1";
+            mainVm.AddTodoCommand.Execute(null);
+            Assert.Single(mainVm.Todos);
+
+            // Simulate remote machine adding a task and pushing to Google Drive
+            var remoteList = new List<TodoItem>
+            {
+                new TodoItem { Id = mainVm.Todos[0].Id, Title = "Local Task 1", IsCompleted = false },
+                new TodoItem { Id = Guid.NewGuid().ToString(), Title = "Task Created on Machine B", IsCompleted = false }
+            };
+
+            // Trigger sync event (as CheckForRemoteChangesAsync does when remote change is detected)
+            syncService.TriggerTodosSynced(remoteList);
+
+            // Machine A should now automatically have 2 tasks without clicking sync!
+            Assert.Equal(2, mainVm.TotalTodosCount);
+            Assert.Contains(mainVm.Todos, t => t.Title == "Task Created on Machine B");
         }
         finally
         {

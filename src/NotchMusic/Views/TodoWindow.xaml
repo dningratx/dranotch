@@ -400,12 +400,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- Tombol Pasang Kembali ke Panel Musik -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachTodoCommand}"
-                                    ToolTip="Pasang kembali To-Do List ke panel utama" Margin="0,0,4,0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="⇲" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Pasang ke Musik" FontSize="10.5" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
+                                    Content="⇲" ToolTip="Pasang kembali To-Do List ke panel utama" Margin="0,0,4,0"/>
 
                             <!-- Tombol Tutup ke Compact (Minimize) -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizeTodoWindowCommand}"

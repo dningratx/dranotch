@@ -19,5 +19,6 @@ public interface IGoogleDriveSyncService
     Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, CancellationToken ct = default);
     Task<bool> UploadTodosAsync(IEnumerable<TodoItem> todos, CancellationToken ct = default);
     Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default);
+    Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default);
     bool ImportCredentialsFile(string filePath);
 }
