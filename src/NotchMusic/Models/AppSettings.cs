@@ -37,19 +37,21 @@ public class AppSettings
     // Component Display & Detach Settings
     public string ComponentDisplayMode { get; set; } = "Both"; // "Both", "MusicOnly", "TodoOnly"
     public bool IsTodoDetached { get; set; } = false;
+    public bool IsTodoWindowOpen { get; set; } = true;
     public double TodoWindowLeft { get; set; } = -1;
     public double TodoWindowTop { get; set; } = -1;
-    public double TodoWindowWidth { get; set; } = 420;
-    public double TodoWindowHeight { get; set; } = 480;
+    public double TodoWindowWidth { get; set; } = 430;
+    public double TodoWindowHeight { get; set; } = 520;
     public bool IsTodoWindowCompact { get; set; } = false;
 
     // Waktu Sholat & Pengingat (Prayer Times & Reminders)
     public bool EnablePrayerTimes { get; set; } = true;
     public bool IsPrayerDetached { get; set; } = false;
+    public bool IsPrayerWindowOpen { get; set; } = true;
     public double PrayerWindowLeft { get; set; } = -1;
     public double PrayerWindowTop { get; set; } = -1;
     public double PrayerWindowWidth { get; set; } = 360;
-    public double PrayerWindowHeight { get; set; } = 460;
+    public double PrayerWindowHeight { get; set; } = 500;
     public bool IsPrayerWindowCompact { get; set; } = false;
     public string PrayerCity { get; set; } = "Jakarta";
     public double PrayerLatitude { get; set; } = -6.2088;

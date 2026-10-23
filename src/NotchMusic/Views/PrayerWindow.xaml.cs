@@ -59,28 +59,18 @@ public partial class PrayerWindow : Window
 
     private void UpdateCompactMode(bool isCompact)
     {
+        SizeToContent = SizeToContent.Height;
         if (isCompact)
         {
-            if (ActualWidth >= 280 && ActualHeight >= 200)
-            {
-                _settingsService.CurrentSettings.PrayerWindowWidth = ActualWidth;
-                _settingsService.CurrentSettings.PrayerWindowHeight = ActualHeight;
-                _settingsService.Save();
-            }
-
             MinWidth = 240;
             MinHeight = 0;
             Width = 320;
-            Height = 72;
         }
         else
         {
             MinWidth = 300;
-            MinHeight = 340;
-
-            var s = _settingsService.CurrentSettings;
-            Width = s.PrayerWindowWidth >= 300 ? s.PrayerWindowWidth : 360;
-            Height = s.PrayerWindowHeight >= 340 ? s.PrayerWindowHeight : 440;
+            MinHeight = 0;
+            Width = 360;
         }
 
         Dispatcher.InvokeAsync(() => WindowHelper.EnsureInVisibleScreen(this));
@@ -98,7 +88,7 @@ public partial class PrayerWindow : Window
 
     private void PrayerWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (!_viewModel.IsPrayerWindowCompact && WindowState == WindowState.Normal && ActualWidth >= MinWidth && ActualHeight >= MinHeight)
+        if (!_viewModel.IsPrayerWindowCompact && WindowState == WindowState.Normal && ActualWidth >= MinWidth)
         {
             _settingsService.CurrentSettings.PrayerWindowWidth = ActualWidth;
             _settingsService.CurrentSettings.PrayerWindowHeight = ActualHeight;
@@ -116,7 +106,7 @@ public partial class PrayerWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.IsPrayerDetached = false;
+        _viewModel.IsPrayerWindowOpen = false;
         Hide();
     }
 }

@@ -201,26 +201,26 @@ public class PrayerTests
             settingsService,
             prayerService: prayerService);
 
-        // All 3 attached: Music + Prayer + Todo = 1030
+        // All 3 attached: Music + Prayer + Todo = 1100
         Assert.True(mainVm.ShowPrayerSectionInMainWindow);
         Assert.True(mainVm.ShowExpandedPrayerDivider1);
         Assert.True(mainVm.ShowExpandedPrayerDivider2);
-        Assert.Equal(1030, mainVm.ExpandedPanelWidth);
+        Assert.Equal(1100, mainVm.ExpandedPanelWidth);
 
-        // Detach Prayer: Music + Todo = 760
+        // Detach Prayer: Music + Todo = 805
         mainVm.DetachPrayerCommand.Execute(null);
         Assert.False(mainVm.ShowPrayerSectionInMainWindow);
         Assert.False(mainVm.ShowExpandedPrayerDivider1);
         Assert.True(mainVm.ShowExpandedPrayerDivider2);
-        Assert.Equal(760, mainVm.ExpandedPanelWidth);
+        Assert.Equal(805, mainVm.ExpandedPanelWidth);
 
-        // Re-attach Prayer, detach Todo: Music + Prayer = 680
+        // Re-attach Prayer, detach Todo: Music + Prayer = 686
         mainVm.AttachPrayerCommand.Execute(null);
         mainVm.DetachTodoCommand.Execute(null);
         Assert.True(mainVm.ShowPrayerSectionInMainWindow);
         Assert.True(mainVm.ShowExpandedPrayerDivider1);
         Assert.False(mainVm.ShowExpandedPrayerDivider2);
-        Assert.Equal(680, mainVm.ExpandedPanelWidth);
+        Assert.Equal(686, mainVm.ExpandedPanelWidth);
     }
 
     [Fact]
@@ -280,5 +280,35 @@ public class PrayerTests
 
         Assert.True(finished);
         Assert.Null(caught);
+    }
+
+    [Fact]
+    public void MainViewModel_ComponentsButtonSymbol_UpdatesBasedOnClosedComponents()
+    {
+        var settingsService = new FakeSettingsService();
+        var mainVm = new MainViewModel(
+            new FakeMediaSessionService(),
+            new FakeLyricsService(),
+            settingsService);
+
+        // Initially both open -> symbol is 🍱
+        Assert.False(mainVm.HasClosedComponents);
+        Assert.Equal("🍱", mainVm.ComponentsButtonSymbol);
+
+        // Close prayer
+        mainVm.ClosePrayerCommand.Execute(null);
+        Assert.True(mainVm.IsPrayerClosed);
+        Assert.Equal("🕌", mainVm.ComponentsButtonSymbol);
+
+        // Close todo
+        mainVm.CloseTodoCommand.Execute(null);
+        Assert.True(mainVm.IsPrayerClosed);
+        Assert.True(mainVm.IsTodoClosed);
+        Assert.Equal("🕌 ✓", mainVm.ComponentsButtonSymbol);
+
+        // Restore all
+        mainVm.RestoreAllComponentsCommand.Execute(null);
+        Assert.False(mainVm.HasClosedComponents);
+        Assert.Equal("🍱", mainVm.ComponentsButtonSymbol);
     }
 }

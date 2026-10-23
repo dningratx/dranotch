@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
         Title="DRANOTCH - To-Do List"
-        Width="430" Height="520" MinWidth="340" MinHeight="360"
+        Width="430" Height="520" MinWidth="400" MinHeight="360"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"
@@ -352,13 +352,23 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header: Judul, Ringkasan, Sinkronisasi, Pasang Kembali, Tutup -->
-                    <Grid Grid.Row="0" Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                    <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="True">
+                        <!-- Action Buttons docked right so they are never clipped -->
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Tombol Pasang Kembali ke Panel Musik -->
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachTodoCommand}"
+                                    Content="⇲" ToolTip="Pasang kembali To-Do List ke panel utama" Margin="0,0,4,0"/>
 
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Tombol Tutup ke Compact (Minimize) -->
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizeTodoWindowCommand}"
+                                    Content="▴" ToolTip="Tutup ke Compact" Margin="0,0,4,0"/>
+
+                            <!-- Tombol Tutup / Sembunyikan -->
+                            <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click"
+                                    Content="✕" ToolTip="Tutup jendela To-Do (dapat dibuka kembali via menu komponen)"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="✓" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="To-Do List" Foreground="#FFFFFF" FontSize="14.5" FontWeight="Bold" VerticalAlignment="Center"/>
                             <Border Background="#1A1A20" CornerRadius="8" Padding="6,2" Margin="8,0,0,0" VerticalAlignment="Center">
@@ -396,21 +406,7 @@
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <!-- Tombol Pasang Kembali ke Panel Musik -->
-                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachTodoCommand}"
-                                    Content="⇲" ToolTip="Pasang kembali To-Do List ke panel utama" Margin="0,0,4,0"/>
-
-                            <!-- Tombol Tutup ke Compact (Minimize) -->
-                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizeTodoWindowCommand}"
-                                    Content="▴" ToolTip="Tutup ke Compact" Margin="0,0,4,0"/>
-
-                            <!-- Tombol Tutup / Sembunyikan -->
-                            <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click"
-                                    Content="✕" ToolTip="Tutup jendela To-Do (dapat dibuka kembali via pengaturan atau panel)"/>
-                        </StackPanel>
-                    </Grid>
+                    </DockPanel>
 
                 <!-- Filter Tabs & Actions -->
                 <StackPanel Grid.Row="1" Margin="0,0,0,8">
@@ -506,7 +502,7 @@
                 <Grid Grid.Row="2" Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
                         <!-- Dropdown / Input Kategori -->
-                        <ColumnDefinition Width="105"/>
+                        <ColumnDefinition Width="95"/>
                         <!-- Input Teks Tugas -->
                         <ColumnDefinition Width="*"/>
                         <!-- Tombol Tambah (+) -->

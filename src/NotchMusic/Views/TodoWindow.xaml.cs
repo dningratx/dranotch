@@ -76,12 +76,12 @@ public partial class TodoWindow : Window
         }
         else
         {
-            MinWidth = 340;
+            MinWidth = 400;
             MinHeight = 360;
 
             var s = _settingsService.CurrentSettings;
-            Width = s.TodoWindowWidth >= 340 ? s.TodoWindowWidth : 420;
-            Height = s.TodoWindowHeight >= 360 ? s.TodoWindowHeight : 480;
+            Width = s.TodoWindowWidth >= 400 ? s.TodoWindowWidth : 430;
+            Height = s.TodoWindowHeight >= 400 ? s.TodoWindowHeight : 520;
         }
 
         Dispatcher.InvokeAsync(() => WindowHelper.EnsureInVisibleScreen(this));
@@ -120,6 +120,7 @@ public partial class TodoWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
+        _viewModel.IsTodoWindowOpen = false;
         Hide();
     }
 

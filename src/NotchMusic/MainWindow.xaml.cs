@@ -204,7 +204,7 @@ public partial class MainWindow : Window
 
     private void UpdateTodoWindowState()
     {
-        if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection)
+        if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection && _viewModel.IsTodoWindowOpen)
         {
             if (_todoWindow == null)
             {
@@ -224,7 +224,7 @@ public partial class MainWindow : Window
 
     private void UpdatePrayerWindowState()
     {
-        if (_viewModel.IsPrayerDetached && _viewModel.EnablePrayerTimes)
+        if (_viewModel.IsPrayerDetached && _viewModel.EnablePrayerTimes && _viewModel.IsPrayerWindowOpen)
         {
             if (_prayerWindow == null)
             {

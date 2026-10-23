@@ -123,6 +123,20 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    public bool IsTodoWindowOpen
+    {
+        get => Settings.IsTodoWindowOpen;
+        set
+        {
+            if (Settings.IsTodoWindowOpen != value)
+            {
+                Settings.IsTodoWindowOpen = value;
+                _settingsService.Save();
+                RefreshComponentLayout();
+            }
+        }
+    }
+
     public bool IsPrayerDetached
     {
         get => Settings.IsPrayerDetached;
@@ -137,14 +151,69 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    public bool IsPrayerWindowOpen
+    {
+        get => Settings.IsPrayerWindowOpen;
+        set
+        {
+            if (Settings.IsPrayerWindowOpen != value)
+            {
+                Settings.IsPrayerWindowOpen = value;
+                _settingsService.Save();
+                RefreshComponentLayout();
+            }
+        }
+    }
+
+    public bool IsPrayerClosed => IsPrayerDetached && !IsPrayerWindowOpen;
+    public bool IsTodoClosed => IsTodoDetached && !IsTodoWindowOpen;
+    public bool HasClosedComponents => IsPrayerClosed || IsTodoClosed;
+    public int ClosedComponentsCount => (IsPrayerClosed ? 1 : 0) + (IsTodoClosed ? 1 : 0);
+    public string ComponentsButtonText => HasClosedComponents ? $"Komponen ({ClosedComponentsCount})" : "Komponen";
+
+    public string ComponentsButtonSymbol
+    {
+        get
+        {
+            if (IsPrayerClosed && IsTodoClosed)
+                return "🕌 ✓";
+            if (IsPrayerClosed)
+                return "🕌";
+            if (IsTodoClosed)
+                return "✓";
+            return "🍱";
+        }
+    }
+
+    public string ComponentsButtonTooltip
+    {
+        get
+        {
+            if (IsPrayerClosed && IsTodoClosed)
+                return "Komponen ditutup: Waktu Sholat & To-Do List (Klik untuk kelola/buka)";
+            if (IsPrayerClosed)
+                return "Komponen ditutup: Waktu Sholat (Klik untuk kelola/buka)";
+            if (IsTodoClosed)
+                return "Komponen ditutup: To-Do List (Klik untuk kelola/buka)";
+            return "Kelola komponen notch";
+        }
+    }
+
+    private bool _isComponentsMenuOpen;
+    public bool IsComponentsMenuOpen
+    {
+        get => _isComponentsMenuOpen;
+        set => SetProperty(ref _isComponentsMenuOpen, value);
+    }
+
     public bool IsComponentBoth => ComponentDisplayMode == "Both";
     public bool IsComponentMusicOnly => ComponentDisplayMode == "MusicOnly";
     public bool IsComponentTodoOnly => ComponentDisplayMode == "TodoOnly";
 
     public bool ShowMusicSection => ComponentDisplayMode != "TodoOnly";
     public bool ShowTodoSection => ComponentDisplayMode != "MusicOnly";
-    public bool ShowTodoTicker => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly");
-    public bool ShowTodoSectionInMainWindow => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly");
+    public bool ShowTodoTicker => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly") && IsTodoWindowOpen;
+    public bool ShowTodoSectionInMainWindow => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly") && IsTodoWindowOpen;
     public bool ShowMusicMinimizeButton => !ShowTodoSectionInMainWindow;
     public bool ShowSplitter => ShowExpandedPrayerDivider2;
 
@@ -188,13 +257,13 @@ public class MainViewModel : ViewModelBase
     public bool ShowPrayerDivider1 => ShowMusicSection && ShowCompactPrayerPill;
     public bool ShowPrayerDivider2 => ShowTodoTicker && (ShowMusicSection || ShowCompactPrayerPill);
 
-    public bool ShowPrayerSectionInMainWindow => EnablePrayerTimes && !IsPrayerDetached;
+    public bool ShowPrayerSectionInMainWindow => EnablePrayerTimes && !IsPrayerDetached && IsPrayerWindowOpen;
     public bool ShowExpandedPrayerDivider1 => ShowMusicSection && ShowPrayerSectionInMainWindow;
     public bool ShowExpandedPrayerDivider2 => ShowTodoSectionInMainWindow && (ShowMusicSection || ShowPrayerSectionInMainWindow);
 
     public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(390) : new System.Windows.GridLength(0);
     public System.Windows.GridLength PrayerColumnWidth => ShowPrayerSectionInMainWindow ? new System.Windows.GridLength(275) : new System.Windows.GridLength(0);
-    public System.Windows.GridLength TodoColumnWidth => ShowTodoSectionInMainWindow ? new System.Windows.GridLength(345) : new System.Windows.GridLength(0);
+    public System.Windows.GridLength TodoColumnWidth => ShowTodoSectionInMainWindow ? new System.Windows.GridLength(390) : new System.Windows.GridLength(0);
 
     public bool IsPrayerPanelOpen
     {
@@ -221,15 +290,22 @@ public class MainViewModel : ViewModelBase
                 return 440;
 
             if (ShowMusicSection && ShowPrayerSectionInMainWindow && ShowTodoSectionInMainWindow)
-                return 1030;
+                return 1100;
             if (ShowMusicSection && ShowPrayerSectionInMainWindow)
-                return 680;
+                return 686;
             if (ShowPrayerSectionInMainWindow && ShowTodoSectionInMainWindow)
-                return 640;
+                return 690;
             if (ShowMusicSection && ShowTodoSectionInMainWindow)
-                return 760;
+                return 805;
 
-            return 440;
+            if (ShowMusicSection)
+                return 390;
+            if (ShowTodoSectionInMainWindow)
+                return 390;
+            if (ShowPrayerSectionInMainWindow)
+                return 275;
+
+            return 390;
         }
     }
 
@@ -493,7 +569,7 @@ public class MainViewModel : ViewModelBase
     public PrayerSchedule CurrentPrayerSchedule => _prayerReminderService.CurrentSchedule;
 
     public bool EnablePrayerTimes => Settings.EnablePrayerTimes;
-    public bool ShowCompactPrayerPill => Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch && !IsPrayerDetached && CurrentPrayerSchedule?.NextPrayer != null;
+    public bool ShowCompactPrayerPill => Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch && !IsPrayerDetached && IsPrayerWindowOpen && CurrentPrayerSchedule?.NextPrayer != null;
 
     public string NextPrayerName => CurrentPrayerSchedule?.NextPrayer?.Name ?? string.Empty;
     public string NextPrayerTimeFormatted => CurrentPrayerSchedule?.NextPrayer?.FormattedTime ?? string.Empty;
@@ -541,15 +617,19 @@ public class MainViewModel : ViewModelBase
     public ICommand SyncGoogleDriveCommand { get; }
     public ICommand DetachTodoCommand { get; }
     public ICommand AttachTodoCommand { get; }
+    public ICommand CloseTodoCommand { get; }
     public ICommand MinimizeTodoWindowCommand { get; }
     public ICommand ExpandTodoWindowCommand { get; }
     public ICommand DetachPrayerCommand { get; }
     public ICommand AttachPrayerCommand { get; }
+    public ICommand ClosePrayerCommand { get; }
     public ICommand MinimizePrayerWindowCommand { get; }
     public ICommand ExpandPrayerWindowCommand { get; }
     public ICommand TogglePrayerPanelCommand { get; }
     public ICommand OpenPrayerScheduleCommand { get; }
     public ICommand DismissPrayerNotificationCommand { get; }
+    public ICommand ToggleComponentsMenuCommand { get; }
+    public ICommand RestoreAllComponentsCommand { get; }
     public ICommand ExitApplicationCommand { get; }
 
     public event Action? RequestExit;
@@ -701,15 +781,58 @@ public class MainViewModel : ViewModelBase
             }
         });
 
-        DetachTodoCommand = new RelayCommand(() => IsTodoDetached = true);
-        AttachTodoCommand = new RelayCommand(() => IsTodoDetached = false);
+        DetachTodoCommand = new RelayCommand(() =>
+        {
+            IsTodoDetached = true;
+            IsTodoWindowOpen = true;
+            IsComponentsMenuOpen = false;
+        });
+        AttachTodoCommand = new RelayCommand(() =>
+        {
+            IsTodoDetached = false;
+            IsTodoWindowOpen = true;
+            IsComponentsMenuOpen = false;
+        });
+        CloseTodoCommand = new RelayCommand(() =>
+        {
+            IsTodoDetached = true;
+            IsTodoWindowOpen = false;
+            IsComponentsMenuOpen = false;
+        });
         MinimizeTodoWindowCommand = new RelayCommand(() => IsTodoWindowCompact = true);
         ExpandTodoWindowCommand = new RelayCommand(() => IsTodoWindowCompact = false);
 
-        DetachPrayerCommand = new RelayCommand(() => IsPrayerDetached = true);
-        AttachPrayerCommand = new RelayCommand(() => IsPrayerDetached = false);
+        DetachPrayerCommand = new RelayCommand(() =>
+        {
+            IsPrayerDetached = true;
+            IsPrayerWindowOpen = true;
+            IsComponentsMenuOpen = false;
+        });
+        AttachPrayerCommand = new RelayCommand(() =>
+        {
+            IsPrayerDetached = false;
+            IsPrayerWindowOpen = true;
+            IsComponentsMenuOpen = false;
+        });
+        ClosePrayerCommand = new RelayCommand(() =>
+        {
+            IsPrayerDetached = true;
+            IsPrayerWindowOpen = false;
+            IsComponentsMenuOpen = false;
+        });
         MinimizePrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = true);
         ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false);
+
+        ToggleComponentsMenuCommand = new RelayCommand(() => IsComponentsMenuOpen = !IsComponentsMenuOpen);
+        RestoreAllComponentsCommand = new RelayCommand(() =>
+        {
+            IsPrayerDetached = false;
+            IsPrayerWindowOpen = true;
+            IsTodoDetached = false;
+            IsTodoWindowOpen = true;
+            ComponentDisplayMode = "Both";
+            IsComponentsMenuOpen = false;
+        });
 
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
@@ -750,6 +873,15 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(ComponentDisplayMode));
         OnPropertyChanged(nameof(IsTodoDetached));
         OnPropertyChanged(nameof(IsPrayerDetached));
+        OnPropertyChanged(nameof(IsTodoWindowOpen));
+        OnPropertyChanged(nameof(IsPrayerWindowOpen));
+        OnPropertyChanged(nameof(IsPrayerClosed));
+        OnPropertyChanged(nameof(IsTodoClosed));
+        OnPropertyChanged(nameof(HasClosedComponents));
+        OnPropertyChanged(nameof(ClosedComponentsCount));
+        OnPropertyChanged(nameof(ComponentsButtonText));
+        OnPropertyChanged(nameof(ComponentsButtonSymbol));
+        OnPropertyChanged(nameof(ComponentsButtonTooltip));
         OnPropertyChanged(nameof(IsComponentBoth));
         OnPropertyChanged(nameof(IsComponentMusicOnly));
         OnPropertyChanged(nameof(IsComponentTodoOnly));

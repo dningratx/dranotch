@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
         Title="DRANOTCH - Waktu Sholat"
-        Width="360" Height="440" MinWidth="300" MinHeight="340"
+        Width="360" MinWidth="300"
+        SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"
@@ -110,7 +111,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/> <!-- Header -->
                         <RowDefinition Height="Auto"/> <!-- Next Prayer Countdown Card -->
-                        <RowDefinition Height="*"/>    <!-- Daily Schedule List -->
+                        <RowDefinition Height="Auto"/> <!-- Daily Schedule List -->
                         <RowDefinition Height="Auto"/> <!-- Bottom Actions -->
                     </Grid.RowDefinitions>
 
@@ -175,8 +176,7 @@
 
                     <!-- Schedule Cards Grid (Imsak, Subuh, Terbit, Dzuhur, Ashar, Maghrib, Isya) -->
                     <Border Grid.Row="2" Background="#0C0C0F" CornerRadius="10" Padding="8,6" Margin="0,0,0,10">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding CurrentPrayerSchedule.Items}">
+                        <ItemsControl ItemsSource="{Binding CurrentPrayerSchedule.Items}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="8" Padding="10,6" Margin="0,2,0,2">
@@ -258,7 +258,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ScrollViewer>
                     </Border>
 
                     <!-- Bottom Status & Actions -->
