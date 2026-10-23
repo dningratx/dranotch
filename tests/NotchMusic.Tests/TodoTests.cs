@@ -31,6 +31,7 @@ public class TodoTests
         public Task PreviousAsync() => Task.CompletedTask;
         public Task NextAsync() => Task.CompletedTask;
         public Task SeekAsync(TimeSpan position) => Task.CompletedTask;
+        public void TriggerTrackChanged(TrackInfo? track) => TrackChanged?.Invoke(this, track);
         public void Dispose() { }
     }
 
@@ -314,6 +315,7 @@ public class TodoTests
 
         public event Action? StatusChanged;
         public event Action<List<TodoItem>>? TodosSynced;
+        public void TriggerStatusChanged() => StatusChanged?.Invoke();
 
         public Task<bool> AuthenticateAsync(CancellationToken ct = default) => Task.FromResult(true);
         public Task DisconnectAsync() => Task.CompletedTask;
@@ -820,5 +822,188 @@ public class TodoTests
 
         Assert.True(finished);
         Assert.Null(caught);
+    }
+
+    [Fact]
+    public void MainViewModel_HasTrack_ReflectsTrackAvailability()
+    {
+        var mediaService = new FakeMediaSessionService();
+        var lyricsService = new FakeLyricsService();
+        var settingsService = new FakeSettingsService();
+        var todoService = new TodoService(settingsService);
+
+        var vm = new MainViewModel(mediaService, lyricsService, settingsService, todoService);
+
+        // Initially no track
+        Assert.False(vm.HasTrack);
+        Assert.Equal(string.Empty, vm.ActiveLyric);
+
+        // Track with title
+        mediaService.TriggerTrackChanged(new TrackInfo
+        {
+            Title = "Song Title",
+            Artist = "Artist"
+        });
+
+        Assert.True(vm.HasTrack);
+
+        // Track null
+        mediaService.TriggerTrackChanged(null);
+        Assert.False(vm.HasTrack);
+        Assert.Equal(string.Empty, vm.ActiveLyric);
+    }
+
+    [Fact]
+    public async Task MainViewModel_GoogleDriveStatus_ReturnsCorrectLabelsAndTooltips()
+    {
+        var mediaService = new FakeMediaSessionService();
+        var lyricsService = new FakeLyricsService();
+        var settingsService = new FakeSettingsService();
+        var todoService = new TodoService(settingsService);
+        var syncService = new FakeGoogleDriveSyncService { IsConnected = false, UserEmail = string.Empty };
+
+        var vm = new MainViewModel(mediaService, lyricsService, settingsService, todoService, syncService);
+
+        Assert.False(vm.IsGoogleDriveConnected);
+        Assert.Equal("Drive: Belum Konek", vm.GoogleDriveStatusButtonText);
+        Assert.Contains("belum terhubung", vm.GoogleDriveSyncTooltip);
+
+        // Trigger click when disconnected -> authenticates
+        await vm.HandleGoogleDriveClickAsync();
+        // FakeGoogleDriveSyncService AuthenticateAsync returns true
+        syncService.IsConnected = true;
+        syncService.UserEmail = "test@example.com";
+        syncService.TriggerStatusChanged();
+
+        Assert.True(vm.IsGoogleDriveConnected);
+        Assert.Equal("Drive", vm.GoogleDriveStatusButtonText);
+        Assert.Contains("test@example.com", vm.GoogleDriveSyncTooltip);
+    }
+
+    [Fact]
+    public void TodoItemViewModel_Edit_StartSaveCancelWorksCorrectly()
+    {
+        var item = new TodoItem { Title = "Kategori: Tugas Awal" };
+        var vm = new TodoItemViewModel(item);
+
+        Assert.False(vm.IsEditing);
+        Assert.Equal("Kategori", vm.Category);
+        Assert.Equal("Tugas Awal", vm.TaskText);
+
+        // Start Edit
+        vm.StartEdit();
+        Assert.True(vm.IsEditing);
+        Assert.Equal("Kategori: Tugas Awal", vm.EditText);
+
+        // Cancel Edit
+        vm.EditText = "Tugas Berubah";
+        vm.CancelEdit();
+        Assert.False(vm.IsEditing);
+        Assert.Equal("Kategori: Tugas Awal", vm.Title);
+
+        // Save Edit
+        vm.StartEdit();
+        vm.EditText = "Projek: Tugas Direvisi";
+        bool changed = false;
+        vm.OnChanged += () => changed = true;
+        vm.SaveEdit();
+
+        Assert.False(vm.IsEditing);
+        Assert.True(changed);
+        Assert.Equal("Projek: Tugas Direvisi", vm.Title);
+        Assert.Equal("Projek", vm.Category);
+        Assert.Equal("Tugas Direvisi", vm.TaskText);
+    }
+
+    [Fact]
+    public void MainViewModel_AutoSync_TriggeredOnAddEditAndDelete()
+    {
+        Exception? caught = null;
+        var thread = new Thread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext());
+            var settingsService = new FakeSettingsService();
+            settingsService.CurrentSettings.GoogleDriveAutoSync = true;
+            var syncService = new FakeGoogleDriveSyncService { IsConnected = true };
+
+            var tempFile = Path.Combine(Path.GetTempPath(), $"dranotch_autosync_crud_{Guid.NewGuid():N}.json");
+            try
+            {
+                File.WriteAllText(tempFile, "[]");
+                var todoService = new TodoService(tempFile);
+                var vm = new MainViewModel(
+                    new FakeMediaSessionService(),
+                    new FakeLyricsService(),
+                    settingsService,
+                    todoService: todoService,
+                    googleDriveSyncService: syncService);
+
+                int initialCalls = syncService.UploadCallCount;
+
+                // 1. ADD
+                vm.NewTodoTitle = "Tugas Baru";
+                vm.AddTodoCommand.Execute(null);
+
+                Thread.Sleep(850);
+                Assert.True(syncService.UploadCallCount > initialCalls, "Upload should be called on Add");
+                int afterAdd = syncService.UploadCallCount;
+
+                // 2. EDIT / UPDATE
+                var addedItem = vm.Todos.First();
+                addedItem.StartEdit();
+                addedItem.EditText = "Tugas Diedit";
+                addedItem.SaveEdit();
+
+                Thread.Sleep(850);
+                Assert.True(syncService.UploadCallCount > afterAdd, "Upload should be called on Edit");
+                int afterEdit = syncService.UploadCallCount;
+
+                // 3. DELETE
+                addedItem.DeleteCommand.Execute(null);
+
+                Thread.Sleep(850);
+                Assert.True(syncService.UploadCallCount > afterEdit, "Upload should be called on Delete");
+            }
+            catch (Exception ex)
+            {
+                caught = ex;
+            }
+            finally
+            {
+                if (File.Exists(tempFile)) File.Delete(tempFile);
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        bool finished = thread.Join(10000);
+        Assert.True(finished);
+        Assert.Null(caught);
+    }
+
+    [Fact]
+    public void MainViewModel_Hover_DoesNotImmediatelyExpand()
+    {
+        var settingsService = new FakeSettingsService();
+        settingsService.CurrentSettings.ExpandOnHover = true;
+
+        var vm = new MainViewModel(
+            new FakeMediaSessionService(),
+            new FakeLyricsService(),
+            settingsService,
+            new TodoService(settingsService));
+
+        vm.CurrentMode = PanelMode.Compact;
+
+        bool expandedImmediately = false;
+        vm.RequestExpand += () => expandedImmediately = true;
+
+        vm.OnMouseEnter();
+
+        // Should NOT expand immediately upon cursor entering
+        Assert.False(expandedImmediately, "Hover should not expand the panel immediately upon mouse enter");
+
+        // Leaving mouse should cancel the expansion timer
+        vm.OnMouseLeave();
+        Assert.False(expandedImmediately);
     }
 }

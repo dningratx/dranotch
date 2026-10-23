@@ -14,6 +14,12 @@ public partial class YouTubeMusicWindow : Window
     public YouTubeMusicWindow()
     {
         InitializeComponent();
+        try
+        {
+            var uri = new Uri("pack://application:,,,/NotchMusic;component/Assets/app.ico");
+            Icon = System.Windows.Media.Imaging.BitmapFrame.Create(uri);
+        }
+        catch { }
         Loaded += YouTubeMusicWindow_Loaded;
     }
 

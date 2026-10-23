@@ -9,6 +9,12 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         DataContext = viewModel;
+        try
+        {
+            var uri = new Uri("pack://application:,,,/NotchMusic;component/Assets/app.ico");
+            Icon = System.Windows.Media.Imaging.BitmapFrame.Create(uri);
+        }
+        catch { }
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

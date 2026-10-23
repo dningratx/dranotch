@@ -12,9 +12,23 @@ public class TodoItemViewModel : ViewModelBase
     private string _taskText = string.Empty;
     private bool _isCompleted;
     private DateTime? _completedAt;
+    private bool _isEditing;
+    private string _editText = string.Empty;
 
     public string Id { get; }
     public DateTime CreatedAt { get; }
+
+    public bool IsEditing
+    {
+        get => _isEditing;
+        set => SetProperty(ref _isEditing, value);
+    }
+
+    public string EditText
+    {
+        get => _editText;
+        set => SetProperty(ref _editText, value);
+    }
 
     public string Title
     {
@@ -88,6 +102,30 @@ public class TodoItemViewModel : ViewModelBase
     public event Action<TodoItemViewModel>? OnDeleteRequested;
 
     public ICommand DeleteCommand { get; }
+    public ICommand StartEditCommand { get; }
+    public ICommand SaveEditCommand { get; }
+    public ICommand CancelEditCommand { get; }
+
+    public void StartEdit()
+    {
+        EditText = Title;
+        IsEditing = true;
+    }
+
+    public void SaveEdit()
+    {
+        if (!string.IsNullOrWhiteSpace(EditText))
+        {
+            Title = EditText.Trim();
+        }
+        IsEditing = false;
+    }
+
+    public void CancelEdit()
+    {
+        EditText = Title;
+        IsEditing = false;
+    }
 
     public TodoItemViewModel(TodoItem item)
     {
@@ -113,6 +151,9 @@ public class TodoItemViewModel : ViewModelBase
         }
 
         DeleteCommand = new RelayCommand(() => OnDeleteRequested?.Invoke(this));
+        StartEditCommand = new RelayCommand(StartEdit);
+        SaveEditCommand = new RelayCommand(SaveEdit);
+        CancelEditCommand = new RelayCommand(CancelEdit);
     }
 
     public TodoItem ToModel() => new()

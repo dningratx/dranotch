@@ -365,23 +365,34 @@
                                 <TextBlock Text="{Binding TodoSummaryText}" Foreground="#CCCCCC" FontSize="10.5" FontWeight="Medium"/>
                             </Border>
 
-                            <!-- Tombol Sinkronisasi Google Drive -->
+                            <!-- Tombol Status Google Drive (Klik untuk Login / Sync) -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding SyncGoogleDriveCommand}"
-                                    ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="5,2" Margin="6,0,0,0">
+                                    ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="6,2" Margin="6,0,0,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="☁" FontSize="11" Margin="0,0,3,0">
+                                    <TextBlock Text="☁" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="#777788"/>
+                                                <Setter Property="Foreground" Value="#FFAA44"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
-                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                        <Setter Property="Foreground" Value="#4CD964"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <TextBlock Text="Sync" FontSize="10" Foreground="#DDDDDD"/>
+                                    <TextBlock Text="{Binding GoogleDriveStatusButtonText}" FontSize="10" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#BBBBCC"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                        <Setter Property="Foreground" Value="#EEEEEE"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -608,14 +619,22 @@
                                                           Style="{StaticResource TodoCheckBoxStyle}"
                                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
 
-                                                <!-- Judul Tugas & Kategori Tag -->
-                                                <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                <!-- Judul Tugas & Kategori Tag (Mode Tampilan) -->
+                                                <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0" Cursor="Hand"
+                                                           ToolTip="Klik dua kali atau klik ikon pensil untuk mengedit tugas"
+                                                           Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
+                                                    <DockPanel.InputBindings>
+                                                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding StartEditCommand}"/>
+                                                    </DockPanel.InputBindings>
+
+                                                    <!-- Tag / Kategori Badge -->
                                                     <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
                                                             Background="#1E1E24" BorderBrush="#363640" BorderThickness="1"
                                                             CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding Category}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="Bold"/>
                                                     </Border>
 
+                                                    <!-- Teks Tugas -->
                                                     <TextBlock Text="{Binding TaskText}" VerticalAlignment="Center"
                                                                FontSize="11.5" TextWrapping="Wrap">
                                                         <TextBlock.Style>
@@ -632,12 +651,49 @@
                                                     </TextBlock>
                                                 </DockPanel>
 
-                                                <!-- Tombol Hapus -->
-                                                <Button Grid.Column="3" Command="{Binding DeleteCommand}"
-                                                        Style="{StaticResource TodoDeleteButtonStyle}"
-                                                        ToolTip="Hapus tugas" Width="20" Height="20" VerticalAlignment="Center">
-                                                    <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
-                                                </Button>
+                                                <!-- Mode Edit Inline -->
+                                                <Grid Grid.Column="2" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                      Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
+                                                    <TextBox Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource TodoTextBoxStyle}"
+                                                             FontSize="11.5" Padding="6,3" VerticalAlignment="Center"
+                                                             ToolTip="Tekan Enter untuk simpan, Esc untuk batal">
+                                                        <TextBox.InputBindings>
+                                                            <KeyBinding Key="Enter" Command="{Binding SaveEditCommand}"/>
+                                                            <KeyBinding Key="Esc" Command="{Binding CancelEditCommand}"/>
+                                                        </TextBox.InputBindings>
+                                                    </TextBox>
+                                                </Grid>
+
+                                                <!-- Tombol Aksi saat Normal (Edit ✎ & Hapus ×) -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                                            Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
+                                                    <Button Command="{Binding StartEditCommand}"
+                                                            Style="{StaticResource TodoDeleteButtonStyle}"
+                                                            ToolTip="Edit tugas" Width="20" Height="20" Margin="0,0,2,0">
+                                                        <TextBlock Text="✎" FontSize="11" Foreground="#777788" Margin="0,-1,0,0"/>
+                                                    </Button>
+                                                    <Button Command="{Binding DeleteCommand}"
+                                                            Style="{StaticResource TodoDeleteButtonStyle}"
+                                                            ToolTip="Hapus tugas" Width="20" Height="20">
+                                                        <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <!-- Tombol Aksi saat Mode Edit (Simpan ✓ & Batal ✕) -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                                            Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
+                                                    <Button Command="{Binding SaveEditCommand}"
+                                                            Style="{StaticResource TodoDeleteButtonStyle}"
+                                                            ToolTip="Simpan (Enter)" Width="20" Height="20" Margin="0,0,2,0">
+                                                        <TextBlock Text="✓" FontSize="12" Foreground="#4CD964" FontWeight="Bold"/>
+                                                    </Button>
+                                                    <Button Command="{Binding CancelEditCommand}"
+                                                            Style="{StaticResource TodoDeleteButtonStyle}"
+                                                            ToolTip="Batal (Esc)" Width="20" Height="20">
+                                                        <TextBlock Text="✕" FontSize="11" Foreground="#FF4D6D"/>
+                                                    </Button>
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>

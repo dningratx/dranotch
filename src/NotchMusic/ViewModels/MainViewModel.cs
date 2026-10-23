@@ -55,7 +55,7 @@ public class MainViewModel : ViewModelBase
     private double _durationSeconds;
     private string _formattedTime = "0:00 / 0:00";
     private string _previousLyric = string.Empty;
-    private string _activeLyric = "Memuat...";
+    private string _activeLyric = string.Empty;
     private string _nextLyric = string.Empty;
     private string _sessionStatus = "Menunggu pemutar...";
     private double _manualOffsetSeconds = 0;
@@ -230,9 +230,12 @@ public class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(StandbyLyric));
                 OnPropertyChanged(nameof(IsPlaying));
+                OnPropertyChanged(nameof(HasTrack));
             }
         }
     }
+
+    public bool HasTrack => CurrentTrack != null && !string.IsNullOrWhiteSpace(CurrentTrack.Title);
 
     public bool IsPlaying => CurrentTrack?.IsPlaying ?? false;
 
@@ -454,9 +457,23 @@ public class MainViewModel : ViewModelBase
 
     public ICommand OpenUpdateCommand { get; }
     public bool IsGoogleDriveConnected => _googleDriveSyncService.IsConnected;
+    public bool IsGoogleDriveSyncing => _googleDriveSyncService.IsSyncing;
+    public string GoogleDriveUserEmail => _googleDriveSyncService.UserEmail;
+    public string GoogleDriveSyncStatus => _googleDriveSyncService.SyncStatus;
+
+    public string GoogleDriveStatusButtonText
+    {
+        get
+        {
+            if (IsGoogleDriveSyncing) return "Menyinkronkan...";
+            if (IsGoogleDriveConnected) return "Drive";
+            return "Drive: Belum Konek";
+        }
+    }
+
     public string GoogleDriveSyncTooltip => _googleDriveSyncService.IsConnected
-        ? $"Google Drive ({_googleDriveSyncService.UserEmail}): {_googleDriveSyncService.SyncStatus} (Klik untuk sinkronkan)"
-        : "Google Drive belum terhubung (Buka Pengaturan)";
+        ? $"Google Drive ({_googleDriveSyncService.UserEmail}): {_googleDriveSyncService.SyncStatus}\nKlik untuk sinkronkan sekarang"
+        : "Google Drive belum terhubung.\nKlik untuk menghubungkan dan login akun Google";
 
     // Prayer Times & Reminders Properties
     public IPrayerService PrayerService => _prayerService;
@@ -573,6 +590,10 @@ public class MainViewModel : ViewModelBase
         _googleDriveSyncService.StatusChanged += () =>
         {
             OnPropertyChanged(nameof(IsGoogleDriveConnected));
+            OnPropertyChanged(nameof(IsGoogleDriveSyncing));
+            OnPropertyChanged(nameof(GoogleDriveUserEmail));
+            OnPropertyChanged(nameof(GoogleDriveSyncStatus));
+            OnPropertyChanged(nameof(GoogleDriveStatusButtonText));
             OnPropertyChanged(nameof(GoogleDriveSyncTooltip));
         };
         _googleDriveSyncService.TodosSynced += OnTodosSyncedFromCloud;
@@ -616,7 +637,7 @@ public class MainViewModel : ViewModelBase
         NextTickerCommand = new RelayCommand(NextTicker);
         PreviousTickerCommand = new RelayCommand(PreviousTicker);
         CompleteCurrentTickerCommand = new RelayCommand(CompleteCurrentTicker);
-        SyncGoogleDriveCommand = new RelayCommand(async () => await SyncWithGoogleDriveAsync());
+        SyncGoogleDriveCommand = new RelayCommand(async () => await HandleGoogleDriveClickAsync());
 
         UpdateTicker();
 
@@ -781,7 +802,7 @@ public class MainViewModel : ViewModelBase
 
     private void OnTrackChanged(object? sender, TrackInfo? track)
     {
-        App.Current?.Dispatcher.Invoke(() =>
+        Action update = () =>
         {
             var oldTrackKey = _currentTrack?.UniqueSongKey;
             CurrentTrack = track;
@@ -789,7 +810,7 @@ public class MainViewModel : ViewModelBase
             if (track == null || string.IsNullOrWhiteSpace(track.Title))
             {
                 SessionStatus = "Tidak ada lagu yang sedang diputar";
-                ActiveLyric = "Buka YouTube Music di Chrome atau Edge";
+                ActiveLyric = string.Empty;
                 PreviousLyric = string.Empty;
                 NextLyric = string.Empty;
                 DurationSeconds = 0;
@@ -823,7 +844,16 @@ public class MainViewModel : ViewModelBase
             }
 
             UpdateTimelineAndLyrics();
-        });
+        };
+
+        if (App.Current?.Dispatcher != null && !App.Current.Dispatcher.CheckAccess())
+        {
+            App.Current.Dispatcher.Invoke(update);
+        }
+        else
+        {
+            update();
+        }
     }
 
     private void OnTimelineUpdated(object? sender, TimeSpan position)
@@ -1247,7 +1277,44 @@ public class MainViewModel : ViewModelBase
                 {
                     System.Diagnostics.Debug.WriteLine($"AutoSync error: {ex.Message}");
                 }
-            }, null, TimeSpan.FromMilliseconds(700), Timeout.InfiniteTimeSpan);
+            }, null, TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
+        }
+    }
+
+    public async Task HandleGoogleDriveClickAsync()
+    {
+        if (!_googleDriveSyncService.IsConnected)
+        {
+            try
+            {
+                RequestShowTrayNotification?.Invoke("Google Drive", "Membuka browser untuk login akun Google...");
+                var success = await _googleDriveSyncService.AuthenticateAsync();
+                if (success)
+                {
+                    RequestShowTrayNotification?.Invoke("Google Drive", $"Berhasil terhubung sebagai {_googleDriveSyncService.UserEmail}!");
+                    await SyncWithGoogleDriveAsync();
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Tidak dapat login ke Google Drive:\n{_googleDriveSyncService.SyncStatus}",
+                        "DRANOTCH - Google Drive",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Gagal otentikasi Google Drive:\n{ex.Message}",
+                    "DRANOTCH - Google Drive Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+        else
+        {
+            await SyncWithGoogleDriveAsync();
         }
     }
 
@@ -1396,18 +1463,34 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasPendingTodos));
     }
 
+    private DispatcherTimer? _expandHoverTimer;
+
     public void OnMouseEnter()
     {
         _isHovering = true;
+        _expandHoverTimer?.Stop();
+
         if (Settings.ExpandOnHover && CurrentMode == PanelMode.Compact && !IsPinned)
         {
-            RequestExpand?.Invoke();
+            // Tidak langsung terbuka: Berikan jeda hover (650ms) agar tidak terbuka saat kursor hanya melintas
+            _expandHoverTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(650) };
+            _expandHoverTimer.Tick += (s, e) =>
+            {
+                _expandHoverTimer?.Stop();
+                if (_isHovering && CurrentMode == PanelMode.Compact && !IsPinned)
+                {
+                    RequestExpand?.Invoke();
+                }
+            };
+            _expandHoverTimer.Start();
         }
     }
 
     public void OnMouseLeave()
     {
         _isHovering = false;
+        _expandHoverTimer?.Stop();
+
         if (Settings.ExpandOnHover && CurrentMode == PanelMode.Expanded && !IsPinned)
         {
             // Delay collapse slightly so it doesn't flicker

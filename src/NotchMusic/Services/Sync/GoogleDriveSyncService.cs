@@ -280,8 +280,16 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
     {
         try
         {
+            IsSyncing = true;
+            _syncStatus = "Menyinkronkan ke Google Drive...";
+            StatusChanged?.Invoke();
+
             var service = await CreateDriveServiceAsync(ct);
-            if (service == null) return false;
+            if (service == null)
+            {
+                IsSyncing = false;
+                return false;
+            }
 
             var folderId = await GetOrCreateFolderAsync(service, ct);
             var existingFile = await FindTodoFileAsync(service, folderId, ct);
@@ -308,11 +316,16 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 
             _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
             _settingsService.Save();
+
+            _syncStatus = $"Tersinkron ({DateTime.Now:HH:mm})";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
             return true;
         }
         catch (Exception ex)
         {
             _syncStatus = $"Gagal unggah ke Google Drive: {ex.Message}";
+            IsSyncing = false;
             StatusChanged?.Invoke();
             return false;
         }

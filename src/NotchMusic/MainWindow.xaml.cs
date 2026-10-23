@@ -262,11 +262,59 @@ public partial class MainWindow : Window
     {
         try
         {
+            // Minimize Dranotch ke mode compact saat YT Music dibuka
+            _viewModel.CurrentMode = PanelMode.Compact;
+
             if (_ytMusicWindow == null)
             {
                 _ytMusicWindow = new YouTubeMusicWindow();
                 _ytMusicWindow.Closed += (s, e) => _ytMusicWindow = null;
             }
+
+            // Dapatkan area monitor tempat Dranotch berada
+            var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+            var workingArea = screen.WorkingArea;
+
+            var source = PresentationSource.FromVisual(this);
+            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+            double areaLeft = workingArea.Left / dpiX;
+            double areaTop = workingArea.Top / dpiY;
+            double areaWidth = workingArea.Width / dpiX;
+            double areaHeight = workingArea.Height / dpiY;
+
+            // Ukuran ideal tidak melebihi batas layar Windows
+            double horizontalMargin = 20;
+            double verticalMargin = 16;
+            double targetWidth = Math.Min(1080, areaWidth - (horizontalMargin * 2));
+            if (targetWidth < _ytMusicWindow.MinWidth)
+            {
+                targetWidth = Math.Min(_ytMusicWindow.MinWidth, areaWidth - 10);
+            }
+
+            // Terbuka di bawah dranotch dan tengah horizontalnya
+            double notchHeight = 44;
+            double notchBottom = Top + notchHeight;
+            if (notchBottom < areaTop) notchBottom = areaTop;
+
+            double targetTop = notchBottom + 8;
+            double availableHeight = (areaTop + areaHeight) - targetTop - verticalMargin;
+            double targetHeight = Math.Min(720, availableHeight);
+
+            if (targetHeight < _ytMusicWindow.MinHeight)
+            {
+                targetHeight = Math.Min(_ytMusicWindow.MinHeight, areaHeight - 30);
+                targetTop = Math.Max(areaTop + 4, (areaTop + areaHeight) - targetHeight - verticalMargin);
+            }
+
+            double targetLeft = areaLeft + (areaWidth - targetWidth) / 2.0;
+
+            _ytMusicWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+            _ytMusicWindow.Left = targetLeft;
+            _ytMusicWindow.Top = targetTop;
+            _ytMusicWindow.Width = targetWidth;
+            _ytMusicWindow.Height = targetHeight;
 
             if (_ytMusicWindow.WindowState == WindowState.Minimized)
             {

@@ -612,12 +612,6 @@
                                                    Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}" ToolTip="Buka Pemutar YouTube Music" Background="#20181C">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="9" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="YT Music" Foreground="#FFD0DD" FontSize="11" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePinCommand}" ToolTip="Pin agar tetap terbuka">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="📌" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0"/>
@@ -665,23 +659,39 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Synced 3-Line Lyrics Preview / Unsynced Scrollable Lyrics -->
+                        <!-- Synced 3-Line Lyrics Preview / Unsynced Scrollable Lyrics / YT Music Button State -->
                         <Border Grid.Row="1" Background="#141418" CornerRadius="10" Padding="10,8" Margin="0,4,0,8"
                                 MinHeight="68" MaxHeight="96">
                             <Grid>
-                                <!-- Synced 3-Line Display -->
-                                <StackPanel VerticalAlignment="Center"
-                                            Visibility="{Binding IsLyricsSynced, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="{Binding PreviousLyric}" Foreground="#555566" FontSize="12" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
-                                    <TextBlock Text="{Binding ActiveLyric}" Foreground="#FFFFFF" FontSize="14" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" Margin="0,2"/>
-                                    <TextBlock Text="{Binding NextLyric}" Foreground="#555566" FontSize="12" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                <!-- State 1: Tidak ada lagu yang diputar -> Tombol YT Music -->
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            Visibility="{Binding HasTrack, Converter={StaticResource InverseBoolToVis}}">
+                                    <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
+                                            ToolTip="Buka Pemutar YouTube Music" Background="#23171F" BorderBrush="#4A2534" BorderThickness="1.2"
+                                            Padding="16,8" Cursor="Hand">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="12" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="YT Music" Foreground="#FFD0DD" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
                                 </StackPanel>
 
-                                <!-- Unsynced / Plain Lyrics Display with ScrollViewer -->
-                                <ScrollViewer VerticalAlignment="Center" MaxHeight="80" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                                              Visibility="{Binding IsLyricsSynced, Converter={StaticResource InverseBoolToVis}}">
-                                    <TextBlock Text="{Binding ActiveLyric}" Foreground="#CCCCCC" FontSize="13" TextAlignment="Center" TextWrapping="Wrap" LineHeight="18"/>
-                                </ScrollViewer>
+                                <!-- State 2: Ada lagu yang diputar -> Tampilkan Lirik -->
+                                <Grid Visibility="{Binding HasTrack, Converter={StaticResource BoolToVis}}">
+                                    <!-- Synced 3-Line Display -->
+                                    <StackPanel VerticalAlignment="Center"
+                                                Visibility="{Binding IsLyricsSynced, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="{Binding PreviousLyric}" Foreground="#555566" FontSize="12" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
+                                        <TextBlock Text="{Binding ActiveLyric}" Foreground="#FFFFFF" FontSize="14" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" Margin="0,2"/>
+                                        <TextBlock Text="{Binding NextLyric}" Foreground="#555566" FontSize="12" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Unsynced / Plain Lyrics Display with ScrollViewer -->
+                                    <ScrollViewer VerticalAlignment="Center" MaxHeight="80" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                                  Visibility="{Binding IsLyricsSynced, Converter={StaticResource InverseBoolToVis}}">
+                                        <TextBlock Text="{Binding ActiveLyric}" Foreground="#CCCCCC" FontSize="13" TextAlignment="Center" TextWrapping="Wrap" LineHeight="18"/>
+                                    </ScrollViewer>
+                                </Grid>
                             </Grid>
                         </Border>
 
@@ -774,23 +784,34 @@
                                     <TextBlock Text="{Binding TodoSummaryText}" Foreground="#CCCCCC" FontSize="10.5" FontWeight="Medium"/>
                                 </Border>
 
-                                <!-- Tombol Sinkronisasi Google Drive -->
+                                <!-- Tombol Status Google Drive (Klik untuk Login / Sync) -->
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SyncGoogleDriveCommand}"
-                                        ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="5,2" Margin="6,0,0,0">
+                                        ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="6,2" Margin="6,0,0,0">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="☁" FontSize="11" Margin="0,0,3,0">
+                                        <TextBlock Text="☁" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#777788"/>
+                                                    <Setter Property="Foreground" Value="#FFAA44"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
-                                                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                            <Setter Property="Foreground" Value="#4CD964"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                        <TextBlock Text="Sync" FontSize="10" Foreground="#CCCCCC"/>
+                                        <TextBlock Text="{Binding GoogleDriveStatusButtonText}" FontSize="10" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#BBBBCC"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                            <Setter Property="Foreground" Value="#EEEEEE"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -1018,8 +1039,14 @@
                                                                   Style="{StaticResource TodoCheckBoxStyle}"
                                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
 
-                                                        <!-- Judul Tugas & Kategori Tag -->
-                                                        <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                        <!-- Judul Tugas & Kategori Tag (Mode Tampilan) -->
+                                                        <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0" Cursor="Hand"
+                                                                   ToolTip="Klik dua kali atau klik ikon pensil untuk mengedit tugas"
+                                                                   Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
+                                                            <DockPanel.InputBindings>
+                                                                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding StartEditCommand}"/>
+                                                            </DockPanel.InputBindings>
+
                                                             <!-- Tag / Kategori Badge -->
                                                             <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
                                                                     Background="#1E1E24" BorderBrush="#363640" BorderThickness="1"
@@ -1044,12 +1071,49 @@
                                                             </TextBlock>
                                                         </DockPanel>
 
-                                                        <!-- Tombol Hapus -->
-                                                        <Button Grid.Column="3" Command="{Binding DeleteCommand}"
-                                                                Style="{StaticResource TodoDeleteButtonStyle}"
-                                                                ToolTip="Hapus tugas" Width="20" Height="20" VerticalAlignment="Center">
-                                                            <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
-                                                        </Button>
+                                                        <!-- Mode Edit Inline -->
+                                                        <Grid Grid.Column="2" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                              Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
+                                                            <TextBox Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}"
+                                                                     Style="{StaticResource TodoTextBoxStyle}"
+                                                                     FontSize="11.5" Padding="6,3" VerticalAlignment="Center"
+                                                                     ToolTip="Tekan Enter untuk simpan, Esc untuk batal">
+                                                                <TextBox.InputBindings>
+                                                                    <KeyBinding Key="Enter" Command="{Binding SaveEditCommand}"/>
+                                                                    <KeyBinding Key="Esc" Command="{Binding CancelEditCommand}"/>
+                                                                </TextBox.InputBindings>
+                                                            </TextBox>
+                                                        </Grid>
+
+                                                        <!-- Tombol Aksi saat Normal (Edit ✎ & Hapus ×) -->
+                                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                                                    Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
+                                                            <Button Command="{Binding StartEditCommand}"
+                                                                    Style="{StaticResource TodoDeleteButtonStyle}"
+                                                                    ToolTip="Edit tugas" Width="20" Height="20" Margin="0,0,2,0">
+                                                                <TextBlock Text="✎" FontSize="11" Foreground="#777788" Margin="0,-1,0,0"/>
+                                                            </Button>
+                                                            <Button Command="{Binding DeleteCommand}"
+                                                                    Style="{StaticResource TodoDeleteButtonStyle}"
+                                                                    ToolTip="Hapus tugas" Width="20" Height="20">
+                                                                <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
+                                                            </Button>
+                                                        </StackPanel>
+
+                                                        <!-- Tombol Aksi saat Mode Edit (Simpan ✓ & Batal ✕) -->
+                                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                                                    Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
+                                                            <Button Command="{Binding SaveEditCommand}"
+                                                                    Style="{StaticResource TodoDeleteButtonStyle}"
+                                                                    ToolTip="Simpan (Enter)" Width="20" Height="20" Margin="0,0,2,0">
+                                                                <TextBlock Text="✓" FontSize="12" Foreground="#4CD964" FontWeight="Bold"/>
+                                                            </Button>
+                                                            <Button Command="{Binding CancelEditCommand}"
+                                                                    Style="{StaticResource TodoDeleteButtonStyle}"
+                                                                    ToolTip="Batal (Esc)" Width="20" Height="20">
+                                                                <TextBlock Text="✕" FontSize="11" Foreground="#FF4D6D"/>
+                                                            </Button>
+                                                        </StackPanel>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>

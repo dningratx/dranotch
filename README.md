@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.4.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.4.1)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -61,7 +61,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Pengingat Sesudah Sholat**: Notifikasi konfirmasi ramah (*"Sudahkah Anda sholat?"*) setelah waktu sholat berlalu agar ibadah tidak terlewat.
 - **Pill Ringkas di Compact Notch & Kartu Lengkap**: Pantau hitung mundur sholat berikutnya langsung dari notch (`🕌 Dzuhur 11:39 (-15m)`) dan buka jadwal harian lengkap kapan saja dengan sekali klik tombol **`🕌 Sholat`**.
 
-### 🧩 7. Desain Modular 3-Komponen, Drag & Drop To-Do, & Keamanan Terpercaya *(Baru di v1.4.0)*
+### 🧩 7. Desain Modular 3-Komponen, Drag & Drop To-Do, & Keamanan Terpercaya *(v1.4.0)*
 - **Urutan Modular Terintegrasi**: Dynamic Notch default menempel di tengah atas layar dengan 3 bagian rapi bergaris pemisah modern:
   `[ Pemutar Musik ]` ╎ `[ Waktu Sholat ]` ╎ `[ To-Do List ]`
 - **Waktu Sholat Dapat Dilepas (*Detachable*)**: Komponen waktu sholat kini bisa dilepas menjadi jendela melayang mandiri (`PrayerWindow`) atau dipasang kembali ke Dynamic Notch kapan saja.
@@ -69,6 +69,13 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Continuous Live Ticker**: Teks berjalan di mode compact mengalir lancar dari kanan ke kiri tanpa jeda pergantian kategori, lengkap dengan jeda pintar saat kursor diarahkan (*pause on hover*).
 - **Akses Cepat Keluar / Tutup Aplikasi**: Tombol `✕` di header notch (dengan efek hover merah elegan), opsi *Tutup Aplikasi* pada klik kanan notch capsule, dan tombol keluar di pengaturan.
 - **Digital Code Signing & 1-Click Trusted Certificate**: Installer dan binary ditandatangani secara digital dengan SHA-256 dan stempel waktu resmi DigiCert, disertai script `Install-Certificate.bat` untuk menghilangkan peringatan Windows SmartScreen.
+
+### 🚀 8. Pembaruan Fitur & Visual *(Baru di v1.4.1)*
+- **Ikon Baru & Branding Segar**: Ikon aplikasi resmi baru yang tajam dan modern dengan multi-resolusi (16px hingga 256px), tampil sempurna di taskbar, installer setup, system tray, dan control panel uninstaller.
+- **Integrasi YouTube Music Pintar**: Tombol *Buka YouTube Music* tersemat rapi di area lirik saat tidak ada musik yang aktif. Saat diklik, notch otomatis mengecil (*compact*) dan jendela YouTube Music muncul tepat di tengah bawah layar tanpa melebihi batas layar monitor.
+- **Status Google Drive Langsung & Sinkronisasi Instan**: Tombol status Google Drive di header To-Do (`G-Drive Terhubung` / `Sambungkan G-Drive`). Klik untuk langsung login atau sinkronisasi. Setiap penambahan, pengeditan teks, atau penghapusan tugas otomatis tersinkronisasi ke Google Drive.
+- **Edit Tugas di Tempat (*Inline To-Do Editing*)**: Klik dua kali pada nama tugas (atau klik ikon pensil) untuk mengedit teks secara langsung. Tekan <kbd>Enter</kbd> untuk menyimpan perubahan atau <kbd>Esc</kbd> untuk membatalkan.
+- **Intelligent Hover Delay**: Peningkatan kenyamanan dengan jeda sengaja (650ms) saat mouse mendekati notch agar panel tidak terbuka secara tidak sengaja ketika kursor hanya melintas cepat.
 
 ---
 
@@ -98,7 +105,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.4.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.4.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 
