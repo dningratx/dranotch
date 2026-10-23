@@ -50,7 +50,62 @@ public partial class App : System.Windows.Application
         // Start listening on named pipe
         StartPipeServer();
 
+        // Ensure desktop shortcut references the new icon and flush Windows icon cache
+        Task.Run(EnsureDesktopShortcutIconAndRefreshCache);
+
         base.OnStartup(e);
+    }
+
+    [System.Runtime.InteropServices.DllImport("shell32.dll")]
+    private static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);
+
+    private static void EnsureDesktopShortcutIconAndRefreshCache()
+    {
+        try
+        {
+            var desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var shortcutCandidates = new[]
+            {
+                Path.Combine(desktopDir, "DRANOTCH.lnk"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory), "DRANOTCH.lnk")
+            };
+
+            var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+            var icoPath = Path.Combine(exeDir, "app.ico");
+            if (!File.Exists(icoPath))
+            {
+                icoPath = Path.Combine(exeDir, "Assets", "app.ico");
+            }
+
+            if (File.Exists(icoPath))
+            {
+                var shellType = Type.GetTypeFromProgID("WScript.Shell");
+                if (shellType != null)
+                {
+                    dynamic? shell = Activator.CreateInstance(shellType);
+                    if (shell != null)
+                    {
+                        foreach (var scPath in shortcutCandidates)
+                        {
+                            if (File.Exists(scPath))
+                            {
+                                try
+                                {
+                                    dynamic shortcut = shell.CreateShortcut(scPath);
+                                    shortcut.IconLocation = $"{icoPath},0";
+                                    shortcut.Save();
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Flush Windows Shell Icon cache
+            SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);
+        }
+        catch { }
     }
 
     private void StartPipeServer()

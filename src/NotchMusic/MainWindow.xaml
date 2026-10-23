@@ -341,8 +341,9 @@
                         <!-- Album Art / Placeholder -->
                         <Border Width="34" Height="34" CornerRadius="17" Margin="2,0,8,0" ClipToBounds="True" Background="#18181C">
                             <Grid>
-                                <TextBlock Text="♪" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Image Source="pack://application:,,,/Assets/app.png" Width="20" Height="20" Stretch="Uniform"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
                                 <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
                             </Grid>
                         </Border>
@@ -555,15 +556,19 @@
                 <Grid x:Name="ExpandedView" Visibility="{Binding IsExpandedMode, Converter={StaticResource BoolToVis}}" 
                       Width="{Binding ExpandedPanelWidth}" Margin="14,10">
 
-                    <!-- TAMPILAN NORMAL (MUSIK & TO-DO) -->
+                    <!-- TAMPILAN NORMAL (MUSIK, WAKTU SHOLAT, & TO-DO) -->
                     <Grid Visibility="{Binding ShowNormalExpandedContent, Converter={StaticResource BoolToVis}}">
                         <Grid.ColumnDefinitions>
-                            <!-- Kolom Kiri: Pemutar Musik -->
+                            <!-- Kolom 0: Pemutar Musik -->
                             <ColumnDefinition Width="{Binding MusicColumnWidth}"/>
-                            <!-- Garis Pemisah Vertikal -->
+                            <!-- Garis Pemisah Vertikal 1: Musik | Waktu Sholat -->
                             <ColumnDefinition Width="Auto"/>
-                            <!-- Kolom Kanan: To-Do List -->
-                            <ColumnDefinition Width="*"/>
+                            <!-- Kolom 2: Waktu Sholat (Expanded) -->
+                            <ColumnDefinition Width="{Binding PrayerColumnWidth}"/>
+                            <!-- Garis Pemisah Vertikal 2: Waktu Sholat | To-Do -->
+                            <ColumnDefinition Width="Auto"/>
+                            <!-- Kolom 4: To-Do List -->
+                            <ColumnDefinition Width="{Binding TodoColumnWidth}"/>
                         </Grid.ColumnDefinitions>
 
                     <!-- ===== SISI KIRI: PEMUTAR MUSIK ===== -->
@@ -586,7 +591,12 @@
 
                             <!-- Album art -->
                             <Border Grid.Column="0" Width="52" Height="52" CornerRadius="12" ClipToBounds="True" Background="#18181C" Margin="0,0,12,0">
-                                <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
+                                <Grid>
+                                    <Image Source="pack://application:,,,/Assets/app.png" Width="32" Height="32" Stretch="Uniform"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"/>
+                                </Grid>
                             </Border>
 
                             <!-- Track Title, Artist, Session -->
@@ -757,12 +767,177 @@
                         </Grid>
                     </Grid>
 
-                    <!-- ===== PEMISAH VERTIKAL ===== -->
-                    <Border Grid.Column="1" Width="1" Background="#222228" Margin="14,2,14,2"
-                            Visibility="{Binding ShowSplitter, Converter={StaticResource BoolToVis}}"/>
+                    <!-- ===== PEMISAH VERTIKAL 1: MUSIK | WAKTU SHOLAT ===== -->
+                    <Border Grid.Column="1" Width="1" Background="#222228" Margin="10,2"
+                            Visibility="{Binding ShowExpandedPrayerDivider1, Converter={StaticResource BoolToVis}}"/>
+
+                    <!-- ===== KOLOM 2: WAKTU SHOLAT (EXPANDED) ===== -->
+                    <Grid Grid.Column="2" Visibility="{Binding ShowPrayerSectionInMainWindow, Converter={StaticResource BoolToVis}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Header -->
+                            <RowDefinition Height="Auto"/> <!-- Next Prayer Card -->
+                            <RowDefinition Height="*"/>    <!-- Daily Schedule List -->
+                            <RowDefinition Height="Auto"/> <!-- Status / Footer -->
+                        </Grid.RowDefinitions>
+
+                        <!-- Header: Icon, Waktu Sholat, Kota, Tanggal Hijriah, Lepas -->
+                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="🕌" FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Waktu Sholat" FontSize="13.5" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <Border Background="#1C1C24" CornerRadius="4" Padding="5,1" Margin="0,0,5,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding CurrentPrayerSchedule.CityName}" Foreground="#CCCCCC" FontSize="9.5" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding CurrentPrayerSchedule.HijriDate}" FontSize="9.5" Foreground="#888899" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}"
+                                        ToolTip="Lepas Waktu Sholat ke jendela terpisah" Margin="0,0,3,0">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="⧉" FontSize="11" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Lepas" FontSize="10.5" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan Waktu Sholat"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Highlight Next Prayer Card -->
+                        <Border Grid.Row="1" Background="#14141A" BorderBrush="#282836" BorderThickness="1.2" 
+                                CornerRadius="10" Padding="10,6" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="WAKTU BERIKUTNYA" FontSize="8.5" FontWeight="Bold" Foreground="#888899" Margin="0,0,0,1"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding NextPrayerName}" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding NextPrayerTimeFormatted}" FontSize="15" FontWeight="Light" Foreground="#DDDDDD"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border Grid.Column="1" Background="#20202A" CornerRadius="6" Padding="6,3" VerticalAlignment="Center">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="HITUNG MUNDUR" FontSize="7.5" FontWeight="Bold" Foreground="#777788" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding NextPrayerCountdownBadge}" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" HorizontalAlignment="Center" Margin="0,1,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Today's Schedule Cards List -->
+                        <Border Grid.Row="2" Background="#0C0C0F" CornerRadius="10" Padding="5,4" Height="172">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding CurrentPrayerSchedule.Items}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="6" Padding="8,4" Margin="0,1,0,1">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#121216"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsNext}" Value="True">
+                                                                <Setter Property="Background" Value="#1E1E28"/>
+                                                                <Setter Property="BorderBrush" Value="#444458"/>
+                                                                <Setter Property="BorderThickness" Value="1"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#DDDDDD"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsNext}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+
+                                                    <TextBlock Grid.Column="1" Text="{Binding FormattedTime}" FontSize="11.5" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsNext}" Value="True">
+                                                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                                        <Setter Property="FontSize" Value="12"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+
+                                                    <Border Grid.Column="2" CornerRadius="4" Padding="5,1.5" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Background" Value="#18181F"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsNext}" Value="True">
+                                                                        <Setter Property="Background" Value="#2A2A38"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="{Binding CountdownText}" FontSize="9" FontWeight="Medium">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="#777788"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsNext}" Value="True">
+                                                                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+
+                        <!-- Footer: Pengingat Status -->
+                        <Grid Grid.Row="3" Margin="2,4,2,0">
+                            <TextBlock Text="Pengingat: -10m • Adzan • +15m" FontSize="9.5" Foreground="#666677" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- ===== PEMISAH VERTIKAL 2: WAKTU SHOLAT | TO-DO ===== -->
+                    <Border Grid.Column="3" Width="1" Background="#222228" Margin="10,2"
+                            Visibility="{Binding ShowExpandedPrayerDivider2, Converter={StaticResource BoolToVis}}"/>
 
                     <!-- ===== SISI KANAN: TO-DO LIST ===== -->
-                    <Grid Grid.Column="2" Visibility="{Binding ShowTodoSectionInMainWindow, Converter={StaticResource BoolToVis}}">
+                    <Grid Grid.Column="4" Visibility="{Binding ShowTodoSectionInMainWindow, Converter={StaticResource BoolToVis}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/> <!-- Header -->
                             <RowDefinition Height="Auto"/> <!-- Filter Tabs -->

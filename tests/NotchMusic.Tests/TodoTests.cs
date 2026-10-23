@@ -565,6 +565,7 @@ public class TodoTests
     public void MainViewModel_ComponentDisplayMode_UpdatesLayoutState()
     {
         var settingsService = new FakeSettingsService();
+        settingsService.CurrentSettings.EnablePrayerTimes = false;
         var mainVm = new MainViewModel(
             new FakeMediaSessionService(),
             new FakeLyricsService(),

@@ -146,7 +146,7 @@ public class MainViewModel : ViewModelBase
     public bool ShowTodoTicker => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly");
     public bool ShowTodoSectionInMainWindow => ShowTodoSection && (!IsTodoDetached || ComponentDisplayMode == "TodoOnly");
     public bool ShowMusicMinimizeButton => !ShowTodoSectionInMainWindow;
-    public bool ShowSplitter => ShowMusicSection && ShowTodoSectionInMainWindow;
+    public bool ShowSplitter => ShowExpandedPrayerDivider2;
 
     public bool IsTodoWindowCompact
     {
@@ -188,7 +188,13 @@ public class MainViewModel : ViewModelBase
     public bool ShowPrayerDivider1 => ShowMusicSection && ShowCompactPrayerPill;
     public bool ShowPrayerDivider2 => ShowTodoTicker && (ShowMusicSection || ShowCompactPrayerPill);
 
-    public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(420) : new System.Windows.GridLength(0);
+    public bool ShowPrayerSectionInMainWindow => EnablePrayerTimes && !IsPrayerDetached;
+    public bool ShowExpandedPrayerDivider1 => ShowMusicSection && ShowPrayerSectionInMainWindow;
+    public bool ShowExpandedPrayerDivider2 => ShowTodoSectionInMainWindow && (ShowMusicSection || ShowPrayerSectionInMainWindow);
+
+    public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(390) : new System.Windows.GridLength(0);
+    public System.Windows.GridLength PrayerColumnWidth => ShowPrayerSectionInMainWindow ? new System.Windows.GridLength(275) : new System.Windows.GridLength(0);
+    public System.Windows.GridLength TodoColumnWidth => ShowTodoSectionInMainWindow ? new System.Windows.GridLength(345) : new System.Windows.GridLength(0);
 
     public bool IsPrayerPanelOpen
     {
@@ -213,10 +219,16 @@ public class MainViewModel : ViewModelBase
         {
             if (IsPrayerPanelOpen)
                 return 440;
+
+            if (ShowMusicSection && ShowPrayerSectionInMainWindow && ShowTodoSectionInMainWindow)
+                return 1030;
+            if (ShowMusicSection && ShowPrayerSectionInMainWindow)
+                return 680;
+            if (ShowPrayerSectionInMainWindow && ShowTodoSectionInMainWindow)
+                return 640;
             if (ShowMusicSection && ShowTodoSectionInMainWindow)
                 return 760;
-            if (ShowMusicSection)
-                return 440;
+
             return 440;
         }
     }
@@ -727,7 +739,12 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
         OnPropertyChanged(nameof(ShowPrayerDivider1));
         OnPropertyChanged(nameof(ShowPrayerDivider2));
+        OnPropertyChanged(nameof(ShowPrayerSectionInMainWindow));
+        OnPropertyChanged(nameof(ShowExpandedPrayerDivider1));
+        OnPropertyChanged(nameof(ShowExpandedPrayerDivider2));
         OnPropertyChanged(nameof(MusicColumnWidth));
+        OnPropertyChanged(nameof(PrayerColumnWidth));
+        OnPropertyChanged(nameof(TodoColumnWidth));
         OnPropertyChanged(nameof(ExpandedPanelWidth));
         OnPropertyChanged(nameof(EnablePrayerTimes));
         OnPropertyChanged(nameof(ShowCompactPrayerPill));

@@ -189,6 +189,41 @@ public class PrayerTests
     }
 
     [Fact]
+    public void MainViewModel_ExpandedPrayer_WidthsAndDividers_WorkCorrectly()
+    {
+        var settingsService = new FakeSettingsService();
+        settingsService.CurrentSettings.EnablePrayerTimes = true;
+
+        var prayerService = new PrayerService(settingsService);
+        var mainVm = new MainViewModel(
+            new FakeMediaSessionService(),
+            new FakeLyricsService(),
+            settingsService,
+            prayerService: prayerService);
+
+        // All 3 attached: Music + Prayer + Todo = 1030
+        Assert.True(mainVm.ShowPrayerSectionInMainWindow);
+        Assert.True(mainVm.ShowExpandedPrayerDivider1);
+        Assert.True(mainVm.ShowExpandedPrayerDivider2);
+        Assert.Equal(1030, mainVm.ExpandedPanelWidth);
+
+        // Detach Prayer: Music + Todo = 760
+        mainVm.DetachPrayerCommand.Execute(null);
+        Assert.False(mainVm.ShowPrayerSectionInMainWindow);
+        Assert.False(mainVm.ShowExpandedPrayerDivider1);
+        Assert.True(mainVm.ShowExpandedPrayerDivider2);
+        Assert.Equal(760, mainVm.ExpandedPanelWidth);
+
+        // Re-attach Prayer, detach Todo: Music + Prayer = 680
+        mainVm.AttachPrayerCommand.Execute(null);
+        mainVm.DetachTodoCommand.Execute(null);
+        Assert.True(mainVm.ShowPrayerSectionInMainWindow);
+        Assert.True(mainVm.ShowExpandedPrayerDivider1);
+        Assert.False(mainVm.ShowExpandedPrayerDivider2);
+        Assert.Equal(680, mainVm.ExpandedPanelWidth);
+    }
+
+    [Fact]
     public void MainViewModel_PrayerWindowCompactCommands_ToggleCorrectly()
     {
         var settingsService = new FakeSettingsService();
