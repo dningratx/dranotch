@@ -373,7 +373,7 @@
                 Background="#000000"
                 BorderBrush="{StaticResource LuxuryNotchBorderBrush}"
                 BorderThickness="1.2,0,1.2,1.2"
-                CornerRadius="0,0,32,32"
+                CornerRadius="0,0,24,24"
                 MouseDown="Island_MouseDown">
             <Border.ContextMenu>
                 <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
@@ -388,20 +388,11 @@
             </Border.ContextMenu>
 
             <Grid>
-                <!-- Subtle MacBook Camera Lens & Active Indicator at Top Center Bezel -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0" IsHitTestVisible="False" Panel.ZIndex="5">
-                    <Border Width="9" Height="9" CornerRadius="4.5" Background="#0A0A10" BorderBrush="#262636" BorderThickness="1">
-                        <Ellipse Width="3.5" Height="3.5" Fill="#1E2C40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <Ellipse Width="5" Height="5" Fill="#30D158" Margin="6,0,0,0" VerticalAlignment="Center"
-                             Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}"/>
-                </StackPanel>
-
                 <!-- ================= MODE 1A: COMPACT (LUXURY MAC NOTCH: 4 KOMPONEN MODULAR) ================= -->
                 <Grid x:Name="CompactView" Visibility="{Binding ShowCompactMusicView, Converter={StaticResource BoolToVis}}" 
-                      Height="68" MaxWidth="1180" Margin="22,10,22,12" HorizontalAlignment="Center">
+                      Height="52" MaxWidth="1180" Margin="18,4,18,6" HorizontalAlignment="Center">
                     <Grid.ColumnDefinitions>
-                        <!-- Kolom 0: Komponen 1 - Musik (Album art, Track info & Standby lyrics, Wave, & Tombol Play/Pause) -->
+                        <!-- Kolom 0: Komponen 1 - Musik (Album art, Track info & Standby lyrics, & Tombol Play/Pause) -->
                         <ColumnDefinition Width="Auto"/>
                         <!-- Kolom 1: Pembatas Garis 1 (Musik | Waktu Sholat) -->
                         <ColumnDefinition Width="Auto"/>
@@ -422,10 +413,10 @@
                     <!-- KOMPONEN 1: MUSIC PLAYER (Mac Dynamic Notch Style) -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Luxury Mac Squircle Album Art -->
-                        <Border Width="50" Height="50" CornerRadius="13" Margin="2,0,12,0" ClipToBounds="True" 
+                        <Border Width="46" Height="46" CornerRadius="12" Margin="2,0,11,0" ClipToBounds="True" 
                                 Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1.2">
                             <Grid>
-                                <Image Source="pack://application:,,,/Assets/app.png" Width="28" Height="28" Stretch="Uniform"
+                                <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" Width="28" Height="28" Stretch="Uniform"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        RenderOptions.BitmapScalingMode="HighQuality"/>
                                 <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"
@@ -446,7 +437,7 @@
                             </DockPanel>
 
                             <!-- Baris 2: Lirik Real-Time Saat Standby -->
-                            <Grid Margin="0,3,0,0" ToolTip="{Binding StandbyLyric}">
+                            <Grid Margin="0,2,0,0" ToolTip="{Binding StandbyLyric}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
@@ -457,15 +448,6 @@
                                            Foreground="#E6E6F2" FontSize="13" FontWeight="SemiBold"
                                            TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                             </Grid>
-                        </StackPanel>
-
-                        <!-- Mac-Style Sound Wave / Activity Indicator -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,10,0"
-                                     Visibility="{Binding CurrentTrack.IsPlaying, Converter={StaticResource BoolToVis}}">
-                            <Rectangle Width="3" Height="13" RadiusX="1.5" RadiusY="1.5" Fill="{StaticResource MetallicSilverBrush}" Margin="1.4,0"/>
-                            <Rectangle Width="3" Height="20" RadiusX="1.5" RadiusY="1.5" Fill="{StaticResource MetallicSilverBrush}" Margin="1.4,0"/>
-                            <Rectangle Width="3" Height="11" RadiusX="1.5" RadiusY="1.5" Fill="{StaticResource MetallicSilverBrush}" Margin="1.4,0"/>
-                            <Rectangle Width="3" Height="16" RadiusX="1.5" RadiusY="1.5" Fill="{StaticResource MetallicSilverBrush}" Margin="1.4,0"/>
                         </StackPanel>
 
                         <!-- Tombol Play / Pause (Luxury Satin Glass Circle) -->
@@ -617,7 +599,7 @@
 
                 <!-- ================= MODE 1B: COMPACT (TODO ONLY NOTCH) ================= -->
                 <Grid x:Name="CompactTodoView" Visibility="{Binding ShowCompactTodoOnlyView, Converter={StaticResource BoolToVis}}" 
-                      Height="68" MinWidth="420" MaxWidth="840" Margin="22,10,22,12" HorizontalAlignment="Center">
+                      Height="52" MinWidth="420" MaxWidth="840" Margin="18,4,18,6" HorizontalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -770,7 +752,7 @@
                             <!-- Album art / Icon DRANOTCH (Luxury Mac Squircle) -->
                             <Border Grid.Column="0" Width="50" Height="50" CornerRadius="13" ClipToBounds="True" Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1.2" Margin="0,0,12,0" VerticalAlignment="Center">
                                 <Grid>
-                                    <Image Source="pack://application:,,,/Assets/app.png" Width="28" Height="28" Stretch="Uniform"
+                                    <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" Width="28" Height="28" Stretch="Uniform"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                            RenderOptions.BitmapScalingMode="HighQuality"/>
                                     <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"
@@ -1781,7 +1763,7 @@
                         <Border Grid.Column="0" Width="48" Height="48" CornerRadius="12" ClipToBounds="True"
                                 Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1.2" Margin="0,0,14,0" VerticalAlignment="Center">
                             <Grid>
-                                <Image Source="pack://application:,,,/Assets/app.png" Width="26" Height="26" Stretch="Uniform"
+                                <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" Width="26" Height="26" Stretch="Uniform"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        RenderOptions.BitmapScalingMode="HighQuality"/>
                                 <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"

@@ -353,7 +353,7 @@ public partial class MainWindow : Window
             }
 
             // Terbuka di bawah dranotch dan tengah horizontalnya
-            double notchHeight = 90;
+            double notchHeight = 64;
             double notchBottom = Top + notchHeight;
             if (notchBottom < areaTop) notchBottom = areaTop;
 

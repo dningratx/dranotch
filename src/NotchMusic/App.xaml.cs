@@ -16,6 +16,15 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        try
+        {
+            if (!string.IsNullOrEmpty(AppContext.BaseDirectory))
+            {
+                Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+            }
+        }
+        catch { }
+
         DispatcherUnhandledException += (s, args) =>
         {
             args.Handled = true;
