@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
+Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.5.2)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -107,7 +107,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Auto-Dock & Snap ke Tepi Atas**: Jendela notch otomatis menempel rapat ke tepi atas monitor saat aplikasi dijalankan, saat beralih mode (*Compact* / *Expanded* / *Lyrics*), maupun setelah digeser secara horizontal.
 - **Antarmuka Browser Mengambang Lebih Bersih & Ringkas**: Menghapus tombol-tombol pintasan situs di samping kolom URL agar bar pencarian/alamat membentang penuh, menyederhanakan header kiri dengan menyisakan grip `⋮⋮ Geser`, serta merampingkan tombol Pin menjadi hanya ikon `📌`.
 
-### 💎 14. Luxury Mac Dynamic Notch, Ikon Vektor Silver Metallic, & Bar 4-Komponen Terpisah *(Baru di v1.5.2)*
+### 💎 14. Luxury Mac Dynamic Notch, Ikon Vektor Silver Metallic, & Bar 4-Komponen Terpisah *(v1.5.2)*
 - **Desain Luxury MacBook Pro Dynamic Notch**: Ukuran Notch diperbesar secara proporsional (`Height="68"`, `CornerRadius="0,0,28,28"`, bahu lengkung cekung `28×28`, panel *Expanded* `1150px`) dengan bingkai *Specular Rim* (`LuxuryNotchBorderBrush`), permukaan tombol *Satin Pill*, dan tipografi tajam `Segoe UI Variable Display` (*ClearType*).
 - **Selalu Presisi di Tengah Atas saat Minimize (`CenterAtTopBezel`)**: Ketika berada di mode *Compact* (minimize), Notch otomatis memposisikan dirinya tepat di tengah-atas layar monitor (`Top = 0`), baik saat pertama dibuka, saat kembali dari mode *Expanded*/*Lyrics*, maupun saat lebar konten dinamis berubah.
 - **4 Komponen Terpisah dengan Pembatas di Notch**: Kapsul komponen ke-4 (**`Browser`**) kini ditempatkan langsung di sebelah kanan komponen **To-Do List** lengkap dengan garis pembatas vertikal (`|`), menandakan 4 komponen modular yang terpisah secara jelas:
@@ -115,6 +115,22 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   *(Tombol Browser di dalam Music Player dihapus agar tidak duplikat).*
 - **Ikon Vektor Kustom Berwarna Silver Metallic**: Menggantikan emoji bawaan Windows dengan **ikon vektor SVG kustom** berlapis gradien **Silver Metallic** (`#FFFFFF` → `#E2E6F0` → `#949BA8` → `#D4D9E6`) yang serasi dengan logo resmi DRANOTCH di dalam lencana *squircle* `28×28` untuk **Waktu Sholat** (Bulan Sabit & Bintang Berlian), **To-Do List** (Bingkai & Centang Tugas), **Browser** (Bola Dunia Meridian), dan **Musik**.
 - **Panggung Lirik Karaoke Lebih Mewah & Bersih**: Memperbesar mode *Lyrics* menjadi `640×400` dengan efek panggung *radial gradient*, kontrol media vektor bertema *Satin Glass*, serta menghapus tombol *Click-Through* agar antarmuka lirik lebih fokus dan elegan.
+
+### 📻 15. Komponen ke-5: Radio Online Indonesia & Dunia, Mode Notch Cerdas (Mini/Idle), & Kunci Pin *(Baru di v1.6.0)*
+- **5 Komponen Modular Terintegrasi**: Menambahkan komponen **Radio Online** tepat di sebelah kanan **Music Player** dengan urutan barisan:
+  `[ Pemutar Musik ]` ╎ `[ Radio Online ]` ╎ `[ Waktu Sholat ]` ╎ `[ To-Do List ]` ╎ `[ Browser ]`
+- **Streaming Radio Online Indonesia & Dunia (`RadioWindow`)**:
+  - Dilengkapi puluhan stasiun radio populer Indonesia & internasional yang telah diverifikasi (Prambors FM, Hard Rock FM, Gen FM, Jak FM, Trax FM, Most Radio, I-Radio, Cosmopolitan FM, Brava Radio, Elshinta, RRI Pro 1/2/3, Radio Rodja, BBC World Service, Lofi Girl / Chillsky, Jazz24, SomaFM, dll.).
+  - **Pencarian Stasiun Radio Dunia Online**: Cari puluhan ribu stasiun radio dari seluruh dunia secara langsung melalui integrasi **Radio-Browser API**.
+  - **Mesin Audio WinRT Modern & Auto-Fallback**: Menggunakan `Windows.Media.Playback.MediaPlayer` yang mendukung penuh stream `AAC`, `AAC+`, `MP3`, dan `HLS` dengan sistem *auto-fallback* dan *auto-resolve* otomatis jika suatu kanal stream sedang sibuk.
+  - **Stasiun Kustom & Favorit**: Tambahkan URL stream radio favorit Anda sendiri (`+ Tambah Radio`), tandai stasiun favorit (`★`), atur volume radio mandiri, serta perkecil jendela radio ke mode *compact player*.
+- **Tombol Mengecilkan Notch (`›‹` / `‹›`) & Mode Idle Cerdas**:
+  - Tombol di ujung paling kanan Notch kini berfungsi untuk **mengecilkan atau memperbesar Notch** secara instan.
+  - Saat Notch dikecilkan (baik melalui tombol di ujung kanan maupun otomatis saat *idle*), **komponen yang sedang aktif** tetap ditampilkan secara utuh, sedangkan **komponen yang tidak aktif** otomatis dirampingkan menjadi **hanya ikon saja**.
+  - **Waktu Sholat Selalu Tampil**: Komponen Waktu Sholat selalu tampil utuh walaupun Notch sedang dalam kondisi *idle* / dikecilkan.
+- **Tombol Pin Notch (`📌`) & Kontrol Tanpa Gangguan Hover**:
+  - Saat tombol **Pin (`📌`)** diaktifkan, Notch dikunci agar tidak mengecil otomatis ketika *idle*.
+  - Menonaktifkan pembukaan panel otomatis saat kursor melintas (*Expand on Hover*) agar tidak mengganggu aktivitas kerja di bagian atas layar.
 
 ---
 
@@ -144,7 +160,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.5.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

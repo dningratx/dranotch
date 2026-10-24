@@ -13,7 +13,8 @@ public class AppSettings
     public double LyricsHeight { get; set; } = 320;
     public double LyricsFontSize { get; set; } = 18;
     public double LyricsOpacity { get; set; } = 0.95;
-    public bool ExpandOnHover { get; set; } = true;
+    public bool ExpandOnHover { get; set; } = false;
+    public bool IsPinned { get; set; } = false;
     public string PreferredSessionId { get; set; } = string.Empty;
     public bool AutoSearchLyrics { get; set; } = true;
     public bool ClickThroughInLyricsMode { get; set; } = false;
@@ -74,4 +75,17 @@ public class AppSettings
     public double BrowserHeight { get; set; } = 540;
     public bool BrowserAlwaysOnTop { get; set; } = true;
     public string BrowserLastUrl { get; set; } = "https://www.youtube.com";
+
+    // Radio Online (Komponen ke-5)
+    public bool IsRadioWindowOpen { get; set; } = false;
+    public double RadioWindowLeft { get; set; } = -1;
+    public double RadioWindowTop { get; set; } = -1;
+    public double RadioWindowWidth { get; set; } = 410;
+    public double RadioWindowHeight { get; set; } = 540;
+    public bool IsRadioWindowCompact { get; set; } = false;
+    public double RadioVolume { get; set; } = 0.80;
+    public bool RadioMuted { get; set; } = false;
+    public string LastRadioStationId { get; set; } = string.Empty;
+    public List<string> FavoriteRadioStationIds { get; set; } = new();
+    public List<RadioStation> CustomRadioStations { get; set; } = new();
 }

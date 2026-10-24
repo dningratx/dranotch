@@ -8,6 +8,7 @@ public interface ITrayIconService : IDisposable
     void Initialize();
     event Action? ToggleVisibilityRequested;
     event Action? OpenYouTubeMusicRequested;
+    event Action? OpenRadioRequested;
     event Action? OpenFloatingBrowserRequested;
     event Action<PanelMode>? ModeChangeRequested;
     event Action? OpenSettingsRequested;
@@ -23,6 +24,7 @@ public class TrayIconService : ITrayIconService
 
     public event Action? ToggleVisibilityRequested;
     public event Action? OpenYouTubeMusicRequested;
+    public event Action? OpenRadioRequested;
     public event Action? OpenFloatingBrowserRequested;
     public event Action<PanelMode>? ModeChangeRequested;
     public event Action? OpenSettingsRequested;
@@ -101,6 +103,9 @@ public class TrayIconService : ITrayIconService
 
         var ytMusicItem = new ToolStripMenuItem("Buka YouTube Music (Player)", null, (s, e) => OpenYouTubeMusicRequested?.Invoke());
         contextMenu.Items.Add(ytMusicItem);
+
+        var radioItem = new ToolStripMenuItem("Buka Radio Online (Streaming Radio)", null, (s, e) => OpenRadioRequested?.Invoke());
+        contextMenu.Items.Add(radioItem);
 
         var browserItem = new ToolStripMenuItem("Buka Browser Mengambang (Web / Video)", null, (s, e) => OpenFloatingBrowserRequested?.Invoke());
         contextMenu.Items.Add(browserItem);

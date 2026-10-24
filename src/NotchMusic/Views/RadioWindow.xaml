@@ -1,0 +1,548 @@
+<Window x:Class="NotchMusic.Views.RadioWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:NotchMusic.Helpers"
+        Title="DRANOTCH - Radio Online"
+        Width="410" MinWidth="340"
+        SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="{Binding Settings.AlwaysOnTop}"
+        ShowInTaskbar="False"
+        WindowStartupLocation="Manual">
+
+    <Window.Resources>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+
+        <LinearGradientBrush x:Key="MetallicSilverBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFFFFF" Offset="0.0"/>
+            <GradientStop Color="#E2E6F0" Offset="0.35"/>
+            <GradientStop Color="#949BA8" Offset="0.72"/>
+            <GradientStop Color="#D4D9E6" Offset="1.0"/>
+        </LinearGradientBrush>
+
+        <!-- Luxury Radio Receiver & Antenna Geometry (24x24) -->
+        <Geometry x:Key="LuxuryRadioIconGeometry">M 6.5,7 L 16.8,2.8 L 17.6,4.6 L 10.5,7.5 H 19.5 A 2.5,2.5 0 0 1 22,10 V 18.5 A 2.5,2.5 0 0 1 19.5,21 H 4.5 A 2.5,2.5 0 0 1 2,18.5 V 10 A 2.5,2.5 0 0 1 4.5,7.5 H 6.5 Z M 8,11.5 A 2.8,2.8 0 1 0 8,17.1 A 2.8,2.8 0 1 0 8,11.5 Z M 13.5,12 H 19 V 13.6 H 13.5 Z M 13.5,15.2 H 17.5 V 16.8 H 13.5 Z</Geometry>
+
+        <!-- Small Pill Button Style -->
+        <Style x:Key="SmallPillButton" TargetType="Button">
+            <Setter Property="Background" Value="#1E1E26"/>
+            <Setter Property="Foreground" Value="#E0E0EC"/>
+            <Setter Property="BorderBrush" Value="#303042"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#2C2C3C"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#4C4C66"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Filter Chip Style -->
+        <Style x:Key="RadioFilterPillStyle" TargetType="Button">
+            <Setter Property="Background" Value="#15151C"/>
+            <Setter Property="Foreground" Value="#9898AC"/>
+            <Setter Property="BorderBrush" Value="#262634"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="9,3.5"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PillBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="PillBorder" Property="Background" Value="#242432"/>
+                                <Setter TargetName="PillBorder" Property="BorderBrush" Value="#424258"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Input TextBox -->
+        <Style x:Key="RadioTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#14141C"/>
+            <Setter Property="Foreground" Value="#EDEDF5"/>
+            <Setter Property="BorderBrush" Value="#2C2C3A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="CaretBrush" Value="#FFFFFF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="TxtBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="TxtBorder" Property="BorderBrush" Value="#686888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Border x:Name="RadioContainerBorder"
+                Background="#0A0A0E"
+                BorderBrush="#262634"
+                BorderThickness="1.2"
+                CornerRadius="20"
+                MouseDown="Border_MouseDown">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="5" BlurRadius="18" Opacity="0.75"/>
+            </Border.Effect>
+
+            <Grid>
+                <!-- ================= MODE 1: COMPACT RADIO MINI NOTCH ================= -->
+                <Grid x:Name="RadioCompactView"
+                      Visibility="{Binding IsRadioWindowCompact, Converter={StaticResource BoolToVis}}"
+                      Height="50" Margin="10,0" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Icon Badge -->
+                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="9" Margin="0,0,8,0"
+                            Background="#1C1C26" BorderBrush="#38FFFFFF" BorderThickness="1">
+                        <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                              Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Current Station Info Pill (Click to Expand) -->
+                    <Border Grid.Column="1" Background="#14141C" BorderBrush="#262634" BorderThickness="1.2"
+                            CornerRadius="12" Height="34" Margin="0,0,8,0" Padding="10,2" Cursor="Hand"
+                            ToolTip="{Binding RadioNotchTooltip}">
+                        <Border.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandRadioWindowCommand}"/>
+                        </Border.InputBindings>
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Ellipse Grid.Column="0" Width="6" Height="6" Margin="0,0,7,0" VerticalAlignment="Center">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="#666677"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRadioPlaying}" Value="True">
+                                                <Setter Property="Fill" Value="#30D158"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsRadioBuffering}" Value="True">
+                                                <Setter Property="Fill" Value="#FFAA44"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+
+                            <TextBlock Grid.Column="1" Text="{Binding CurrentRadioStationName}" Foreground="#FFFFFF"
+                                       FontSize="12" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Quick Controls -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleRadioPlayPauseCommand}"
+                                ToolTip="Putar / Hentikan Radio" Padding="8,4">
+                            <Grid>
+                                <TextBlock Text="▶" FontSize="10" Visibility="{Binding IsRadioPlaying, Converter={StaticResource InverseBoolToVis}}"/>
+                                <TextBlock Text="⏸" FontSize="10" Visibility="{Binding IsRadioPlaying, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                        </Button>
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding NextRadioStationCommand}" Content="⏭" ToolTip="Stasiun Berikutnya" Padding="7,4"/>
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandRadioWindowCommand}" Content="▾" ToolTip="Perluas Radio Online"/>
+                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="✕" ToolTip="Sembunyikan Jendela Radio"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ================= MODE 2: EXPANDED RADIO ONLINE PLAYER ================= -->
+                <Grid x:Name="RadioExpandedView"
+                      Visibility="{Binding IsRadioWindowExpanded, Converter={StaticResource BoolToVis}}"
+                      Margin="16,14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Row 0: Header -->
+                        <RowDefinition Height="Auto"/> <!-- Row 1: Now Playing Hero Card -->
+                        <RowDefinition Height="Auto"/> <!-- Row 2: Category Filter Pills -->
+                        <RowDefinition Height="Auto"/> <!-- Row 3: Search & Online Search Bar -->
+                        <RowDefinition Height="Auto"/> <!-- Row 4: Add Custom Stream Form -->
+                        <RowDefinition Height="Auto"/> <!-- Row 5: Station List -->
+                        <RowDefinition Height="Auto"/> <!-- Row 6: Footer -->
+                    </Grid.RowDefinitions>
+
+                    <!-- ROW 0: HEADER -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="28" Height="28" CornerRadius="8" Background="#1C1C26" BorderBrush="#38FFFFFF" BorderThickness="1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                      Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Radio Online" FontSize="14.5" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                    <Border CornerRadius="5" Padding="6,1.5" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#1E1E28"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRadioPlaying}" Value="True">
+                                                        <Setter Property="Background" Value="#163824"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsRadioBuffering}" Value="True">
+                                                        <Setter Property="Background" Value="#382A14"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="5" Height="5" Margin="0,0,4,0" VerticalAlignment="Center">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="#88889A"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsRadioPlaying}" Value="True">
+                                                                <Setter Property="Fill" Value="#30D158"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsRadioBuffering}" Value="True">
+                                                                <Setter Property="Fill" Value="#FFAA44"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock Text="{Binding RadioStateBadgeText}" FontSize="9.5" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="{Binding RadioStatusMessage}" FontSize="10.5" Foreground="#88889C" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleAddCustomRadioCommand}"
+                                    Content="+ URL" ToolTip="Tambah URL Stream Radio Custom" Margin="0,0,3,0"/>
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizeRadioWindowCommand}"
+                                    Content="▴" ToolTip="Perkecil ke Mini Player" Margin="0,0,3,0"/>
+                            <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click"
+                                    Content="✕" ToolTip="Sembunyikan Jendela Radio (Siaran tetap berjalan di latar belakang)"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ROW 1: NOW PLAYING HERO CARD -->
+                    <Border Grid.Row="1" Background="#13131B" BorderBrush="#282838" BorderThickness="1.2"
+                            CornerRadius="14" Padding="12,10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Station Title & Favorite Star -->
+                            <Grid Grid.Row="0" Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,8,0">
+                                    <TextBlock Text="STASIUN AKTIF" FontSize="8.5" FontWeight="Bold" Foreground="#7A7A90" Margin="0,0,0,2"/>
+                                    <TextBlock Text="{Binding CurrentRadioStationName}" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding CurrentRadioStationSubtitle}" FontSize="11" Foreground="#A6A6BC" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1" Style="{StaticResource SmallPillButton}"
+                                        Command="{Binding ToggleCurrentRadioFavoriteCommand}"
+                                        ToolTip="Simpan ke Favorit" Padding="9,6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentRadioFavoriteSymbol}" FontSize="14" Foreground="#FFCC4D"/>
+                                </Button>
+                            </Grid>
+
+                            <!-- Transport Controls (Prev, Play/Pause, Stop, Next) -->
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,8">
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding PreviousRadioStationCommand}"
+                                        Width="38" Height="34" Padding="0" ToolTip="Stasiun Sebelumnya" Margin="0,0,6,0">
+                                    <Path Data="M 0 0 H 2.2 V 11 H 0 Z M 10 0 L 2.8 5.5 L 10 11 Z" Fill="#EEEEEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleRadioPlayPauseCommand}"
+                                        Width="48" Height="38" Padding="0" ToolTip="Putar / Jeda Siaran Radio"
+                                        Background="#FFFFFF" BorderBrush="#FFFFFF" Margin="0,0,6,0">
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <!-- Play Icon -->
+                                        <Path Data="M 0 0 L 12 7 L 0 14 Z" Fill="#000000" Margin="2,0,0,0"
+                                              Visibility="{Binding IsRadioPlaying, Converter={StaticResource InverseBoolToVis}}"/>
+                                        <!-- Pause Icon -->
+                                        <Path Data="M 0 0 H 3.8 V 13 H 0 Z M 6.8 0 H 10.6 V 13 H 6.8 Z" Fill="#000000"
+                                              Visibility="{Binding IsRadioPlaying, Converter={StaticResource BoolToVis}}"/>
+                                    </Grid>
+                                </Button>
+
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding StopRadioCommand}"
+                                        Width="38" Height="34" Padding="0" ToolTip="Hentikan Siaran" Margin="0,0,6,0">
+                                    <Rectangle Width="10" Height="10" RadiusX="1.5" RadiusY="1.5" Fill="#EEEEEE"/>
+                                </Button>
+
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding NextRadioStationCommand}"
+                                        Width="38" Height="34" Padding="0" ToolTip="Stasiun Berikutnya" Margin="0">
+                                    <Path Data="M 0 0 L 7.2 5.5 L 0 11 Z M 7.8 0 H 10 V 11 H 7.8 Z" Fill="#EEEEEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Volume Slider Row -->
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="38"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Style="{StaticResource SmallPillButton}" Command="{Binding ToggleRadioMuteCommand}"
+                                        Padding="6,2" Margin="0,0,8,0" ToolTip="Bisukan / Bunyikan Suara Radio">
+                                    <TextBlock Text="{Binding RadioVolumeIcon}" FontSize="11"/>
+                                </Button>
+
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding RadioVolume, Mode=TwoWay}"
+                                        IsMoveToPointEnabled="True" VerticalAlignment="Center" Cursor="Hand"/>
+
+                                <TextBlock Grid.Column="2" Text="{Binding RadioVolumePercentText}" Foreground="#9898B0"
+                                           FontSize="10.5" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- ROW 2: CATEGORY FILTER TABS -->
+                    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource RadioFilterPillStyle}" Command="{Binding SetRadioCategoryCommand}" CommandParameter="All" Content="Semua"/>
+                            <Button Style="{StaticResource RadioFilterPillStyle}" Command="{Binding SetRadioCategoryCommand}" CommandParameter="Favorites" Content="★ Favorit"/>
+                            <Button Style="{StaticResource RadioFilterPillStyle}" Command="{Binding SetRadioCategoryCommand}" CommandParameter="Indonesia" Content="🇮🇩 Indonesia"/>
+                            <Button Style="{StaticResource RadioFilterPillStyle}" Command="{Binding SetRadioCategoryCommand}" CommandParameter="Musik &amp; Lofi" Content="🎵 Lofi &amp; Musik"/>
+                            <Button Style="{StaticResource RadioFilterPillStyle}" Command="{Binding SetRadioCategoryCommand}" CommandParameter="Religi" Content="🕌 Religi"/>
+                            <Button Style="{StaticResource RadioFilterPillStyle}" Command="{Binding SetRadioCategoryCommand}" CommandParameter="Internasional" Content="🌍 Dunia"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- ROW 3: SEARCH BAR (LOCAL & ONLINE RADIO BROWSER) -->
+                    <Grid Grid.Row="3" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0" Margin="0,0,6,0">
+                            <TextBox x:Name="SearchRadioBox"
+                                     Text="{Binding RadioSearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource RadioTextBoxStyle}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding SearchOnlineRadioCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <TextBlock Text="Cari stasiun (ketik lalu Enter untuk cari online)..."
+                                       Foreground="#66667A" FontSize="11" IsHitTestVisible="False"
+                                       Margin="9,0,0,0" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=SearchRadioBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <Button Grid.Column="1" Style="{StaticResource SmallPillButton}"
+                                Command="{Binding SearchOnlineRadioCommand}"
+                                ToolTip="Cari puluhan ribu stasiun radio dunia secara online"
+                                Padding="10,5" Margin="0">
+                            <TextBlock Text="{Binding SearchOnlineRadioButtonText}" FontSize="11" FontWeight="SemiBold"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- ROW 4: COLLAPSIBLE ADD CUSTOM URL PANEL -->
+                    <Border Grid.Row="4" Background="#14141D" BorderBrush="#2C2C3E" BorderThickness="1"
+                            CornerRadius="10" Padding="10,8" Margin="0,0,0,8"
+                            Visibility="{Binding IsAddingCustomRadio, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="Tambah Stasiun Radio Custom (MP3 / AAC / M3U8)" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
+                            <Grid Margin="0,0,0,5">
+                                <TextBox x:Name="CustomRadioNameBox" Text="{Binding CustomRadioName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource RadioTextBoxStyle}"/>
+                                <TextBlock Text="Nama Stasiun (contoh: Radio Favoritku)" Foreground="#66667A" FontSize="11" IsHitTestVisible="False" Margin="9,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=CustomRadioNameBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                            <Grid Margin="0,0,0,6">
+                                <TextBox x:Name="CustomRadioUrlBox" Text="{Binding CustomRadioUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource RadioTextBoxStyle}"/>
+                                <TextBlock Text="URL Stream (https://...)" Foreground="#66667A" FontSize="11" IsHitTestVisible="False" Margin="9,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=CustomRadioUrlBox}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleAddCustomRadioCommand}" Content="Batal" Margin="0,0,4,0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SaveCustomRadioCommand}" Content="Simpan &amp; Putar" Background="#283850" Foreground="#FFFFFF"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ROW 5: STATION LIST -->
+                    <Border Grid.Row="5" Background="#0D0D12" BorderBrush="#1E1E28" BorderThickness="1" CornerRadius="12" Padding="6,5" Height="220">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding FilteredRadioStations}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="9" Padding="8,6" Margin="0,2" Cursor="Hand">
+                                            <Border.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick"
+                                                              Command="{Binding DataContext.PlayRadioStationCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                              CommandParameter="{Binding}"/>
+                                            </Border.InputBindings>
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#14141C"/>
+                                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                                    <Setter Property="BorderThickness" Value="1"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#1E1E2A"/>
+                                                            <Setter Property="BorderBrush" Value="#323246"/>
+                                                        </Trigger>
+                                                        <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                            <Setter Property="Background" Value="#1C2232"/>
+                                                            <Setter Property="BorderBrush" Value="#485880"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Play / Active Indicator Badge -->
+                                                <Border Grid.Column="0" Width="28" Height="28" CornerRadius="7" Margin="0,0,9,0" VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#1E1E2A"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                                                    <Setter Property="Background" Value="#30D158"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <TextBlock Text="▶" FontSize="9.5" Foreground="#E0E0F0" Margin="1,0,0,0"
+                                                                   Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}}"/>
+                                                        <TextBlock Text="♫" FontSize="11" FontWeight="Bold" Foreground="#000000"
+                                                                   Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}"/>
+                                                    </Grid>
+                                                </Border>
+
+                                                <!-- Station Name & Subtitle -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#FFFFFF" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="10" Foreground="#8A8AA0" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+
+                                                <!-- Bitrate Badge -->
+                                                <Border Grid.Column="2" Background="#1A1A24" CornerRadius="5" Padding="5,2" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding BitrateText}" FontSize="9" Foreground="#9898B0" FontWeight="SemiBold"/>
+                                                </Border>
+
+                                                <!-- Favorite & Delete Custom Buttons -->
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource SmallPillButton}"
+                                                            Command="{Binding DataContext.ToggleStationFavoriteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            ToolTip="Favorit" Padding="6,2" Background="Transparent" BorderThickness="0">
+                                                        <TextBlock Text="{Binding FavoriteSymbol}" FontSize="12.5" Foreground="#FFCC4D"/>
+                                                    </Button>
+                                                    <Button Style="{StaticResource SmallPillButton}"
+                                                            Command="{Binding DataContext.DeleteCustomRadioStationCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            CommandParameter="{Binding}"
+                                                            Visibility="{Binding IsCustom, Converter={StaticResource BoolToVis}}"
+                                                            ToolTip="Hapus stasiun custom" Padding="5,2" Background="Transparent" BorderThickness="0">
+                                                        <TextBlock Text="×" FontSize="13" FontWeight="Bold" Foreground="#FF6B8B"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- ROW 6: FOOTER -->
+                    <DockPanel Grid.Row="6" Margin="2,8,2,0" LastChildFill="True">
+                        <TextBlock Text="Streaming Radio Indonesia &amp; Dunia • Komponen ke-5 DRANOTCH"
+                                   FontSize="9.5" Foreground="#66667A" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly ITrayIconService _trayService;
     private YouTubeMusicWindow? _ytMusicWindow;
     private FloatingBrowserWindow? _floatingBrowserWindow;
+    private RadioWindow? _radioWindow;
     private TodoWindow? _todoWindow;
     private PrayerWindow? _prayerWindow;
     private HotkeyManager? _hotkeyManager;
@@ -40,18 +41,23 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenSettings += OpenSettings;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
         _viewModel.RequestOpenFloatingBrowser += OpenFloatingBrowser;
+        _viewModel.RequestOpenRadio += OpenRadio;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
             UpdateTodoWindowState();
             UpdatePrayerWindowState();
             UpdateBrowserWindowState();
+            UpdateRadioWindowState();
         });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
         _viewModel.PropertyChanged += (s, ev) =>
         {
-            if (ev.PropertyName == nameof(MainViewModel.CurrentMode) || ev.PropertyName == nameof(MainViewModel.IsCompactMode))
+            if (ev.PropertyName == nameof(MainViewModel.CurrentMode) ||
+                ev.PropertyName == nameof(MainViewModel.IsCompactMode) ||
+                ev.PropertyName == nameof(MainViewModel.IsIdleMiniMode) ||
+                ev.PropertyName == nameof(MainViewModel.ShowIdleMiniView))
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -193,6 +199,7 @@ public partial class MainWindow : Window
         };
 
         _trayService.OpenYouTubeMusicRequested += () => Dispatcher.Invoke(OpenYouTubeMusic);
+        _trayService.OpenRadioRequested += () => Dispatcher.Invoke(OpenRadio);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
@@ -300,6 +307,18 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateRadioWindowState()
+    {
+        if (_viewModel.IsRadioWindowOpen)
+        {
+            OpenRadio();
+        }
+        else
+        {
+            _radioWindow?.Hide();
+        }
+    }
+
     private void OpenSettings()
     {
         var settingsVm = new SettingsViewModel(_settingsService, _ => SetupHotkeys(), _viewModel.GoogleDriveSyncService, _viewModel.UpdateService, _viewModel.PrayerService);
@@ -315,6 +334,7 @@ public partial class MainWindow : Window
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
         UpdateBrowserWindowState();
+        UpdateRadioWindowState();
     }
 
     public void OpenYouTubeMusic()
@@ -478,6 +498,37 @@ public partial class MainWindow : Window
         }
     }
 
+    public void OpenRadio()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsRadioWindowOpen = true;
+
+            if (_radioWindow == null)
+            {
+                _radioWindow = new RadioWindow(_viewModel, _settingsService);
+                _radioWindow.Closed += (s, e) => _radioWindow = null;
+            }
+
+            if (_radioWindow.WindowState == WindowState.Minimized)
+            {
+                _radioWindow.WindowState = WindowState.Normal;
+            }
+
+            _radioWindow.Show();
+            _radioWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Radio Online:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void Island_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
@@ -542,6 +593,8 @@ public partial class MainWindow : Window
 
         _ytMusicWindow?.ForceClose();
         _floatingBrowserWindow?.ForceClose();
+        _radioWindow?.ForceClose();
+        _viewModel.RadioService.Dispose();
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _hotkeyManager?.Dispose();

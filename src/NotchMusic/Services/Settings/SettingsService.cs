@@ -49,7 +49,11 @@ public class SettingsService : ISettingsService
             {
                 var json = File.ReadAllText(_settingsFilePath);
                 var loaded = JsonSerializer.Deserialize<AppSettings>(json);
-                if (loaded != null) return loaded;
+                if (loaded != null)
+                {
+                    loaded.ExpandOnHover = false;
+                    return loaded;
+                }
             }
         }
         catch
