@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.1)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.2)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -132,7 +132,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - Saat tombol **Pin (`📌`)** diaktifkan, Notch dikunci agar tidak mengecil otomatis ketika *idle*.
   - Menonaktifkan pembukaan panel otomatis saat kursor melintas (*Expand on Hover*) agar tidak mengganggu aktivitas kerja di bagian atas layar.
 
-### ✨ 16. Mode Idle Simetris Berpusat pada Logo DRANOTCH, Jendela Lepas Pemutar Musik, & Transformasi Ikon Pintar *(Baru di v1.6.1)*
+### ✨ 16. Mode Idle Simetris Berpusat pada Logo DRANOTCH, Jendela Lepas Pemutar Musik, & Transformasi Ikon Pintar *(v1.6.1)*
 - **Tampilan Idle Minimalis (Logo DRANOTCH, Waktu Sholat, & Pemutar Musik saat Memutar Lagu)**:
   - Saat kondisi *idle*, notch menampilkan **Logo DRANOTCH**, **Waktu Sholat** tepat di sampingnya (dapat diatur tampil atau disembunyikan melalui Pengaturan), serta **Pemutar Musik** otomatis tetap tampil jika lagu sedang dimainkan (`IsPlaying == true`).
   - Saat kursor diarahkan (*hover*) ke notch, 5 komponen mengembang secara simetris: **Pemutar Musik** & **Radio Online** di sisi kiri, **Browser** & **To-Do List** di sisi kanan, serta **Pengaturan (`⚙`)**, **Waktu Sholat**, & **Tombol Versi** di baris bawah.
@@ -146,6 +146,14 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Perbaikan Hitung Mundur Subuh Hari Berikutnya & Penyederhanaan Pengaturan**:
   - Memperbaiki perhitungan hitung mundur menuju waktu **Subuh hari berikutnya** setelah waktu Isya berlalu.
   - Menyempurnakan kontras teks *dropdown* di jendela Pengaturan dan menempatkan bagian **Pembaruan Aplikasi** di urutan paling atas.
+
+### 🎤 17. Penghilang Vokal *Real-Time* (Mode Karaoke DSP) & Lirik Tetap Tampil saat *Minimize* *(Baru di v1.6.2)*
+- **Tombol Penghilang Vokal (`🎤 Karaoke`) *Real-Time***:
+  - Tersedia di jendela **Pemutar Musik** (baik saat mode diperluas maupun saat di-*minimize*), di panel *Expanded* notch utama, serta di *bar* navigasi atas **YouTube Music Bawaan (`YouTubeMusicWindow`)**.
+  - Menggunakan pemrosesan sinyal **Web Audio API DSP (*Mid-Side Phase Cancellation* `L - R`)** untuk meredam suara vokal utama di kanal tengah (`> 165 Hz`) secara *real-time* tanpa jeda saat memutar lagu di **YouTube Music Bawaan (`▶ YT Music`)** atau **Browser Mengambang**.
+  - Dilengkapi **Pelestarian Bass & Kick Drum (`< 165 Hz`)** serta **Dynamics Compressor** agar musik pengiring tetap bulat, hangat, dan bertenaga untuk berkaraoke.
+- **Lirik Tetap Tampil saat Mode *Minimize* Pelepasan Pemutar Musik**:
+  - Ketika jendela pelepasan Pemutar Musik (`MusicWindow`) diperkecil (*minimize* `▴`), tampilan ringkas tetap menampilkan **kotak lirik 3 baris** secara langsung di bawah baris kontrol utama (tanpa *progress bar* dan *offset* agar tetap ringkas di layar).
 
 ---
 
@@ -175,7 +183,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 
