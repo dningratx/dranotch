@@ -34,6 +34,7 @@ public class CompactHoverIslandTests
         public Task NextAsync() => Task.CompletedTask;
         public Task SeekAsync(TimeSpan position) => Task.CompletedTask;
         public void Dispose() { }
+        public void FireTrackChanged(TrackInfo? track) => TrackChanged?.Invoke(this, track);
     }
 
     private class FakeLyricsService : ILyricsService
@@ -63,6 +64,7 @@ public class CompactHoverIslandTests
 
         // When idle (not hovering, not pinned), ShowComponentIcons should be false and ShowIdlePrayerBesideLogo true by default
         Assert.False(vm.ShowComponentIcons);
+        Assert.False(vm.ShowMusicInNotch);
         Assert.True(vm.ShowIdlePrayerBesideLogo);
         Assert.False(vm.IsHovering);
     }
@@ -224,5 +226,18 @@ public class CompactHoverIslandTests
         Assert.Equal("Subuh", schedule.NextPrayer!.Name);
         Assert.EndsWith("lagi", schedule.NextPrayer.CountdownText);
         Assert.True(schedule.TimeUntilNextPrayer.TotalHours > 4 && schedule.TimeUntilNextPrayer.TotalHours < 8);
+
+        // Verify when music is playing while idle, ShowMusicInNotch and ShowMusicPillInNotch are true
+        var fakeMedia = new FakeMediaSessionService();
+        var vmIdleMusic = new MainViewModel(fakeMedia, new FakeLyricsService(), new FakeSettingsService());
+        vmIdleMusic.CurrentMode = PanelMode.Compact;
+        Assert.False(vmIdleMusic.ShowComponentIcons);
+        Assert.False(vmIdleMusic.ShowMusicInNotch);
+
+        fakeMedia.FireTrackChanged(new TrackInfo { Title = "Test Song", Artist = "Test Artist", IsPlaying = true });
+        Assert.False(vmIdleMusic.ShowComponentIcons);
+        Assert.True(vmIdleMusic.IsPlaying);
+        Assert.True(vmIdleMusic.ShowMusicInNotch);
+        Assert.True(vmIdleMusic.ShowMusicPillInNotch);
     }
 }

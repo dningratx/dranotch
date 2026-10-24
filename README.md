@@ -133,8 +133,8 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - Menonaktifkan pembukaan panel otomatis saat kursor melintas (*Expand on Hover*) agar tidak mengganggu aktivitas kerja di bagian atas layar.
 
 ### ✨ 16. Mode Idle Simetris Berpusat pada Logo DRANOTCH, Jendela Lepas Pemutar Musik, & Transformasi Ikon Pintar *(Baru di v1.6.1)*
-- **Tampilan Idle Minimalis (Logo DRANOTCH & Waktu Sholat)**:
-  - Saat kondisi *idle*, notch hanya menampilkan **Logo DRANOTCH** beserta **Waktu Sholat** tepat di sampingnya (dapat diatur tampil atau disembunyikan melalui Pengaturan).
+- **Tampilan Idle Minimalis (Logo DRANOTCH, Waktu Sholat, & Pemutar Musik saat Memutar Lagu)**:
+  - Saat kondisi *idle*, notch menampilkan **Logo DRANOTCH**, **Waktu Sholat** tepat di sampingnya (dapat diatur tampil atau disembunyikan melalui Pengaturan), serta **Pemutar Musik** otomatis tetap tampil jika lagu sedang dimainkan (`IsPlaying == true`).
   - Saat kursor diarahkan (*hover*) ke notch, 5 komponen mengembang secara simetris: **Pemutar Musik** & **Radio Online** di sisi kiri, **Browser** & **To-Do List** di sisi kanan, serta **Pengaturan (`⚙`)**, **Waktu Sholat**, & **Tombol Versi** di baris bawah.
 - **Mode Pelepasan Pemutar Musik & Lirik (`MusicWindow`)**:
   - Mengklik pemutar musik membuka jendela melayang mandiri yang menampilkan lirik *real-time* 3 baris, *progress bar*, kontrol media & offset satu baris, tombol **`▶ YT Music`**, tombol minimize (`▴`), dan tombol satukan kembali ke notch utama (`⇲`), sementara notch utama tetap tampil di atas layar.

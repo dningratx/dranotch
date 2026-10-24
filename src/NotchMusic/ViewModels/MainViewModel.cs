@@ -114,6 +114,9 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
             }
         }
     }
@@ -131,12 +134,18 @@ public class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
                 OnPropertyChanged(nameof(IsNotchActive));
             }
         }
     }
 
     public bool ShowComponentIcons => IsCompactMode && (_isHovering || IsPinned);
+    public bool ShowMusicInNotch => IsCompactMode && (ShowComponentIcons || IsPlaying);
+    public bool ShowMusicPillInNotch => ShowMusicInNotch && !IsMusicWindowOpen;
+    public bool ShowMusicIconInNotch => ShowMusicInNotch && IsMusicWindowOpen;
     public bool ShowIdlePrayerBesideLogo => IsCompactMode && !ShowComponentIcons && Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch;
 
     public string MusicNotchTooltip => HasTrack
@@ -166,6 +175,9 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
                 OnPropertyChanged(nameof(ShowFullMusicInCompact));
                 OnPropertyChanged(nameof(ShowFullRadioInCompact));
                 OnPropertyChanged(nameof(ShowFullTodoInCompact));
@@ -299,6 +311,8 @@ public class MainViewModel : ViewModelBase
                 Settings.IsMusicWindowOpen = value;
                 _settingsService.Save();
                 OnPropertyChanged(nameof(IsMusicWindowOpen));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
                 RequestComponentLayoutChanged?.Invoke();
             }
         }
@@ -626,6 +640,9 @@ public class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(StandbyLyric));
                 OnPropertyChanged(nameof(IsPlaying));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
                 OnPropertyChanged(nameof(IsAudioActive));
                 OnPropertyChanged(nameof(ShowFullMusicInCompact));
                 OnPropertyChanged(nameof(IsNotchActive));
@@ -683,6 +700,9 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
                 OnPropertyChanged(nameof(ShowFullMusicInCompact));
                 OnPropertyChanged(nameof(ShowFullRadioInCompact));
                 OnPropertyChanged(nameof(ShowFullTodoInCompact));

@@ -442,11 +442,11 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- SISI KIRI: KOMPONEN 1 (MUSIK LENGKAP DI PALING KIRI) & KOMPONEN 2 (RADIO ONLINE) (Muncul saat Hover) -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
                                     >
                             <!-- 1. Pemutar Musik Lengkap (Di Paling Kiri: Album Art, Judul & Artis, Lirik Standby, Play/Pause, & Tombol YT Music) -->
                             <Border Style="{StaticResource NotchPrayerPillStyle}" Height="44" Margin="2,0,6,0" Padding="6,3,8,3"
-                                    Visibility="{Binding IsMusicWindowOpen, Converter={StaticResource InverseBoolToVis}}"
+                                    Visibility="{Binding ShowMusicPillInNotch, Converter={StaticResource BoolToVis}}"
                                     VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <!-- Album Art / Ikon Musik Squircle (Klik untuk perluas pemutar musik & lirik) -->
@@ -525,7 +525,7 @@
 
                             <!-- 1b. Tombol Ikon Musik Saja (Muncul saat Pemutar Musik dalam Mode Pelebaran / Pelepasan) -->
                             <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,6,0" Cursor="Hand"
-                                    Visibility="{Binding IsMusicWindowOpen, Converter={StaticResource BoolToVis}}"
+                                    Visibility="{Binding ShowMusicIconInNotch, Converter={StaticResource BoolToVis}}"
                                     ToolTip="Pemutar Musik sedang dibuka (Klik untuk satukan kembali ke notch utama)">
                                 <Border.InputBindings>
                                     <MouseBinding MouseAction="LeftClick" Command="{Binding CloseMusicWindowCommand}"/>
@@ -539,6 +539,7 @@
 
                             <!-- 2. Radio Online -->
                             <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,6,0" Cursor="Hand"
+                                    Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
                                     ToolTip="{Binding RadioNotchTooltip}">
                                 <Border.InputBindings>
                                     <MouseBinding MouseAction="LeftClick" Command="{Binding OpenRadioCommand}"/>

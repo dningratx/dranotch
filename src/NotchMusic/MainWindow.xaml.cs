@@ -65,6 +65,8 @@ public partial class MainWindow : Window
                 ev.PropertyName == nameof(MainViewModel.IsIdleMiniMode) ||
                 ev.PropertyName == nameof(MainViewModel.ShowIdleMiniView) ||
                 ev.PropertyName == nameof(MainViewModel.IsMusicWindowOpen) ||
+                ev.PropertyName == nameof(MainViewModel.ShowMusicInNotch) ||
+                ev.PropertyName == nameof(MainViewModel.ShowIdlePrayerBesideLogo) ||
                 ev.PropertyName == nameof(MainViewModel.IsTodoDetachedWindowVisible))
             {
                 Dispatcher.BeginInvoke(new Action(() =>
