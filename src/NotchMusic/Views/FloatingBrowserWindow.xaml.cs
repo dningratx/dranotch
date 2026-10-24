@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
+using NotchMusic.Helpers;
 using NotchMusic.Services.Settings;
 using NotchMusic.ViewModels;
 using Brushes = System.Windows.Media.Brushes;
@@ -72,11 +73,15 @@ public partial class FloatingBrowserWindow : Window
             var userDataFolder = Path.Combine(localAppData, "DRANOTCH", "FloatingBrowserProfile");
             Directory.CreateDirectory(userDataFolder);
 
-            var env = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+            var options = new CoreWebView2EnvironmentOptions("--autoplay-policy=no-user-gesture-required");
+            var env = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder, options: options);
             await webView.EnsureCoreWebView2Async(env);
 
             webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             webView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = true;
+
+            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+                WebAudioVocalRemoverScript.GetBootstrapScript(_viewModel?.IsVocalRemoverEnabled ?? false));
 
             // Pastikan iframe dan video player (seperti di LK21/YouTube) diizinkan fullscreen
             await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
@@ -433,6 +438,19 @@ public partial class FloatingBrowserWindow : Window
             _viewModel.IsBrowserWindowOpen = false;
         }
         Hide();
+    }
+
+    public async Task SetVocalRemoverAsync(bool enabled)
+    {
+        try
+        {
+            if (webView?.CoreWebView2 != null)
+            {
+                await webView.CoreWebView2.ExecuteScriptAsync(
+                    WebAudioVocalRemoverScript.GetSetEnabledScript(enabled));
+            }
+        }
+        catch { }
     }
 
     public void ForceClose()

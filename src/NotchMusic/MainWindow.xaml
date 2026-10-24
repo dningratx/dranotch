@@ -823,6 +823,15 @@
                                                    Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleVocalRemoverCommand}"
+                                        ToolTip="{Binding VocalRemoverTooltip}" Padding="6,3" Margin="0,0,3,0">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F3A4;" FontSize="10" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="Karaoke" FontSize="11" Foreground="#CCCCCC" VerticalAlignment="Center"/>
+                                        <Ellipse Width="6" Height="6" Fill="#30D158" Margin="4,0,0,0" VerticalAlignment="Center"
+                                                 Visibility="{Binding IsVocalRemoverEnabled, Converter={StaticResource BoolToVis}}"/>
+                                    </StackPanel>
+                                </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}" 
                                         ToolTip="Buka Pemutar YouTube Music untuk ganti lagu" Padding="6,3" Margin="0,0,3,0">
                                     <StackPanel Orientation="Horizontal">

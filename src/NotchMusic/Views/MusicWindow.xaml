@@ -117,7 +117,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Baris 0: Header Ringkas (Album Art, Judul & Artis, Play/Pause, Perluas, Menyatu dengan Notch) -->
+                    <!-- Baris 0: Header Ringkas (Album Art, Judul & Artis, Karaoke, Play/Pause, Perluas, Menyatu dengan Notch) -->
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -157,8 +157,16 @@
                             </Grid>
                         </Border>
 
-                        <!-- Quick Controls (Play/Pause, Perluas, Menyatu dengan Notch Utama) -->
+                        <!-- Quick Controls (Karaoke Vocal Remover, Play/Pause, Perluas, Menyatu dengan Notch Utama) -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleVocalRemoverCommand}"
+                                    ToolTip="{Binding VocalRemoverTooltip}" Padding="7,4" Margin="0,0,3,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F3A4;" FontSize="10.5" VerticalAlignment="Center"/>
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" Margin="4,0,0,0" VerticalAlignment="Center"
+                                             Visibility="{Binding IsVocalRemoverEnabled, Converter={StaticResource BoolToVis}}"/>
+                                </StackPanel>
+                            </Button>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePlayPauseCommand}"
                                     ToolTip="Putar / Jeda" Padding="8,4" Margin="0,0,3,0">
                                 <Grid>
@@ -167,7 +175,7 @@
                                 </Grid>
                             </Button>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandMusicWindowCommand}"
-                                    Content="&#x25BE;" ToolTip="Perluas Pemutar Musik" Padding="7,4" Margin="0,0,3,0"/>
+                                     Content="&#x25BE;" ToolTip="Perluas Pemutar Musik" Padding="7,4" Margin="0,0,3,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseMusicWindowCommand}"
                                     Content="&#x21F2;" ToolTip="Menyatu kembali dengan notch utama" Padding="7,4" Margin="0"/>
                         </StackPanel>
@@ -214,7 +222,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Baris 0: Header (Album Art, Judul/Artis/Status, YT Music, Minimize, & Tombol Menyatu dengan Notch Utama) -->
+                    <!-- Baris 0: Header (Album Art, Judul/Artis/Status, Karaoke, YT Music, Minimize, & Tombol Menyatu dengan Notch Utama) -->
                     <Grid Grid.Row="0" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -244,7 +252,7 @@
                                        Foreground="#84849A" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
                         </StackPanel>
 
-                        <!-- Top Actions: Update (jika ada), YT Music, Minimize (▴), & Menyatu Kembali dengan Notch Utama (⇲) -->
+                        <!-- Top Actions: Update (jika ada), Karaoke (Hapus Vokal), YT Music, Minimize (▴), & Menyatu Kembali dengan Notch Utama (⇲) -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource SmallPillButton}"
                                     Command="{Binding OpenUpdateCommand}"
@@ -255,6 +263,16 @@
                                     <TextBlock Text="&#x2728;" FontSize="10" Margin="0,0,3,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding AvailableUpdateVersion, StringFormat='Update {0}'}"
                                                Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleVocalRemoverCommand}"
+                                    ToolTip="{Binding VocalRemoverTooltip}" Padding="8,4" Margin="0,0,4,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F3A4;" FontSize="10.5" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="Karaoke" FontSize="11" Foreground="#EDEDF5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" Margin="5,0,0,0" VerticalAlignment="Center"
+                                             Visibility="{Binding IsVocalRemoverEnabled, Converter={StaticResource BoolToVis}}"/>
                                 </StackPanel>
                             </Button>
 

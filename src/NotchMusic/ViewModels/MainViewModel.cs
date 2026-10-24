@@ -76,6 +76,7 @@ public class MainViewModel : ViewModelBase
     private double _manualOffsetSeconds = 0;
     private string _searchQuery = string.Empty;
     private bool _isSearching;
+    private bool _isVocalRemoverEnabled;
     private List<LrcLibSearchResult> _searchResults = new();
 
     private CancellationTokenSource? _lyricsCts;
@@ -820,6 +821,26 @@ public class MainViewModel : ViewModelBase
     }
 
     public IReadOnlyList<MediaSessionInfo> AvailableSessions => _mediaService.AvailableSessions;
+
+    public bool IsVocalRemoverEnabled
+    {
+        get => _isVocalRemoverEnabled;
+        set
+        {
+            if (SetProperty(ref _isVocalRemoverEnabled, value))
+            {
+                OnPropertyChanged(nameof(VocalRemoverButtonText));
+                OnPropertyChanged(nameof(VocalRemoverTooltip));
+                RequestVocalRemoverChanged?.Invoke(value);
+            }
+        }
+    }
+
+    public string VocalRemoverButtonText => IsVocalRemoverEnabled ? "🎤 Karaoke ON" : "🎤 Karaoke";
+
+    public string VocalRemoverTooltip => IsVocalRemoverEnabled
+        ? "Penghilang Vokal (Mode Karaoke) sedang AKTIF — Klik untuk kembali ke vokal normal"
+        : "Aktifkan Penghilang Vokal (Mode Karaoke) untuk meredam suara vokal penyanyi";
     public AppSettings Settings => _settingsService.CurrentSettings;
 
     // To-Do List Properties
@@ -1070,6 +1091,8 @@ public class MainViewModel : ViewModelBase
     public ICommand DeleteCustomRadioStationCommand { get; }
     public ICommand WakeFromIdleCommand { get; }
     public ICommand ToggleMiniModeCommand { get; }
+    public ICommand ToggleVocalRemoverCommand { get; }
+    public event Action<bool>? RequestVocalRemoverChanged;
     public ICommand ExitApplicationCommand { get; }
 
     public event Action? RequestExit;
@@ -1228,6 +1251,7 @@ public class MainViewModel : ViewModelBase
         OpenSettingsCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
         OpenAboutCommand = new RelayCommand(() => RequestOpenAbout?.Invoke());
         OpenYouTubeMusicCommand = new RelayCommand(() => RequestOpenYouTubeMusic?.Invoke());
+        ToggleVocalRemoverCommand = new RelayCommand(() => IsVocalRemoverEnabled = !IsVocalRemoverEnabled);
         OpenTodoCommand = new RelayCommand(() =>
         {
             CurrentMode = PanelMode.Compact;

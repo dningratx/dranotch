@@ -1,18 +1,26 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
+using NotchMusic.Helpers;
+using NotchMusic.ViewModels;
+using Color = System.Windows.Media.Color;
 
 namespace NotchMusic.Views;
 
 public partial class YouTubeMusicWindow : Window
 {
     private const string YouTubeMusicUrl = "https://music.youtube.com/";
+    private readonly MainViewModel? _viewModel;
     private bool _isForceClose;
     private bool _isInitialized;
+    private bool _isVocalRemoverEnabled;
 
-    public YouTubeMusicWindow()
+    public YouTubeMusicWindow(MainViewModel? viewModel = null)
     {
+        _viewModel = viewModel;
+        _isVocalRemoverEnabled = _viewModel?.IsVocalRemoverEnabled ?? false;
         InitializeComponent();
         try
         {
@@ -20,6 +28,8 @@ public partial class YouTubeMusicWindow : Window
             Icon = System.Windows.Media.Imaging.BitmapFrame.Create(uri);
         }
         catch { }
+
+        UpdateVocalRemoverButtonVisuals();
         Loaded += YouTubeMusicWindow_Loaded;
     }
 
@@ -45,11 +55,15 @@ public partial class YouTubeMusicWindow : Window
             }
             Directory.CreateDirectory(userDataFolder);
 
-            var env = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+            var options = new CoreWebView2EnvironmentOptions("--autoplay-policy=no-user-gesture-required");
+            var env = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder, options: options);
             await webView.EnsureCoreWebView2Async(env);
 
             webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             webView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = true;
+
+            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+                WebAudioVocalRemoverScript.GetBootstrapScript(_isVocalRemoverEnabled));
 
             webView.NavigationStarting += (s, ev) =>
             {
@@ -59,16 +73,20 @@ public partial class YouTubeMusicWindow : Window
                 });
             };
 
-            webView.NavigationCompleted += (s, ev) =>
+            webView.NavigationCompleted += async (s, ev) =>
             {
                 Dispatcher.Invoke(() =>
                 {
                     LoadingPanel.Visibility = Visibility.Collapsed;
                     webView.Visibility = Visibility.Visible;
-                    StatusText.Text = "Tersambung ke DRANOTCH";
+                    StatusText.Text = _isVocalRemoverEnabled
+                        ? "🎤 Mode Karaoke (Penghilang Vokal) Aktif"
+                        : "Tersambung ke DRANOTCH";
                     BackButton.IsEnabled = webView.CanGoBack;
                     ForwardButton.IsEnabled = webView.CanGoForward;
                 });
+
+                await ApplyVocalRemoverToWebViewAsync();
             };
 
             webView.Source = new Uri(YouTubeMusicUrl);
@@ -81,6 +99,62 @@ public partial class YouTubeMusicWindow : Window
                 "DRANOTCH - WebView2 Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
+        }
+    }
+
+    public async Task SetVocalRemoverAsync(bool enabled)
+    {
+        _isVocalRemoverEnabled = enabled;
+        Dispatcher.Invoke(() =>
+        {
+            UpdateVocalRemoverButtonVisuals();
+            StatusText.Text = _isVocalRemoverEnabled
+                ? "🎤 Mode Karaoke (Penghilang Vokal) Aktif"
+                : "Tersambung ke DRANOTCH";
+        });
+
+        await ApplyVocalRemoverToWebViewAsync();
+    }
+
+    private async Task ApplyVocalRemoverToWebViewAsync()
+    {
+        try
+        {
+            if (webView?.CoreWebView2 != null)
+            {
+                await webView.CoreWebView2.ExecuteScriptAsync(
+                    WebAudioVocalRemoverScript.GetSetEnabledScript(_isVocalRemoverEnabled));
+            }
+        }
+        catch { }
+    }
+
+    private void UpdateVocalRemoverButtonVisuals()
+    {
+        if (VocalRemoverButton == null) return;
+        if (_isVocalRemoverEnabled)
+        {
+            VocalRemoverButton.Content = "🎤 Karaoke: ON";
+            VocalRemoverButton.Background = new SolidColorBrush(Color.FromRgb(42, 24, 62));
+            VocalRemoverButton.Foreground = new SolidColorBrush(Color.FromRgb(233, 213, 255));
+        }
+        else
+        {
+            VocalRemoverButton.Content = "🎤 Karaoke (Hapus Vokal)";
+            VocalRemoverButton.Background = System.Windows.Media.Brushes.Transparent;
+            VocalRemoverButton.Foreground = new SolidColorBrush(Color.FromRgb(204, 204, 204));
+        }
+    }
+
+    private async void VocalRemoverButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel != null)
+        {
+            _viewModel.IsVocalRemoverEnabled = !_viewModel.IsVocalRemoverEnabled;
+        }
+        else
+        {
+            await SetVocalRemoverAsync(!_isVocalRemoverEnabled);
         }
     }
 

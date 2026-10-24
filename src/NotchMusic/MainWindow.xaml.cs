@@ -43,6 +43,7 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenSettings += OpenSettings;
         _viewModel.RequestOpenAbout += OpenAbout;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
+        _viewModel.RequestVocalRemoverChanged += OnVocalRemoverChanged;
         _viewModel.RequestOpenFloatingBrowser += OpenFloatingBrowser;
         _viewModel.RequestOpenRadio += OpenRadio;
         _viewModel.RequestOpenMusic += OpenMusic;
@@ -437,6 +438,33 @@ public partial class MainWindow : Window
         UpdateRadioWindowState();
     }
 
+    private async void OnVocalRemoverChanged(bool enabled)
+    {
+        try
+        {
+            if (_ytMusicWindow != null)
+            {
+                await _ytMusicWindow.SetVocalRemoverAsync(enabled);
+            }
+            if (_floatingBrowserWindow != null)
+            {
+                await _floatingBrowserWindow.SetVocalRemoverAsync(enabled);
+            }
+
+            if (enabled)
+            {
+                _viewModel.SessionStatus = (_ytMusicWindow != null || _floatingBrowserWindow != null)
+                    ? "🎤 Mode Karaoke (Penghilang Vokal) Aktif"
+                    : "🎤 Karaoke Aktif (Putar lagu di ▶ YT Music untuk hapus vokal)";
+            }
+            else
+            {
+                _viewModel.SessionStatus = "🎤 Mode Karaoke Dinonaktifkan";
+            }
+        }
+        catch { }
+    }
+
     public void OpenYouTubeMusic()
     {
         try
@@ -446,7 +474,7 @@ public partial class MainWindow : Window
 
             if (_ytMusicWindow == null)
             {
-                _ytMusicWindow = new YouTubeMusicWindow();
+                _ytMusicWindow = new YouTubeMusicWindow(_viewModel);
                 _ytMusicWindow.Closed += (s, e) => _ytMusicWindow = null;
             }
 
