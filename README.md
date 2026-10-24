@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # 🎵 DRANOTCH
 
@@ -39,7 +39,7 @@ Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **li
 - **Ticker Berjalan (*Live Ticker*)**: Pantau tugas aktif langsung dari mode compact tanpa membuka jendela besar.
 - **Kategori & Tag**: Kelompokkan tugas dengan tag (misal: `#KERJA`, `#KULIAH`, `#PRIBADI`).
 - **Filter Cepat**: Tab filter instan (*Semua*, *Aktif*, *Selesai*) dan pembersihan tugas selesai sekali klik.
-- **Google Drive Cloud Sync**: Sinkronisasi daftar tugas ke cloud akun Google Drive pribadi Anda secara aman.
+- **Google Drive Cloud Sync**: Sinkronisasi daftar tugas ke cloud akun Google Drive pribadi Anda secara aman. *(Panduan setup OAuth pribadi: [docs/GOOGLE_DRIVE_SETUP.md](docs/GOOGLE_DRIVE_SETUP.md))*
 
 ### 🎛️ 4. Pilihan Komponen Tampilan *(Baru di v1.2.0)*
 Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
@@ -225,3 +225,4 @@ Proyek ini dilisensikan di bawah lisensi [MIT License](LICENSE).
 <div align="center">
 Dibuat dengan ❤️ untuk meningkatkan estetika dan produktivitas desktop Windows Anda.
 </div>
+

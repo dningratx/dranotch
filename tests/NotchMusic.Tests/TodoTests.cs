@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.Media;
@@ -300,6 +300,34 @@ public class TodoTests
             {
                 File.Delete(tempFile);
             }
+        }
+    }
+
+    [Fact]
+    public void GoogleDriveSyncService_EnvironmentVariables_ResolveCorrectly()
+    {
+        var settingsService = new FakeSettingsService();
+        settingsService.CurrentSettings.GoogleDriveClientId = string.Empty;
+        settingsService.CurrentSettings.GoogleDriveClientSecret = string.Empty;
+
+        var prevId = Environment.GetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_ID");
+        var prevSecret = Environment.GetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_SECRET");
+
+        try
+        {
+            Environment.SetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_ID", "env-client-id-999");
+            Environment.SetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_SECRET", "env-secret-888");
+
+            var syncService = new GoogleDriveSyncService(settingsService);
+
+            Assert.Equal("env-client-id-999", syncService.EffectiveClientId);
+            Assert.Equal("env-secret-888", syncService.EffectiveClientSecret);
+            Assert.True(syncService.IsConfigured);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_ID", prevId);
+            Environment.SetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_SECRET", prevSecret);
         }
     }
 

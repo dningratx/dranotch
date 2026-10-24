@@ -1,4 +1,4 @@
-# Build results
+# Build results & Packages
 [Dd]ebug/
 [Rr]elease/
 x64/
@@ -6,15 +6,40 @@ x86/
 [Bb]in/
 [Oo]bj/
 dist/
+TestResults/
+*.trx
+coverage/
 
 # Visual Studio / Rider / VSCode
 .vs/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 .idea/
 .vscode/
 
-# Temporary / Log files
+# Secrets, Credentials & Local configs
+credentials.json
+client_secrets*.json
+GoogleAuthDataStore/
+*.env
+*.env.*
+!.env.example
+
+# Certificates & Private Keys
+*.pfx
+*.p12
+*.cer
+*.key
+*.snk
+
+# Temporary & Log files
 *.tmp
 *.log
 crash.log
+
+# OS Artifacts
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store

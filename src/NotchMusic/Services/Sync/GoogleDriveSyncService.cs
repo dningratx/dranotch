@@ -25,6 +25,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 
     private static string DecodeCred(byte[] data)
     {
+        if (data == null || data.Length == 0) return string.Empty;
         var b = new byte[data.Length];
         for (int i = 0; i < data.Length; i++) b[i] = (byte)(data[i] ^ 0x5A);
         return System.Text.Encoding.UTF8.GetString(b);
@@ -38,15 +39,35 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
     private string _syncStatus = "Belum terhubung";
     private DateTimeOffset? _lastKnownRemoteModifiedTime;
 
-    public string EffectiveClientId =>
-        !string.IsNullOrWhiteSpace(_settingsService.CurrentSettings.GoogleDriveClientId)
-            ? _settingsService.CurrentSettings.GoogleDriveClientId.Trim()
-            : DefaultClientId;
+    public string EffectiveClientId
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_settingsService.CurrentSettings.GoogleDriveClientId))
+                return _settingsService.CurrentSettings.GoogleDriveClientId.Trim();
 
-    public string EffectiveClientSecret =>
-        !string.IsNullOrWhiteSpace(_settingsService.CurrentSettings.GoogleDriveClientSecret)
-            ? _settingsService.CurrentSettings.GoogleDriveClientSecret.Trim()
-            : DefaultClientSecret;
+            var envId = Environment.GetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_ID");
+            if (!string.IsNullOrWhiteSpace(envId))
+                return envId.Trim();
+
+            return DefaultClientId;
+        }
+    }
+
+    public string EffectiveClientSecret
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_settingsService.CurrentSettings.GoogleDriveClientSecret))
+                return _settingsService.CurrentSettings.GoogleDriveClientSecret.Trim();
+
+            var envSecret = Environment.GetEnvironmentVariable("GOOGLE_DRIVE_CLIENT_SECRET");
+            if (!string.IsNullOrWhiteSpace(envSecret))
+                return envSecret.Trim();
+
+            return DefaultClientSecret;
+        }
+    }
 
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(EffectiveClientId) &&
@@ -78,6 +99,12 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
         _settingsService = settingsService;
         _authDataStorePath = Path.Combine(_settingsService.GetAppDataPath(), "GoogleAuthDataStore");
 
+        // Auto-discover credentials.json if not configured
+        if (!IsConfigured)
+        {
+            TryAutoDiscoverCredentials();
+        }
+
         if (IsConnected)
         {
             _syncStatus = $"Tersambung ({UserEmail})";
@@ -85,6 +112,35 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
         else if (IsConfigured)
         {
             _syncStatus = "Siap login";
+        }
+        else
+        {
+            _syncStatus = "Kredensial belum disetel (impor credentials.json)";
+        }
+    }
+
+    private void TryAutoDiscoverCredentials()
+    {
+        try
+        {
+            var searchPaths = new[]
+            {
+                Path.Combine(_settingsService.GetAppDataPath(), "credentials.json"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "credentials.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "credentials.json")
+            };
+
+            foreach (var path in searchPaths)
+            {
+                if (File.Exists(path) && ImportCredentialsFile(path))
+                {
+                    break;
+                }
+            }
+        }
+        catch
+        {
+            // Silently ignore auto-discovery errors
         }
     }
 
