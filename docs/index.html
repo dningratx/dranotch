@@ -11,16 +11,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #060609;
-      --bg-card: #0d0d14;
-      --bg-card-hover: #13131e;
-      --border: #1e1e2d;
-      --border-accent: rgba(138, 43, 226, 0.4);
-      --text: #f4f4fa;
-      --text-muted: #9494a8;
-      --accent: #8a2be2;
-      --accent-glow: rgba(138, 43, 226, 0.25);
-      --accent-gradient: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      --bg: #07070a;
+      --bg-card: #0f0f14;
+      --bg-card-hover: #15151c;
+      --border: #22222d;
+      --border-accent: rgba(226, 232, 240, 0.35);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --accent: #e2e8f0;
+      --accent-glow: rgba(226, 232, 240, 0.15);
+      --btn-metal-bg: linear-gradient(180deg, #ffffff 0%, #e2e8f0 45%, #cbd5e1 100%);
+      --btn-metal-text: #09090b;
+      --btn-metal-hover: linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
       --radius: 16px;
       --radius-sm: 10px;
     }
@@ -43,8 +46,8 @@
 
     body {
       background-image:
-        radial-gradient(circle at 50% 0%, rgba(138, 43, 226, 0.15) 0%, transparent 60%),
-        radial-gradient(circle at 90% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+        radial-gradient(circle at 50% 0%, rgba(226, 232, 240, 0.1) 0%, transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(148, 163, 184, 0.05) 0%, transparent 45%);
       background-repeat: no-repeat;
     }
 
@@ -67,8 +70,8 @@
       z-index: 100;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      background: rgba(6, 6, 9, 0.85);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(7, 7, 10, 0.88);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .nav-inner {
@@ -95,10 +98,10 @@
 
     .brand-tag {
       font-size: 0.72rem;
-      background: #181824;
-      border: 1px solid #28283a;
-      color: #c084fc;
-      padding: 2px 7px;
+      background: #14141c;
+      border: 1px solid #282836;
+      color: #e2e8f0;
+      padding: 2px 8px;
       border-radius: 6px;
       font-weight: 600;
     }
@@ -106,7 +109,7 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
     }
 
     .nav-links a {
@@ -134,50 +137,61 @@
       white-space: nowrap;
     }
 
+    /* Silver Metallic Button */
     .btn-primary {
-      background: var(--accent-gradient);
-      color: #fff;
-      box-shadow: 0 4px 16px var(--accent-glow);
+      background: var(--btn-metal-bg);
+      color: var(--btn-metal-text);
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      border: 1px solid #cbd5e1;
+      font-weight: 700;
     }
 
     .btn-primary:hover {
+      background: var(--btn-metal-hover);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+      box-shadow: 0 6px 22px rgba(255, 255, 255, 0.22), inset 0 1px 0 #ffffff;
+      color: #000;
     }
 
+    /* Titanium Dark Button */
     .btn-secondary {
-      background: #12121b;
-      border-color: #242436;
-      color: #dedee8;
+      background: #121218;
+      border: 1px solid #272736;
+      color: #e2e8f0;
     }
 
     .btn-secondary:hover {
-      background: #181824;
-      border-color: #383850;
+      background: #181822;
+      border-color: #475569;
       color: #fff;
     }
 
     /* Hero Section */
     .hero {
-      padding: 56px 0 40px;
+      padding: 52px 0 36px;
       text-align: center;
     }
 
+    /* Mobile-perfect single-line pill */
     .hero-badge {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      background: rgba(138, 43, 226, 0.12);
-      border: 1px solid rgba(138, 43, 226, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      border-radius: 999px;
+      font-size: clamp(0.74rem, 2.6vw, 0.82rem);
       font-weight: 600;
-      color: #d8b4fe;
+      color: #e2e8f0;
       margin-bottom: 20px;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.35);
     }
 
     .hero-badge .dot {
+      flex-shrink: 0;
       width: 7px;
       height: 7px;
       background: #10b981;
@@ -186,20 +200,20 @@
     }
 
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-size: clamp(1.9rem, 4.8vw, 3.3rem);
       font-weight: 800;
       line-height: 1.15;
       letter-spacing: -0.02em;
       margin-bottom: 16px;
-      background: linear-gradient(180deg, #ffffff 40%, #b8b8d0 100%);
+      background: linear-gradient(180deg, #ffffff 25%, #e2e8f0 60%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .hero p {
-      max-width: 680px;
+      max-width: 660px;
       margin: 0 auto 28px;
-      font-size: clamp(0.95rem, 2vw, 1.12rem);
+      font-size: clamp(0.94rem, 2vw, 1.1rem);
       color: var(--text-muted);
       line-height: 1.6;
     }
@@ -210,7 +224,7 @@
       justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .hero-actions .btn {
@@ -220,17 +234,17 @@
 
     .hero-meta {
       font-size: 0.82rem;
-      color: #727288;
+      color: var(--text-subtle);
     }
 
     /* Monitor Preview Mockup */
     .preview-section {
       margin-top: 36px;
-      background: #0a0a0f;
-      border: 1px solid #1c1c28;
+      background: #09090e;
+      border: 1px solid #1c1c26;
       border-radius: 18px;
       padding: 16px;
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     /* Realistic Notch Bar */
@@ -245,7 +259,7 @@
       align-items: center;
       gap: 10px;
       background: #000;
-      border: 1px solid #22222e;
+      border: 1px solid #242432;
       border-top: none;
       padding: 7px 16px;
       border-radius: 0 0 16px 16px;
@@ -266,12 +280,13 @@
     }
 
     .capsule-pill {
-      background: #14141c;
-      border: 1px solid #252535;
+      background: #121218;
+      border: 1px solid #242430;
       padding: 3px 9px;
       border-radius: 8px;
       font-size: 0.74rem;
       white-space: nowrap;
+      color: #cbd5e1;
     }
 
     /* Preview Tabs */
@@ -292,8 +307,8 @@
     }
 
     .preview-tab {
-      background: #101018;
-      border: 1px solid #222232;
+      background: #0f0f15;
+      border: 1px solid #22222e;
       color: var(--text-muted);
       padding: 7px 14px;
       border-radius: 8px;
@@ -306,9 +321,10 @@
     }
 
     .preview-tab.active, .preview-tab:hover {
-      background: #1c1c2a;
-      border-color: #7c3aed;
+      background: #1c1c26;
+      border-color: #94a3b8;
       color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
 
     .screenshot-viewer {
@@ -316,7 +332,7 @@
       background: #000;
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid #1a1a26;
+      border: 1px solid #1c1c28;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -334,19 +350,19 @@
     /* Feature Grid */
     .section-title {
       text-align: center;
-      margin: 64px 0 28px;
+      margin: 60px 0 26px;
     }
 
     .section-title h2 {
-      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      font-size: clamp(1.45rem, 3.4vw, 2.1rem);
       font-weight: 800;
       margin-bottom: 10px;
     }
 
     .section-title p {
       color: var(--text-muted);
-      font-size: 0.96rem;
-      max-width: 540px;
+      font-size: 0.95rem;
+      max-width: 520px;
       margin: 0 auto;
     }
 
@@ -354,7 +370,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 16px;
-      margin-bottom: 48px;
+      margin-bottom: 52px;
     }
 
     .feature-card {
@@ -371,6 +387,7 @@
       background: var(--bg-card-hover);
       border-color: var(--border-accent);
       transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
     .feature-icon {
@@ -379,9 +396,10 @@
     }
 
     .feature-card h3 {
-      font-size: 1.1rem;
+      font-size: 1.08rem;
       font-weight: 700;
       margin-bottom: 8px;
+      color: #f1f5f9;
     }
 
     .feature-card p {
@@ -390,48 +408,11 @@
       line-height: 1.5;
     }
 
-    /* Shortcuts Grid */
-    .shortcuts-card {
-      background: #0b0b12;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 48px;
-    }
-
-    .shortcuts-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-top: 16px;
-    }
-
-    .shortcut-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #12121c;
-      border: 1px solid #202030;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.86rem;
-    }
-
-    kbd {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      background: #1c1c2a;
-      border: 1px solid #323248;
-      border-radius: 5px;
-      padding: 3px 7px;
-      color: #e2e8f0;
-      font-weight: 600;
-    }
-
-    /* CTA Section */
+    /* CTA Section (Silver Metallic & Titanium Tone) */
     .cta-card {
-      background: linear-gradient(135deg, rgba(138, 43, 226, 0.14) 0%, rgba(99, 102, 241, 0.1) 100%);
-      border: 1px solid rgba(138, 43, 226, 0.35);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(203, 213, 225, 0.02) 100%), #0c0c12;
+      border: 1px solid rgba(226, 232, 240, 0.22);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       padding: 40px 24px;
       text-align: center;
@@ -439,33 +420,35 @@
     }
 
     .cta-card h2 {
-      font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+      font-size: clamp(1.45rem, 3.4vw, 2.1rem);
       font-weight: 800;
       margin-bottom: 10px;
+      color: #fff;
     }
 
     .cta-card p {
       color: var(--text-muted);
-      max-width: 560px;
+      max-width: 540px;
       margin: 0 auto 22px;
       font-size: 0.94rem;
     }
 
     /* Footer */
     footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
       padding: 28px 0;
       text-align: center;
       font-size: 0.82rem;
-      color: #727288;
+      color: var(--text-subtle);
     }
 
     footer a {
-      color: #a855f7;
+      color: #cbd5e1;
       margin: 0 6px;
     }
 
     footer a:hover {
+      color: #fff;
       text-decoration: underline;
     }
 
@@ -497,27 +480,24 @@
     /* Mobile Responsive Tweaks */
     @media (max-width: 768px) {
       .nav-links {
-        display: none; /* Keep header clean on mobile */
+        display: none;
       }
       .nav-inner {
         height: 56px;
       }
       .hero {
-        padding: 36px 0 24px;
+        padding: 34px 0 22px;
       }
       .hero-actions .btn {
-        width: 100%; /* Full width buttons for easy tap */
+        width: 100%;
       }
       .preview-section {
         padding: 10px;
       }
       .capsule-extra {
-        display: none; /* Hide extra pills on tiny screens to avoid horizontal scroll */
+        display: none;
       }
       .features-grid {
-        grid-template-columns: 1fr;
-      }
-      .shortcuts-list {
         grid-template-columns: 1fr;
       }
       .cta-card {
@@ -537,8 +517,7 @@
         <span id="nav-version" class="brand-tag">v1.6.0</span>
       </a>
       <div class="nav-links">
-        <a href="#fitur">Fitur</a>
-        <a href="#shortcut">Shortcut</a>
+        <a href="#fitur">Fitur Utama</a>
         <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener">GitHub</a>
       </div>
       <a id="nav-download-btn" href="https://github.com/dningratx/dranotch/releases/latest" class="btn btn-primary" style="padding: 8px 14px; font-size: 0.82rem;">
@@ -550,16 +529,17 @@
   <main class="container">
     <!-- Hero -->
     <section class="hero">
+      <!-- Gambar 1 Fix: Rapi, single-line, fit di mobile -->
       <div class="hero-badge">
         <span class="dot"></span>
-        <span>Aesthetic Dynamic Island untuk Windows 10 &amp; 11</span>
+        <span>Dynamic Island • Windows 10 &amp; 11</span>
       </div>
 
       <h1>Pusat Produktivitas Pintar di Tepi Atas Desktop Anda</h1>
       
       <p>
-        <strong>DRANOTCH</strong> menghadirkan notch mengambang modern bernuansa gelap OLED. 
-        Menggabungkan pemutar musik &amp; radio, lirik karaoke otomatis, jadwal sholat, catatan tugas (To-Do), dan browser mini dalam satu aplikasi ringan.
+        <strong>DRANOTCH</strong> menghadirkan notch mengambang bernuansa elegan OLED. 
+        Menggabungkan pemutar musik &amp; radio online, lirik karaoke otomatis, jadwal sholat, catatan tugas (To-Do), dan browser mini dalam satu aplikasi ringan.
       </p>
 
       <div class="hero-actions">
@@ -649,33 +629,6 @@
           <div class="feature-icon">🌐</div>
           <h3>Browser Mengambang</h3>
           <p>Buka video streaming (YouTube, Twitch, Netflix) atau situs web apa pun dalam jendela mini PiP tanpa menutupi seluruh layar kerja.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Pintasan Keyboard -->
-    <section id="shortcut">
-      <div class="shortcuts-card">
-        <h3 style="font-size: 1.15rem; font-weight: 700;">⌨️ Pintasan Cepat (Hotkeys)</h3>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">Kendalikan DRANOTCH seketika dari mana saja tanpa membuka menu:</p>
-        
-        <div class="shortcuts-list">
-          <div class="shortcut-item">
-            <span>Sembunyikan / Munculkan Notch</span>
-            <kbd>Ctrl + Alt + N</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Buka / Tutup Layar Lirik</span>
-            <kbd>Ctrl + Alt + L</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Buka Panel Penuh</span>
-            <kbd>Arahkan Kursor</kbd>
-          </div>
-          <div class="shortcut-item">
-            <span>Lepas / Pasang Komponen</span>
-            <kbd>Klik Tombol ⧉ / ⇲</kbd>
-          </div>
         </div>
       </div>
     </section>
