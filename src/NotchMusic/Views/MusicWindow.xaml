@@ -108,62 +108,99 @@
             </Border.Effect>
 
             <Grid>
-                <!-- ================= MODE 1: COMPACT MUSIC MINI NOTCH (Saat Minimize) ================= -->
+                <!-- ================= MODE 1: COMPACT MUSIC MINI NOTCH (Saat Minimize - Tetap Menampilkan Lirik) ================= -->
                 <Grid x:Name="MusicCompactView"
                       Visibility="{Binding IsMusicWindowCompact, Converter={StaticResource BoolToVis}}"
-                      Height="50" Margin="10,0" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                      Margin="14,12,14,12" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Album Art / Icon Badge -->
-                    <Border Grid.Column="0" Width="34" Height="34" CornerRadius="9" ClipToBounds="True" Margin="0,0,8,0"
-                            Background="#1C1C26" BorderBrush="#38FFFFFF" BorderThickness="1">
-                        <Grid>
-                            <Path Data="{StaticResource LuxuryMusicNoteGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                  Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                  Visibility="{Binding HasTrackThumbnail, Converter={StaticResource InverseBoolToVis}}"/>
-                            <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"
-                                   RenderOptions.BitmapScalingMode="HighQuality"
-                                   Visibility="{Binding HasTrackThumbnail, Converter={StaticResource BoolToVis}}"/>
-                        </Grid>
-                    </Border>
+                    <!-- Baris 0: Header Ringkas (Album Art, Judul & Artis, Play/Pause, Perluas, Menyatu dengan Notch) -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Track Info & Standby Lyric Pill (Klik untuk Perluas) -->
-                    <Border Grid.Column="1" Background="#14141C" BorderBrush="#262634" BorderThickness="1.2"
-                            CornerRadius="12" Height="34" Margin="0,0,8,0" Padding="10,2" Cursor="Hand"
-                            ToolTip="Klik untuk perluas pemutar musik &amp; lirik">
+                        <!-- Album Art / Icon Badge -->
+                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="9" ClipToBounds="True" Margin="0,0,8,0"
+                                Background="#1C1C26" BorderBrush="#38FFFFFF" BorderThickness="1">
+                            <Grid>
+                                <Path Data="{StaticResource LuxuryMusicNoteGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                      Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Visibility="{Binding HasTrackThumbnail, Converter={StaticResource InverseBoolToVis}}"/>
+                                <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       Visibility="{Binding HasTrackThumbnail, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Track Info Pill (Klik untuk Perluas) -->
+                        <Border Grid.Column="1" Background="#14141C" BorderBrush="#262634" BorderThickness="1.2"
+                                CornerRadius="12" Height="34" Margin="0,0,8,0" Padding="10,2" Cursor="Hand"
+                                ToolTip="Klik untuk perluas pemutar musik">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandMusicWindowCommand}"/>
+                            </Border.InputBindings>
+                            <Grid VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding CurrentTrack.Title, FallbackValue='Tidak ada lagu'}"
+                                           Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Column="1" Text="{Binding CurrentTrack.Artist, FallbackValue=''}"
+                                           Foreground="#9898AC" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Quick Controls (Play/Pause, Perluas, Menyatu dengan Notch Utama) -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePlayPauseCommand}"
+                                    ToolTip="Putar / Jeda" Padding="8,4" Margin="0,0,3,0">
+                                <Grid>
+                                    <TextBlock Text="&#x25B6;" FontSize="10" Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}}"/>
+                                    <TextBlock Text="&#x23F8;" FontSize="10" Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </Button>
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandMusicWindowCommand}"
+                                    Content="&#x25BE;" ToolTip="Perluas Pemutar Musik" Padding="7,4" Margin="0,0,3,0"/>
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseMusicWindowCommand}"
+                                    Content="&#x21F2;" ToolTip="Menyatu kembali dengan notch utama" Padding="7,4" Margin="0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Baris 1: Lirik Tetap Tampil Saat Mode Minimize -->
+                    <Border Grid.Row="1" Background="#141418" CornerRadius="10" Padding="10,8" Margin="0,8,0,0"
+                            MinHeight="56" MaxHeight="90" Cursor="Hand"
+                            ToolTip="Klik untuk perluas pemutar musik">
                         <Border.InputBindings>
                             <MouseBinding MouseAction="LeftClick" Command="{Binding ExpandMusicWindowCommand}"/>
                         </Border.InputBindings>
-                        <Grid VerticalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="{Binding CurrentTrack.Title, FallbackValue='Tidak ada lagu'}"
-                                       Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Grid.Column="1" Text="{Binding CurrentTrack.Artist, FallbackValue=''}"
-                                       Foreground="#9898AC" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                        <Grid>
+                            <TextBlock Text="Siap memutar musik..." Foreground="#777788" FontSize="12" TextAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding HasTrack, Converter={StaticResource InverseBoolToVis}}"/>
+
+                            <Grid Visibility="{Binding HasTrack, Converter={StaticResource BoolToVis}}">
+                                <!-- Synced 3-Line Display -->
+                                <StackPanel VerticalAlignment="Center"
+                                            Visibility="{Binding IsLyricsSynced, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Text="{Binding PreviousLyric}" Foreground="#555566" FontSize="11.5" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,0,2"/>
+                                    <TextBlock Text="{Binding ActiveLyric}" Foreground="#FFFFFF" FontSize="13.5" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap" Margin="0,1"/>
+                                    <TextBlock Text="{Binding NextLyric}" Foreground="#555566" FontSize="11.5" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <!-- Unsynced / Plain Lyrics Display -->
+                                <ScrollViewer VerticalAlignment="Center" MaxHeight="74" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                              Visibility="{Binding IsLyricsSynced, Converter={StaticResource InverseBoolToVis}}">
+                                    <TextBlock Text="{Binding ActiveLyric}" Foreground="#CCCCCC" FontSize="12.5" TextAlignment="Center" TextWrapping="Wrap" LineHeight="17"/>
+                                </ScrollViewer>
+                            </Grid>
                         </Grid>
                     </Border>
-
-                    <!-- Quick Controls (Play/Pause, Perluas, Menyatu dengan Notch Utama) -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePlayPauseCommand}"
-                                ToolTip="Putar / Jeda" Padding="8,4" Margin="0,0,3,0">
-                            <Grid>
-                                <TextBlock Text="&#x25B6;" FontSize="10" Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}}"/>
-                                <TextBlock Text="&#x23F8;" FontSize="10" Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}"/>
-                            </Grid>
-                        </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandMusicWindowCommand}"
-                                Content="&#x25BE;" ToolTip="Perluas Pemutar Musik" Padding="7,4" Margin="0,0,3,0"/>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseMusicWindowCommand}"
-                                Content="&#x21F2;" ToolTip="Menyatu kembali dengan notch utama" Padding="7,4" Margin="0"/>
-                    </StackPanel>
                 </Grid>
 
                 <!-- ================= MODE 2: EXPANDED MUSIC PLAYER & LYRICS ================= -->
@@ -328,10 +365,10 @@
                             </Button>
                         </StackPanel>
 
-                        <!-- Kanan: Import LRC / TXT -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding ImportLyricsCommand}" Content="Impor File (.lrc/.txt)" FontSize="10.5" Padding="7,3" Margin="0"/>
-                        </StackPanel>
+                        <!-- Kanan: Import File -->
+                        <Button Grid.Column="2" Style="{StaticResource SmallPillButton}" Command="{Binding ImportLyricsCommand}"
+                                Content="Impor File (.lrc/.txt)" FontSize="10.5" Padding="8,4" Margin="0" VerticalAlignment="Center"
+                                ToolTip="Impor file lirik lokal (.lrc atau .txt)"/>
                     </Grid>
                 </Grid>
             </Grid>
