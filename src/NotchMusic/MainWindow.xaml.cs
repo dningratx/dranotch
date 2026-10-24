@@ -49,13 +49,33 @@ public partial class MainWindow : Window
         });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
+        _viewModel.PropertyChanged += (s, ev) =>
+        {
+            if (ev.PropertyName == nameof(MainViewModel.CurrentMode) || ev.PropertyName == nameof(MainViewModel.IsCompactMode))
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    WindowHelper.CenterAtTopBezel(this);
+                    _settingsService.CurrentSettings.PanelLeft = Left;
+                    _settingsService.CurrentSettings.PanelTop = Top;
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+        };
+
         SizeChanged += (s, ev) =>
         {
-            if (ev.PreviousSize.Width > 0 && ev.NewSize.Width > 0 && Math.Abs(ev.PreviousSize.Width - ev.NewSize.Width) > 1)
+            if (ev.NewSize.Width > 0)
             {
-                double center = Left + ev.PreviousSize.Width / 2.0;
-                Left = center - ev.NewSize.Width / 2.0;
-                WindowHelper.DockToTopBezel(this);
+                if (_viewModel.IsCompactMode || _viewModel.IsLyricsMode)
+                {
+                    WindowHelper.CenterAtTopBezel(this);
+                }
+                else if (ev.PreviousSize.Width > 0 && Math.Abs(ev.PreviousSize.Width - ev.NewSize.Width) > 1)
+                {
+                    double center = Left + ev.PreviousSize.Width / 2.0;
+                    Left = center - ev.NewSize.Width / 2.0;
+                    WindowHelper.DockToTopBezel(this);
+                }
             }
         };
 
@@ -73,22 +93,27 @@ public partial class MainWindow : Window
         double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
         double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
 
-        if (settings.PanelLeft > 0)
+        if (!_viewModel.IsCompactMode && settings.PanelLeft > 0)
         {
             Left = settings.PanelLeft;
             Top = 0;
+            WindowHelper.DockToTopBezel(this);
         }
-        else if (primary != null)
+        else
         {
-            var bounds = primary.Bounds;
-            double screenLeft = bounds.Left / dpiX;
-            double screenTop = bounds.Top / dpiY;
-            double screenWidth = bounds.Width / dpiX;
-            Left = screenLeft + (screenWidth - ActualWidth) / 2.0;
-            Top = screenTop;
+            if (primary != null)
+            {
+                var bounds = primary.Bounds;
+                double screenLeft = bounds.Left / dpiX;
+                double screenTop = bounds.Top / dpiY;
+                double screenWidth = bounds.Width / dpiX;
+                Left = screenLeft + (screenWidth - ActualWidth) / 2.0;
+                Top = screenTop;
+            }
+            WindowHelper.CenterAtTopBezel(this);
         }
 
-        WindowHelper.DockToTopBezel(this);
+        _settingsService.CurrentSettings.PanelLeft = Left;
         _settingsService.CurrentSettings.PanelTop = Top;
 
         // Setup Hotkeys
@@ -97,7 +122,13 @@ public partial class MainWindow : Window
         // Listen for screen resolution / monitor change
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (s, ev) =>
         {
-            Dispatcher.Invoke(() => WindowHelper.DockToTopBezel(this));
+            Dispatcher.Invoke(() =>
+            {
+                if (_viewModel.IsCompactMode)
+                    WindowHelper.CenterAtTopBezel(this);
+                else
+                    WindowHelper.DockToTopBezel(this);
+            });
         };
 
         UpdateTodoWindowState();
@@ -123,7 +154,10 @@ public partial class MainWindow : Window
                 {
                     Show();
                     Activate();
-                    WindowHelper.DockToTopBezel(this);
+                    if (_viewModel.IsCompactMode)
+                        WindowHelper.CenterAtTopBezel(this);
+                    else
+                        WindowHelper.DockToTopBezel(this);
                     if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection)
                     {
                         _todoWindow?.Show();
@@ -142,7 +176,10 @@ public partial class MainWindow : Window
             {
                 Show();
                 _viewModel.CurrentMode = mode;
-                WindowHelper.DockToTopBezel(this);
+                if (_viewModel.IsCompactMode)
+                    WindowHelper.CenterAtTopBezel(this);
+                else
+                    WindowHelper.DockToTopBezel(this);
             });
         };
 
@@ -316,7 +353,7 @@ public partial class MainWindow : Window
             }
 
             // Terbuka di bawah dranotch dan tengah horizontalnya
-            double notchHeight = 44;
+            double notchHeight = 90;
             double notchBottom = Top + notchHeight;
             if (notchBottom < areaTop) notchBottom = areaTop;
 
@@ -399,7 +436,7 @@ public partial class MainWindow : Window
                         targetWidth = Math.Min(_floatingBrowserWindow.MinWidth, areaWidth - 10);
                     }
 
-                    double notchHeight = 44;
+                    double notchHeight = 90;
                     double notchBottom = Top + notchHeight;
                     if (notchBottom < areaTop) notchBottom = areaTop;
 
@@ -446,7 +483,14 @@ public partial class MainWindow : Window
         if (e.ChangedButton == MouseButton.Left)
         {
             DragMove();
-            WindowHelper.DockToTopBezel(this);
+            if (_viewModel.IsCompactMode)
+            {
+                WindowHelper.CenterAtTopBezel(this);
+            }
+            else
+            {
+                WindowHelper.DockToTopBezel(this);
+            }
             _settingsService.CurrentSettings.PanelLeft = Left;
             _settingsService.CurrentSettings.PanelTop = Top;
             _settingsService.Save();

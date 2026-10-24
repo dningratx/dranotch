@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.5.1)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.5.2)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -29,8 +29,7 @@ Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)*
 
 ### 🎤 2. Lirik Real-Time & Mode Karaoke
 - **Auto-Search LRCLIB**: Pencarian otomatis lirik tersinkronisasi (*timed lyrics*) langsung saat lagu berganti.
-- **Mode Layar Penuh Lirik**: Tampilan lirik transparan (*glassmorphism*) dengan kustomisasi ukuran font dan transparansi.
-- **Click-Through Mode**: Buat panel lirik tembus klik sehingga tidak menghalangi pekerjaan atau game Anda.
+- **Mode Layar Penuh Lirik**: Tampilan panggung lirik karaoke mewah (*Luxury Stage Glass*) berukuran luas (`640×400`) dengan kustomisasi ukuran font dan transparansi.
 - **Manual Offset Sync**: Atur offset waktu lirik (+0.5s / -0.5s) jika lirik terlalu cepat atau terlambat.
 - **Impor Lirik Lokal**: Dukungan file `.lrc` dan `.txt` lokal.
 
@@ -103,10 +102,19 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Preset Ukuran 16:9 Instan (`📐`)**: Pilihan cepat ukuran rasio video standar sekali klik: Mini PiP (360×202), Kecil (480×270), Sedang (720×405), Standar (960×540), hingga HD (1280×720).
 - **Mode Mengambang (Always On Top 📌)**: Fitur pin yang membuat jendela video tetap melayang di atas aplikasi lain (coding, game, office, dll).
 
-### 🖥️ 13. Desain Bezel Notch Menyatu ke Atas Layar & UI Browser Minimalis *(Baru di v1.5.1)*
+### 🖥️ 13. Desain Bezel Notch Menyatu ke Atas Layar & UI Browser Minimalis *(v1.5.1)*
 - **Siluet Bezel Atas Menyatu (*Top-Mounted Hardware Notch*)**: Desain DRANOTCH kini menempel langsung (*flush*) di tepi paling atas layar Windows (`Top = 0`) dengan lengkungan bahu cekung (*concave fillet ears*) di sisi kiri-kanan atas dan sudut bawah membulat, tampak menyatu secara alami dengan bingkai atas monitor.
 - **Auto-Dock & Snap ke Tepi Atas**: Jendela notch otomatis menempel rapat ke tepi atas monitor saat aplikasi dijalankan, saat beralih mode (*Compact* / *Expanded* / *Lyrics*), maupun setelah digeser secara horizontal.
 - **Antarmuka Browser Mengambang Lebih Bersih & Ringkas**: Menghapus tombol-tombol pintasan situs di samping kolom URL agar bar pencarian/alamat membentang penuh, menyederhanakan header kiri dengan menyisakan grip `⋮⋮ Geser`, serta merampingkan tombol Pin menjadi hanya ikon `📌`.
+
+### 💎 14. Luxury Mac Dynamic Notch, Ikon Vektor Silver Metallic, & Bar 4-Komponen Terpisah *(Baru di v1.5.2)*
+- **Desain Luxury MacBook Pro Dynamic Notch**: Ukuran Notch diperbesar secara proporsional (`Height="68"`, `CornerRadius="0,0,28,28"`, bahu lengkung cekung `28×28`, panel *Expanded* `1150px`) dengan bingkai *Specular Rim* (`LuxuryNotchBorderBrush`), permukaan tombol *Satin Pill*, dan tipografi tajam `Segoe UI Variable Display` (*ClearType*).
+- **Selalu Presisi di Tengah Atas saat Minimize (`CenterAtTopBezel`)**: Ketika berada di mode *Compact* (minimize), Notch otomatis memposisikan dirinya tepat di tengah-atas layar monitor (`Top = 0`), baik saat pertama dibuka, saat kembali dari mode *Expanded*/*Lyrics*, maupun saat lebar konten dinamis berubah.
+- **4 Komponen Terpisah dengan Pembatas di Notch**: Kapsul komponen ke-4 (**`Browser`**) kini ditempatkan langsung di sebelah kanan komponen **To-Do List** lengkap dengan garis pembatas vertikal (`|`), menandakan 4 komponen modular yang terpisah secara jelas:
+  `[ Pemutar Musik ]` ╎ `[ Waktu Sholat ]` ╎ `[ To-Do List ]` ╎ `[ Browser ]`
+  *(Tombol Browser di dalam Music Player dihapus agar tidak duplikat).*
+- **Ikon Vektor Kustom Berwarna Silver Metallic**: Menggantikan emoji bawaan Windows dengan **ikon vektor SVG kustom** berlapis gradien **Silver Metallic** (`#FFFFFF` → `#E2E6F0` → `#949BA8` → `#D4D9E6`) yang serasi dengan logo resmi DRANOTCH di dalam lencana *squircle* `28×28` untuk **Waktu Sholat** (Bulan Sabit & Bintang Berlian), **To-Do List** (Bingkai & Centang Tugas), **Browser** (Bola Dunia Meridian), dan **Musik**.
+- **Panggung Lirik Karaoke Lebih Mewah & Bersih**: Memperbesar mode *Lyrics* menjadi `640×400` dengan efek panggung *radial gradient*, kontrol media vektor bertema *Satin Glass*, serta menghapus tombol *Click-Through* agar antarmuka lirik lebih fokus dan elegan.
 
 ---
 
@@ -136,7 +144,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.5.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.5.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

@@ -201,26 +201,26 @@ public class PrayerTests
             settingsService,
             prayerService: prayerService);
 
-        // All 3 attached: Music + Prayer + Todo = 1100
+        // All 3 attached: Music + Prayer + Todo = 1150
         Assert.True(mainVm.ShowPrayerSectionInMainWindow);
         Assert.True(mainVm.ShowExpandedPrayerDivider1);
         Assert.True(mainVm.ShowExpandedPrayerDivider2);
-        Assert.Equal(1100, mainVm.ExpandedPanelWidth);
+        Assert.Equal(1150, mainVm.ExpandedPanelWidth);
 
-        // Detach Prayer: Music + Todo = 805
+        // Detach Prayer: Music + Todo = 845
         mainVm.DetachPrayerCommand.Execute(null);
         Assert.False(mainVm.ShowPrayerSectionInMainWindow);
         Assert.False(mainVm.ShowExpandedPrayerDivider1);
         Assert.True(mainVm.ShowExpandedPrayerDivider2);
-        Assert.Equal(805, mainVm.ExpandedPanelWidth);
+        Assert.Equal(845, mainVm.ExpandedPanelWidth);
 
-        // Re-attach Prayer, detach Todo: Music + Prayer = 686
+        // Re-attach Prayer, detach Todo: Music + Prayer = 716
         mainVm.AttachPrayerCommand.Execute(null);
         mainVm.DetachTodoCommand.Execute(null);
         Assert.True(mainVm.ShowPrayerSectionInMainWindow);
         Assert.True(mainVm.ShowExpandedPrayerDivider1);
         Assert.False(mainVm.ShowExpandedPrayerDivider2);
-        Assert.Equal(686, mainVm.ExpandedPanelWidth);
+        Assert.Equal(716, mainVm.ExpandedPanelWidth);
     }
 
     [Fact]

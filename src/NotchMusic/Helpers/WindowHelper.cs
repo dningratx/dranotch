@@ -69,10 +69,12 @@ public static class WindowHelper
 
     public static void DockToTopBezel(Window window)
     {
-        var centerPoint = new System.Drawing.Point(
-            (int)(window.Left + (window.ActualWidth > 0 ? window.ActualWidth / 2.0 : 100)),
-            (int)Math.Max(0, window.Top));
-        var screen = System.Windows.Forms.Screen.FromPoint(centerPoint);
+        var hwnd = new WindowInteropHelper(window).Handle;
+        var screen = hwnd != IntPtr.Zero
+            ? System.Windows.Forms.Screen.FromHandle(hwnd)
+            : System.Windows.Forms.Screen.PrimaryScreen;
+        if (screen == null) return;
+
         var bounds = screen.Bounds;
 
         var source = PresentationSource.FromVisual(window);
@@ -88,6 +90,29 @@ public static class WindowHelper
             window.Left = screenLeft + (screenWidth - window.ActualWidth) / 2.0;
         }
 
+        window.Top = screenTop;
+    }
+
+    public static void CenterAtTopBezel(Window window)
+    {
+        var hwnd = new WindowInteropHelper(window).Handle;
+        var screen = hwnd != IntPtr.Zero
+            ? System.Windows.Forms.Screen.FromHandle(hwnd)
+            : System.Windows.Forms.Screen.PrimaryScreen;
+        if (screen == null) return;
+
+        var bounds = screen.Bounds;
+
+        var source = PresentationSource.FromVisual(window);
+        double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+        double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+        double screenLeft = bounds.Left / dpiX;
+        double screenTop = bounds.Top / dpiY;
+        double screenWidth = bounds.Width / dpiX;
+        double width = window.ActualWidth > 0 ? window.ActualWidth : (double.IsNaN(window.Width) ? 0 : window.Width);
+
+        window.Left = screenLeft + (screenWidth - width) / 2.0;
         window.Top = screenTop;
     }
 }

@@ -621,7 +621,7 @@ public class TodoTests
         Assert.True(mainVm.ShowTodoTicker);
         Assert.True(mainVm.ShowTodoSectionInMainWindow);
         Assert.True(mainVm.ShowSplitter);
-        Assert.Equal(805, mainVm.ExpandedPanelWidth);
+        Assert.Equal(845, mainVm.ExpandedPanelWidth);
 
         // Detach Todo
         mainVm.DetachTodoCommand.Execute(null);
@@ -629,7 +629,7 @@ public class TodoTests
         Assert.False(mainVm.ShowTodoTicker);
         Assert.False(mainVm.ShowTodoSectionInMainWindow);
         Assert.False(mainVm.ShowSplitter);
-        Assert.Equal(390, mainVm.ExpandedPanelWidth);
+        Assert.Equal(410, mainVm.ExpandedPanelWidth);
 
         // Re-attach Todo
         mainVm.AttachTodoCommand.Execute(null);
@@ -637,7 +637,7 @@ public class TodoTests
         Assert.True(mainVm.ShowTodoTicker);
         Assert.True(mainVm.ShowTodoSectionInMainWindow);
         Assert.True(mainVm.ShowSplitter);
-        Assert.Equal(805, mainVm.ExpandedPanelWidth);
+        Assert.Equal(845, mainVm.ExpandedPanelWidth);
 
         // Music Only
         mainVm.ComponentDisplayMode = "MusicOnly";
@@ -645,7 +645,7 @@ public class TodoTests
         Assert.False(mainVm.ShowTodoSection);
         Assert.False(mainVm.ShowTodoTicker);
         Assert.False(mainVm.ShowTodoSectionInMainWindow);
-        Assert.Equal(390, mainVm.ExpandedPanelWidth);
+        Assert.Equal(410, mainVm.ExpandedPanelWidth);
 
         // Todo Only
         mainVm.ComponentDisplayMode = "TodoOnly";
@@ -654,7 +654,7 @@ public class TodoTests
         Assert.True(mainVm.ShowTodoTicker);
         Assert.True(mainVm.ShowTodoSectionInMainWindow);
         Assert.False(mainVm.ShowSplitter);
-        Assert.Equal(390, mainVm.ExpandedPanelWidth);
+        Assert.Equal(410, mainVm.ExpandedPanelWidth);
     }
 
     [Fact]

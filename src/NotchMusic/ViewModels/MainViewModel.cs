@@ -284,9 +284,9 @@ public class MainViewModel : ViewModelBase
     public bool ShowExpandedPrayerDivider1 => ShowMusicSection && ShowPrayerSectionInMainWindow;
     public bool ShowExpandedPrayerDivider2 => ShowTodoSectionInMainWindow && (ShowMusicSection || ShowPrayerSectionInMainWindow);
 
-    public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(390) : new System.Windows.GridLength(0);
-    public System.Windows.GridLength PrayerColumnWidth => ShowPrayerSectionInMainWindow ? new System.Windows.GridLength(275) : new System.Windows.GridLength(0);
-    public System.Windows.GridLength TodoColumnWidth => ShowTodoSectionInMainWindow ? new System.Windows.GridLength(390) : new System.Windows.GridLength(0);
+    public System.Windows.GridLength MusicColumnWidth => ShowMusicSection ? new System.Windows.GridLength(410) : new System.Windows.GridLength(0);
+    public System.Windows.GridLength PrayerColumnWidth => ShowPrayerSectionInMainWindow ? new System.Windows.GridLength(285) : new System.Windows.GridLength(0);
+    public System.Windows.GridLength TodoColumnWidth => ShowTodoSectionInMainWindow ? new System.Windows.GridLength(410) : new System.Windows.GridLength(0);
 
     public bool IsPrayerPanelOpen
     {
@@ -310,25 +310,25 @@ public class MainViewModel : ViewModelBase
         get
         {
             if (IsPrayerPanelOpen)
-                return 440;
+                return 460;
 
             if (ShowMusicSection && ShowPrayerSectionInMainWindow && ShowTodoSectionInMainWindow)
-                return 1100;
+                return 1150;
             if (ShowMusicSection && ShowPrayerSectionInMainWindow)
-                return 686;
+                return 716;
             if (ShowPrayerSectionInMainWindow && ShowTodoSectionInMainWindow)
-                return 690;
+                return 720;
             if (ShowMusicSection && ShowTodoSectionInMainWindow)
-                return 805;
+                return 845;
 
             if (ShowMusicSection)
-                return 390;
+                return 410;
             if (ShowTodoSectionInMainWindow)
-                return 390;
+                return 410;
             if (ShowPrayerSectionInMainWindow)
-                return 275;
+                return 285;
 
-            return 390;
+            return 410;
         }
     }
 
