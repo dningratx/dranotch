@@ -55,7 +55,7 @@ public partial class MainWindow : Window
             {
                 double center = Left + ev.PreviousSize.Width / 2.0;
                 Left = center - ev.NewSize.Width / 2.0;
-                WindowHelper.EnsureInVisibleScreen(this);
+                WindowHelper.DockToTopBezel(this);
             }
         };
 
@@ -66,25 +66,30 @@ public partial class MainWindow : Window
     {
         WindowHelper.SetToolWindow(this);
 
-        // Position window top-center by default or restore saved position
+        // Position window top-center flush with the top bezel of Windows
         var settings = _settingsService.CurrentSettings;
-        if (settings.PanelLeft > 0 && settings.PanelTop >= 0)
+        var primary = System.Windows.Forms.Screen.PrimaryScreen;
+        var source = PresentationSource.FromVisual(this);
+        double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+        double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+        if (settings.PanelLeft > 0)
         {
             Left = settings.PanelLeft;
-            Top = settings.PanelTop;
+            Top = 0;
         }
-        else
+        else if (primary != null)
         {
-            var primary = System.Windows.Forms.Screen.PrimaryScreen;
-            if (primary != null)
-            {
-                var workArea = primary.WorkingArea;
-                Left = workArea.Left + (workArea.Width - ActualWidth) / 2.0;
-                Top = workArea.Top - 6;
-            }
+            var bounds = primary.Bounds;
+            double screenLeft = bounds.Left / dpiX;
+            double screenTop = bounds.Top / dpiY;
+            double screenWidth = bounds.Width / dpiX;
+            Left = screenLeft + (screenWidth - ActualWidth) / 2.0;
+            Top = screenTop;
         }
 
-        WindowHelper.EnsureInVisibleScreen(this);
+        WindowHelper.DockToTopBezel(this);
+        _settingsService.CurrentSettings.PanelTop = Top;
 
         // Setup Hotkeys
         SetupHotkeys();
@@ -92,7 +97,7 @@ public partial class MainWindow : Window
         // Listen for screen resolution / monitor change
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (s, ev) =>
         {
-            Dispatcher.Invoke(() => WindowHelper.EnsureInVisibleScreen(this));
+            Dispatcher.Invoke(() => WindowHelper.DockToTopBezel(this));
         };
 
         UpdateTodoWindowState();
@@ -118,7 +123,7 @@ public partial class MainWindow : Window
                 {
                     Show();
                     Activate();
-                    WindowHelper.EnsureInVisibleScreen(this);
+                    WindowHelper.DockToTopBezel(this);
                     if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection)
                     {
                         _todoWindow?.Show();
@@ -137,7 +142,7 @@ public partial class MainWindow : Window
             {
                 Show();
                 _viewModel.CurrentMode = mode;
-                WindowHelper.EnsureInVisibleScreen(this);
+                WindowHelper.DockToTopBezel(this);
             });
         };
 
@@ -441,6 +446,7 @@ public partial class MainWindow : Window
         if (e.ChangedButton == MouseButton.Left)
         {
             DragMove();
+            WindowHelper.DockToTopBezel(this);
             _settingsService.CurrentSettings.PanelLeft = Left;
             _settingsService.CurrentSettings.PanelTop = Top;
             _settingsService.Save();

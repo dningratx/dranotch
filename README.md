@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, serta **jadwal waktu sholat & pengingat adzan otomatis**.
 
-[📥 **Unduh Versi Terbaru (v1.5.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.5.1)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -95,13 +95,18 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Desain Notch Simetris & Ikon Seragam**: Menghilangkan kekosongan ruang samping notch dengan proporsi simetris (1100px saat rapat) dan menyamakan ukuran ikon DRANOTCH saat expanded dengan mode minimize.
 - **Tombol Cepat YT Music & Scrollbar OLED**: Tombol `▶ YT Music` di barisan header atas untuk kemudahan mengganti lagu, serta scrollbar vertikal & horizontal kustom yang menyatu dengan tema gelap OLED.
 
-### 🌐 12. Komponen ke-4: Browser Mengambang & Pemutar Streaming *(Baru di v1.5.0)*
+### 🌐 12. Komponen ke-4: Browser Mengambang & Pemutar Streaming *(v1.5.0)*
 - **4 Komponen Layar Modular**: DRANOTCH kini resmi memiliki 4 komponen mandiri yang fleksibel: **Pemutar Musik**, **Waktu Sholat**, **To-Do List**, dan **Browser Mengambang**.
 - **Akses Web & Video Streaming Bebas**: Buka YouTube, situs film streaming (LK21), Twitch, Netflix, atau alamat web apa pun langsung dari notch atau menu tray.
 - **Windowed Fullscreen**: Mode layar penuh video otomatis dibatasi di dalam jendela mengambang (*in-window fullscreen*), tidak akan menutupi seluruh layar monitor komputer Anda.
 - **Navigasi & Drag Selalu Aktif**: Dilengkapi grip geser khusus (`⋮⋮ Geser`) dan batas luar pelindung resize, menjamin jendela selalu bisa dipindahkan dan di-resize bebas kapan pun meski film sedang diputar fullscreen.
 - **Preset Ukuran 16:9 Instan (`📐`)**: Pilihan cepat ukuran rasio video standar sekali klik: Mini PiP (360×202), Kecil (480×270), Sedang (720×405), Standar (960×540), hingga HD (1280×720).
 - **Mode Mengambang (Always On Top 📌)**: Fitur pin yang membuat jendela video tetap melayang di atas aplikasi lain (coding, game, office, dll).
+
+### 🖥️ 13. Desain Bezel Notch Menyatu ke Atas Layar & UI Browser Minimalis *(Baru di v1.5.1)*
+- **Siluet Bezel Atas Menyatu (*Top-Mounted Hardware Notch*)**: Desain DRANOTCH kini menempel langsung (*flush*) di tepi paling atas layar Windows (`Top = 0`) dengan lengkungan bahu cekung (*concave fillet ears*) di sisi kiri-kanan atas dan sudut bawah membulat, tampak menyatu secara alami dengan bingkai atas monitor.
+- **Auto-Dock & Snap ke Tepi Atas**: Jendela notch otomatis menempel rapat ke tepi atas monitor saat aplikasi dijalankan, saat beralih mode (*Compact* / *Expanded* / *Lyrics*), maupun setelah digeser secara horizontal.
+- **Antarmuka Browser Mengambang Lebih Bersih & Ringkas**: Menghapus tombol-tombol pintasan situs di samping kolom URL agar bar pencarian/alamat membentang penuh, menyederhanakan header kiri dengan menyisakan grip `⋮⋮ Geser`, serta merampingkan tombol Pin menjadi hanya ikon `📌`.
 
 ---
 
@@ -131,7 +136,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.5.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.5.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

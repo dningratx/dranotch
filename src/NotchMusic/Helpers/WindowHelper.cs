@@ -63,7 +63,31 @@ public static class WindowHelper
 
         if (window.Top < areaTop || window.Top + window.ActualHeight > areaTop + areaHeight)
         {
-            window.Top = areaTop + 10;
+            window.Top = areaTop;
         }
+    }
+
+    public static void DockToTopBezel(Window window)
+    {
+        var centerPoint = new System.Drawing.Point(
+            (int)(window.Left + (window.ActualWidth > 0 ? window.ActualWidth / 2.0 : 100)),
+            (int)Math.Max(0, window.Top));
+        var screen = System.Windows.Forms.Screen.FromPoint(centerPoint);
+        var bounds = screen.Bounds;
+
+        var source = PresentationSource.FromVisual(window);
+        double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+        double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+        double screenLeft = bounds.Left / dpiX;
+        double screenTop = bounds.Top / dpiY;
+        double screenWidth = bounds.Width / dpiX;
+
+        if (window.Left < screenLeft || window.Left + window.ActualWidth > screenLeft + screenWidth)
+        {
+            window.Left = screenLeft + (screenWidth - window.ActualWidth) / 2.0;
+        }
+
+        window.Top = screenTop;
     }
 }

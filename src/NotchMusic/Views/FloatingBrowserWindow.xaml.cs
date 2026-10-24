@@ -182,14 +182,12 @@ public partial class FloatingBrowserWindow : Window
             // Sembunyikan bar navigasi URL agar video memenuhi jendela
             NavBarBorder.Visibility = Visibility.Collapsed;
             ToggleNavIcon.Text = "▼";
-            FullscreenBadge.Text = "Layar Penuh Jendela";
             // PENTING: Title bar dan grip "⋮⋮ Geser" TETAP AKTIF sehingga jendela tetap 100% bisa digeser dan di-resize!
         }
         else
         {
             NavBarBorder.Visibility = Visibility.Visible;
             ToggleNavIcon.Text = "▲";
-            FullscreenBadge.Text = "PiP / Windowed";
         }
     }
 
@@ -243,14 +241,12 @@ public partial class FloatingBrowserWindow : Window
         {
             PinButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#8A2BE2"));
             PinButton.Foreground = Brushes.White;
-            PinText.Text = "Mengambang";
             PinButton.ToolTip = "Mode Mengambang AKTIF (Selalu di atas). Klik untuk lepas.";
         }
         else
         {
             PinButton.Background = Brushes.Transparent;
             PinButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC"));
-            PinText.Text = "Biasa";
             PinButton.ToolTip = "Mode Mengambang NONAKTIF. Klik agar selalu di atas.";
         }
     }

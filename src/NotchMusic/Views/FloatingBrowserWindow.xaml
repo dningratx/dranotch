@@ -134,7 +134,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Left: Drag Grip Handle & Branding -->
+                    <!-- Left: Drag Grip Handle -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                         <!-- Dedicated Drag Grip with SizeAll cursor -->
                         <Border Background="#252538" CornerRadius="4" Padding="5,2" Margin="0,0,7,0" Cursor="SizeAll" ToolTip="Tahan dan geser untuk memindahkan jendela">
@@ -142,14 +142,6 @@
                                 <TextBlock Text="⋮⋮" Foreground="#8A2BE2" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="Geser" Foreground="#AAAAAA" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                             </StackPanel>
-                        </Border>
-
-                        <Border Width="20" Height="20" CornerRadius="10" Background="#8A2BE2" Margin="0,0,6,0">
-                            <TextBlock Text="🌐" Foreground="#FFFFFF" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock x:Name="AppTitleBlock" Text="Browser Mengambang" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <Border Background="#1E1E2C" BorderBrush="#32324A" BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center">
-                            <TextBlock x:Name="FullscreenBadge" Text="PiP / Windowed" Foreground="#B0B0CE" FontSize="9" FontWeight="SemiBold"/>
                         </Border>
                     </StackPanel>
 
@@ -161,11 +153,8 @@
                     <!-- Right: Window Actions (HitTestVisible for clicking) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
                         <!-- Mode Mengambang (Pin / Always On Top) -->
-                        <Button x:Name="PinButton" Style="{StaticResource NavButtonStyle}" ToolTip="Mode Mengambang (Selalu di Atas Jendela Lain)" Click="PinButton_Click" Padding="7,3" Margin="0,0,2,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📌" FontSize="10.5" VerticalAlignment="Center" Margin="0,0,3,0"/>
-                                <TextBlock x:Name="PinText" Text="Mengambang" FontSize="10.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            </StackPanel>
+                        <Button x:Name="PinButton" Style="{StaticResource NavButtonStyle}" ToolTip="Mode Mengambang (Selalu di Atas Jendela Lain)" Click="PinButton_Click" Padding="5,3" Margin="0,0,2,0">
+                            <TextBlock Text="📌" FontSize="11" VerticalAlignment="Center"/>
                         </Button>
 
                         <!-- Pilihan Ukuran Cepat Preset -->
@@ -194,7 +183,6 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Nav Controls -->
@@ -225,15 +213,6 @@
                             <Button Grid.Column="2" Style="{StaticResource NavButtonStyle}" Content="➔" ToolTip="Kunjungi / Cari" Click="GoButton_Click" Width="24" Height="24" Padding="0" Margin="0,0,2,0"/>
                         </Grid>
                     </Border>
-
-                    <!-- Right: Quick Bookmarks / Streaming Sites -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,0">
-                        <Button Style="{StaticResource PresetChipStyle}" Content="🔴 YouTube" ToolTip="Buka YouTube" Click="NavigateYouTube_Click" Margin="0,0,3,0"/>
-                        <Button Style="{StaticResource PresetChipStyle}" Content="🎵 YT Music" ToolTip="Buka YouTube Music" Click="NavigateYTMusic_Click" Margin="0,0,3,0"/>
-                        <Button Style="{StaticResource PresetChipStyle}" Content="🍿 LK21" ToolTip="Streaming Film LK21" Click="NavigateLk21_Click" Margin="0,0,3,0"/>
-                        <Button Style="{StaticResource PresetChipStyle}" Content="🟣 Twitch" ToolTip="Buka Twitch" Click="NavigateTwitch_Click" Margin="0,0,3,0"/>
-                        <Button Style="{StaticResource PresetChipStyle}" Content="🎬 Netflix" ToolTip="Buka Netflix" Click="NavigateNetflix_Click"/>
-                    </StackPanel>
                 </Grid>
             </Border>
 

@@ -294,13 +294,23 @@
         </Style>
     </Window.Resources>
 
-    <!-- Main Outer Container with DropShadow -->
-    <Grid Margin="12">
+    <!-- Main Outer Container Attached to Top Bezel with Concave Notch Ears & DropShadow -->
+    <Grid Margin="14,0,14,16" SnapsToDevicePixels="True" UseLayoutRounding="True">
+        <Grid.Effect>
+            <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="5" BlurRadius="18" Opacity="0.72"/>
+        </Grid.Effect>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
         <Border x:Name="MainIslandBorder"
-                Background="#0A0A0C"
-                BorderBrush="#24242A"
-                BorderThickness="1.2"
-                CornerRadius="24"
+                Grid.Column="1"
+                Background="#050507"
+                BorderBrush="#1C1C24"
+                BorderThickness="1,0,1,1"
+                CornerRadius="0,0,22,22"
                 MouseDown="Island_MouseDown">
             <Border.ContextMenu>
                 <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
@@ -313,14 +323,11 @@
                     <MenuItem Header="Tutup / Keluar Aplikasi" Command="{Binding ExitApplicationCommand}" Foreground="#FF6666"/>
                 </ContextMenu>
             </Border.ContextMenu>
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="4" BlurRadius="16" Opacity="0.6"/>
-            </Border.Effect>
 
             <Grid>
                 <!-- ================= MODE 1A: COMPACT (MUSIC & OPTIONAL TO-DO TICKER) ================= -->
                 <Grid x:Name="CompactView" Visibility="{Binding ShowCompactMusicView, Converter={StaticResource BoolToVis}}" 
-                      Height="48" MaxWidth="760" Margin="8,4">
+                      Height="48" MaxWidth="760" Margin="10,4,10,6">
                     <Grid.ColumnDefinitions>
                         <!-- Kolom 0: Komponen Musik (Album art, Track info & Standby lyrics, Wave, & Tombol Play/Pause) -->
                         <ColumnDefinition Width="Auto"/>
@@ -488,7 +495,7 @@
 
                 <!-- ================= MODE 1B: COMPACT (TODO ONLY NOTCH) ================= -->
                 <Grid x:Name="CompactTodoView" Visibility="{Binding ShowCompactTodoOnlyView, Converter={StaticResource BoolToVis}}" 
-                      Height="48" MinWidth="260" MaxWidth="520" Margin="8,4">
+                      Height="48" MinWidth="260" MaxWidth="520" Margin="10,4,10,6">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -1701,5 +1708,17 @@
                 </Border>
             </Grid>
         </Border>
+
+        <!-- Left Top Bezel Concave Ear (Bahu Lengkungan Kiri Atas menyatu ke atas layar) -->
+        <Grid Grid.Column="0" Width="16" Height="16" VerticalAlignment="Top" Margin="0,0,-1.2,0" IsHitTestVisible="False">
+            <Path Data="M 0,0 L 16,0 L 16,16 C 16,7.16 8.84,0 0,0 Z" Fill="#050507"/>
+            <Path Data="M 16,16 C 16,7.16 8.84,0 0,0" Stroke="#1C1C24" StrokeThickness="1"/>
+        </Grid>
+
+        <!-- Right Top Bezel Concave Ear (Bahu Lengkungan Kanan Atas menyatu ke atas layar) -->
+        <Grid Grid.Column="2" Width="16" Height="16" VerticalAlignment="Top" Margin="-1.2,0,0,0" IsHitTestVisible="False">
+            <Path Data="M 0,0 L 16,0 C 7.16,0 0,7.16 0,16 Z" Fill="#050507"/>
+            <Path Data="M 16,0 C 7.16,0 0,7.16 0,16" Stroke="#1C1C24" StrokeThickness="1"/>
+        </Grid>
     </Grid>
 </Window>
