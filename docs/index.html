@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DRANOTCH — Dynamic Bezel Notch & Productivity Companion for Windows</title>
+  <meta name="description" content="Hadirkan pengalaman Dynamic Bezel Notch modern yang menyatu di tepi atas layar Windows 10 & 11. Pemutar Musik & Lirik Karaoke, Jadwal Waktu Sholat, Cloud To-Do List (Google Drive Sync), dan Browser Mengambang." />
+  <meta property="og:title" content="DRANOTCH — Dynamic Bezel Notch for Windows" />
+  <meta property="og:description" content="4-in-1 Top-Mounted Bezel Notch untuk Windows: Smart Media & Karaoke Lyrics, Waktu Sholat, Cloud To-Do List, dan Floating Browser." />
+  <meta property="og:image" content="https://dningratx.github.io/dranotch/assets/screenshot-expanded.png" />
+  <link rel="icon" href="assets/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050508;
+      --bg-card: #0c0c12;
+      --bg-elevated: #13131d;
+      --border: #222233;
+      --border-glow: rgba(138, 43, 226, 0.45);
+      --text: #f4f4fa;
+      --text-muted: #9494ad;
+      --accent: #8a2be2;
+      --accent-2: #4f46e5;
+      --accent-cyan: #06b6d4;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(138, 43, 226, 0.16) 0%, transparent 55%),
+        radial-gradient(circle at 85% 25%, rgba(6, 182, 212, 0.1) 0%, transparent 45%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(5, 5, 8, 0.78);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: 0.04em;
+    }
+
+    .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #14141d;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .version-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(138, 43, 226, 0.18);
+      border: 1px solid rgba(138, 43, 226, 0.45);
+      color: #d8b4fe;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: #ffffff;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      font-weight: 600;
+      font-size: 0.94rem;
+      padding: 11px 22px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #8a2be2 0%, #5b21b6 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 28px -6px rgba(138, 43, 226, 0.65);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 34px -4px rgba(138, 43, 226, 0.85);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #3b3b54;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 64px 0 40px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 15px;
+      border-radius: 999px;
+      background: rgba(19, 19, 29, 0.9);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: #d4d4e8;
+      margin-bottom: 22px;
+    }
+
+    .hero-badge span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.3rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      max-width: 900px;
+      margin: 0 auto 20px;
+      background: linear-gradient(180deg, #ffffff 20%, #a5a5c4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p.subtitle {
+      font-size: clamp(1rem, 1.8vw, 1.18rem);
+      color: var(--text-muted);
+      max-width: 740px;
+      margin: 0 auto 34px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .hero-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+
+    /* Interactive Bezel Monitor Showcase */
+    .monitor-frame {
+      max-width: 1080px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #10162a 0%, #090d1a 100%);
+      border-radius: 22px;
+      border: 2px solid #23283e;
+      box-shadow:
+        0 30px 90px -20px rgba(0, 0, 0, 0.9),
+        0 0 60px -15px rgba(138, 43, 226, 0.25);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Physical Top Screen Bezel */
+    .monitor-bezel-top {
+      height: 18px;
+      background: #050507;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .camera-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #151520;
+      border: 1px solid #28283c;
+    }
+
+    /* Live Interactive Top-Attached Notch */
+    .bezel-notch-stage {
+      position: relative;
+      padding: 0 20px 36px;
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(59, 130, 246, 0.22), transparent 60%),
+        radial-gradient(circle at 30% 70%, rgba(138, 43, 226, 0.16), transparent 55%);
+    }
+
+    .hardware-notch-wrap {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.78));
+      margin-top: -1px;
+    }
+
+    .notch-ear {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .hardware-notch-body {
+      background: #050507;
+      border-left: 1px solid #1c1c24;
+      border-right: 1px solid #1c1c24;
+      border-bottom: 1px solid #1c1c24;
+      border-radius: 0 0 22px 22px;
+      padding: 8px 14px 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Screenshot Tabs Switcher */
+    .preview-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 28px auto 18px;
+    }
+
+    .preview-tab {
+      background: #12121c;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preview-tab.active,
+    .preview-tab:hover {
+      background: rgba(138, 43, 226, 0.2);
+      color: #ffffff;
+      border-color: #8a2be2;
+    }
+
+    .screenshot-viewer {
+      width: 100%;
+      max-width: 1020px;
+      margin: 0 auto;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #07070c;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+    }
+
+    .screenshot-viewer img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Section Headings */
+    section {
+      padding: 80px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 52px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #c084fc;
+      margin-bottom: 10px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1.02rem;
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .gallery-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: transform 0.22s ease, border-color 0.22s ease;
+      cursor: pointer;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      border-color: #8a2be2;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: top center;
+      border-bottom: 1px solid var(--border);
+      display: block;
+    }
+
+    .gallery-card-body {
+      padding: 18px 20px;
+    }
+
+    .gallery-card-body h3 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .gallery-card-body p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* 4 Modular Components Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 22px;
+    }
+
+    .feature-card {
+      background: linear-gradient(180deg, rgba(22, 22, 34, 0.7) 0%, rgba(12, 12, 18, 0.9) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 24px;
+      transition: all 0.22s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(138, 43, 226, 0.16);
+      border: 1px solid rgba(138, 43, 226, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+
+    .feature-card p {
+      font-size: 0.91rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .feature-list {
+      list-style: none;
+      font-size: 0.85rem;
+      color: #cfcfe6;
+    }
+
+    .feature-list li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      color: #a855f7;
+      font-weight: 700;
+    }
+
+    /* Showcase + Hotkeys 2-Col */
+    .split-section {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .poster-box {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .poster-box img {
+      width: 100%;
+      display: block;
+    }
+
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+
+    .table-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 11px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    kbd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: #1c1c2b;
+      border: 1px solid #34344e;
+      color: #e2e2f5;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 95vw;
+      max-height: 90vh;
+      border-radius: 14px;
+      border: 1px solid #383854;
+    }
+
+    @media (max-width: 860px) {
+      .split-section {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <img src="assets/app.png" alt="DRANOTCH Logo" />
+        <span>DRANOTCH</span>
+        <span id="nav-version" class="version-pill">v1.5.1</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#tangkapan-layar">Tangkapan Layar</a>
+        <a href="#fitur">4 Komponen Utama</a>
+        <a href="#pintasan">Shortcut & Instalasi</a>
+        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener">GitHub Repo</a>
+      </nav>
+      <a id="nav-download-btn" href="https://github.com/dningratx/dranotch/releases/latest/download/DRANOTCH-Setup-1.5.1.exe" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
+        ⬇ Unduh Gratis
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        <span>Rilis Terbaru <strong id="hero-version-text">v1.5.1</strong> — Desain Bezel Notch Menyatu di Tepi Atas Windows</span>
+      </div>
+      <h1>Dynamic Bezel Notch &amp; Produktivitas 4-in-1 untuk Windows</h1>
+      <p class="subtitle">
+        Menyatu secara elegan di tepi paling atas layar monitor Anda. Menggabungkan <strong>Pemutar Musik &amp; Lirik Karaoke</strong>, <strong>Jadwal Waktu Sholat</strong>, <strong>Cloud To-Do List (Google Drive Sync)</strong>, serta <strong>Browser Mengambang (PiP)</strong> dalam satu kapsul hitam OLED.
+      </p>
+
+      <div class="hero-actions">
+        <a id="main-download-btn" href="https://github.com/dningratx/dranotch/releases/download/v1.5.1/DRANOTCH-Setup-1.5.1.exe" class="btn btn-primary">
+          <span>📥</span>
+          <span id="download-btn-label">Unduh Installer Windows (v1.5.1)</span>
+        </a>
+        <a href="https://github.com/dningratx/dranotch/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span>✨</span>
+          <span>Lihat Catatan Rilis</span>
+        </a>
+        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span>⭐</span>
+          <span>Source Code di GitHub</span>
+        </a>
+      </div>
+      <div class="hero-meta">
+        Mendukung Windows 10 (1809+) &amp; Windows 11 (64-bit) • Self-Contained (.NET 10) • Digitally Signed SHA-256
+      </div>
+
+      <!-- Interactive Monitor Preview -->
+      <div class="monitor-frame" id="tangkapan-layar">
+        <div class="monitor-bezel-top">
+          <div class="camera-dot"></div>
+        </div>
+        <div class="bezel-notch-stage">
+          <!-- Real SVG Concave Bezel Notch Live Mockup -->
+          <div class="hardware-notch-wrap">
+            <svg class="notch-ear" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 0,0 L 16,0 L 16,16 C 16,7.16 8.84,0 0,0 Z" fill="#050507"/>
+              <path d="M 16,16 C 16,7.16 8.84,0 0,0" stroke="#1C1C24" stroke-width="1"/>
+            </svg>
+            <div class="hardware-notch-body">
+              <img src="assets/app.png" alt="icon" style="width: 26px; height: 26px; border-radius: 50%; background:#16161d; padding:3px;" />
+              <div style="text-align: left;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #fff;">Ada Selamanya <span style="color:#88889a; font-weight:400;">• For Revenge</span></div>
+                <div style="font-size: 0.72rem; color: #d4d4e4;">♪ Namun kau tetap ada di setiap sudut ingatan...</div>
+              </div>
+              <span style="color:#2d2d3d;">|</span>
+              <div style="background:#141418; border:1px solid #24242a; border-radius:10px; padding:4px 9px; font-size:0.74rem; font-weight:600;">
+                🕌 Dzuhur 11:52 <span style="background:#1e1e26; padding:1px 5px; border-radius:4px; color:#aaa; font-size:0.68rem;">-18m</span>
+              </div>
+              <span style="color:#2d2d3d;">|</span>
+              <div style="background:#141418; border:1px solid #24242a; border-radius:10px; padding:4px 9px; font-size:0.74rem;">
+                ✓ <span style="background:#1e1e26; padding:1px 5px; border-radius:4px; font-size:0.68rem;">3</span> Review PR &amp; Deploy
+              </div>
+            </div>
+            <svg class="notch-ear" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 0,0 L 16,0 C 7.16,0 0,7.16 0,16 Z" fill="#050507"/>
+              <path d="M 16,0 C 7.16,0 0,7.16 0,16" stroke="#1C1C24" stroke-width="1"/>
+            </svg>
+          </div>
+
+          <!-- Interactive Screenshot Mode Switcher -->
+          <div class="preview-tabs">
+            <button class="preview-tab active" onclick="switchShot('assets/screenshot-expanded.png', this)">
+              🎛️ Mode Expanded (3 Kolom Lengkap)
+            </button>
+            <button class="preview-tab" onclick="switchShot('assets/screenshot-compact.png', this)">
+              🖥️ Mode Compact Bezel Notch
+            </button>
+            <button class="preview-tab" onclick="switchShot('assets/screenshot-browser.png', this)">
+              🌐 Mode Browser Mengambang (v1.5.1)
+            </button>
+          </div>
+
+          <div class="screenshot-viewer" onclick="openLightbox(document.getElementById('active-shot').src)">
+            <img id="active-shot" src="assets/screenshot-expanded.png" alt="Tangkapan Layar Aplikasi DRANOTCH" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshot Gallery Section -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Galeri Tangkapan Aplikasi</span>
+        <h2>Dirancang Menyatu dengan Bezel Atas Windows</h2>
+        <p>Klik pada gambar mana pun untuk memperbesar tampilan detail antarmuka DRANOTCH v1.5.1.</p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-card" onclick="openLightbox('assets/screenshot-compact.png')">
+          <img src="assets/screenshot-compact.png" alt="Compact Bezel Notch Mode" />
+          <div class="gallery-card-body">
+            <h3>1. Top-Mounted Bezel Notch (Compact)</h3>
+            <p>Menempel langsung di titik <code>Top = 0</code> layar dengan bahu lengkung cekung (<em>concave ears</em>) di kiri-kanan atas. Menampilkan musik, lirik berjalan, jadwal sholat berikutnya, dan ticker tugas.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card" onclick="openLightbox('assets/screenshot-expanded.png')">
+          <img src="assets/screenshot-expanded.png" alt="Expanded 3-Column Mode" />
+          <div class="gallery-card-body">
+            <h3>2. Panel Expanded Modular 3-Kolom</h3>
+            <p>Melebar mulus menampilkan kontrol penuh pemutar musik &amp; lirik sinkronisasi LRCLIB, jadwal sholat harian 40+ kota Indonesia, serta daftar tugas Cloud To-Do.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card" onclick="openLightbox('assets/screenshot-browser.png')">
+          <img src="assets/screenshot-browser.png" alt="Floating Browser PiP Mode" />
+          <div class="gallery-card-body">
+            <h3>3. Browser Mengambang &amp; Video PiP Bersih</h3>
+            <p>Header minimalis dengan handle <code>⋮⋮ Geser</code>, kolom URL omnibox penuh, tombol Pin ikonik <code>📌</code>, preset rasio 16:9, serta <em>in-window fullscreen</em>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Modular Features Section -->
+  <section id="fitur" style="padding-top: 20px;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Arsitektur 4 Komponen Modular</span>
+        <h2>Satu Notch, Empat Kekuatan Produktivitas</h2>
+        <p>Setiap komponen dapat dipasang menyatu di dalam kapsul Bezel Notch atau dilepas menjadi jendela mandiri sesuai alur kerja Anda.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎧</div>
+          <h3>Smart Media &amp; Lirik Karaoke</h3>
+          <p>Otomatis mendeteksi lagu yang diputar di Spotify, YouTube, Apple Music, atau browser.</p>
+          <ul class="feature-list">
+            <li>Pencarian lirik tersinkronisasi (LRCLIB)</li>
+            <li>Built-in YouTube Music WebView2</li>
+            <li>Mode layar lirik penuh &amp; Click-Through</li>
+            <li>Pengaturan offset waktu (+0.5s / -0.5s) &amp; impor .lrc</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🕌</div>
+          <h3>Waktu Sholat &amp; Adzan Otomatis</h3>
+          <p>Perhitungan astronomis presisi standar Kemenag RI / MABIMS dengan kalender Hijriah.</p>
+          <ul class="feature-list">
+            <li>40+ Kota Indonesia &amp; Deteksi IP Otomatis</li>
+            <li>Pengingat sebelum waktu, saat Adzan, &amp; sesudah</li>
+            <li>Auto-pause musik saat waktu Adzan tiba</li>
+            <li>Dapat dilepas menjadi jendela melayang mandiri</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3>Cloud To-Do List &amp; Live Ticker</h3>
+          <p>Kelola daftar pekerjaan harian langsung dari atas layar dengan sinkronisasi Google Drive.</p>
+          <ul class="feature-list">
+            <li>Auto-sync real-time lintas perangkat via Google Drive</li>
+            <li>Drag &amp; drop urutan prioritas tugas (<code>⋮⋮</code>)</li>
+            <li>Edit tugas instan dengan klik ganda (Inline Edit)</li>
+            <li>Live Ticker berjalan tanpa jeda di mode compact</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Browser Mengambang (PiP)</h3>
+          <p>Tonton video tutorial, live streaming, atau buka referensi web sambil tetap fokus bekerja.</p>
+          <ul class="feature-list">
+            <li>In-Window Fullscreen (tidak menutupi seluruh monitor)</li>
+            <li>Header bersih dengan grip <code>⋮⋮ Geser</code> &amp; Pin <code>📌</code></li>
+            <li>Preset ukuran 16:9 instan (Mini PiP hingga HD)</li>
+            <li>Mode Bioskop (sembunyikan bar alamat URL)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase Poster & Shortcuts -->
+  <section id="pintasan">
+    <div class="container split-section">
+      <div class="poster-box" onclick="openLightbox('assets/showcase.jpg')" style="cursor: pointer;">
+        <img src="assets/showcase.jpg" alt="DRANOTCH Visual Showcase Poster" />
+      </div>
+
+      <div>
+        <div class="table-card">
+          <h3>⌨️ Pintasan Keyboard (Global Hotkeys)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Shortcut</th>
+                <th>Fungsi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd></td>
+                <td>Tampilkan / Sembunyikan DRANOTCH</td>
+              </tr>
+              <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>L</kbd></td>
+                <td>Buka / Tutup Mode Layar Lirik Karaoke</td>
+              </tr>
+              <tr>
+                <td><kbd>Double Click</kbd> Tugas</td>
+                <td>Edit teks tugas To-Do secara langsung</td>
+              </tr>
+              <tr>
+                <td><kbd>Esc</kbd> (di Browser)</td>
+                <td>Keluar dari mode In-Window Fullscreen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-card">
+          <h3>🛡️ Panduan Cepat Instalasi</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
+            1. Unduh berkas installer <strong id="guide-installer-name">DRANOTCH-Setup-1.5.1.exe</strong> melalui tombol di atas.<br/>
+            2. Jika muncul jendela informasi Windows SmartScreen, klik <strong>"More info"</strong> lalu pilih <strong>"Run anyway"</strong> (atau jalankan <code>Install-Certificate.bat</code> pada halaman rilis untuk mempercayai sertifikat digital DRANOTCH secara permanen).<br/>
+            3. Aplikasi akan otomatis menempel dengan rapi di tepi atas layar Windows Anda!
+          </p>
+          <a href="https://github.com/dningratx/dranotch/releases/latest" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%;">
+            🚀 Buka Halaman Rilis GitHub Resmi
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p><strong>DRANOTCH</strong> — Dibuat dengan ❤️ menggunakan .NET 10 &amp; WPF untuk mempercantik dan meningkatkan produktivitas desktop Windows.</p>
+      <p style="margin-top: 8px;">
+        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener" style="color: #c084fc;">GitHub Repository</a> •
+        <a href="https://github.com/dningratx/dranotch/releases" target="_blank" rel="noopener" style="color: #c084fc;">Semua Rilis</a> •
+        <span>Lisensi MIT</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Preview diperbesar" />
+  </div>
+
+  <script>
+    function switchShot(src, btn) {
+      document.getElementById('active-shot').src = src;
+      document.querySelectorAll('.preview-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      lb.classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    // Otomatis ambil versi & link installer terbaru dari GitHub Releases API
+    fetch('https://api.github.com/repos/dningratx/dranotch/releases/latest')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || !data.tag_name) return;
+        const ver = data.tag_name;
+        document.getElementById('nav-version').textContent = ver;
+        document.getElementById('hero-version-text').textContent = ver;
+        const exeAsset = (data.assets || []).find(a => a.name && a.name.endsWith('.exe'));
+        if (exeAsset && exeAsset.browser_download_url) {
+          document.getElementById('main-download-btn').href = exeAsset.browser_download_url;
+          document.getElementById('nav-download-btn').href = exeAsset.browser_download_url;
+          document.getElementById('download-btn-label').textContent = `Unduh Installer Windows (${ver})`;
+          document.getElementById('guide-installer-name').textContent = exeAsset.name;
+        }
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>
