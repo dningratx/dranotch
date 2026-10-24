@@ -19,8 +19,10 @@ public partial class MainWindow : Window
     private YouTubeMusicWindow? _ytMusicWindow;
     private FloatingBrowserWindow? _floatingBrowserWindow;
     private RadioWindow? _radioWindow;
+    private MusicWindow? _musicWindow;
     private TodoWindow? _todoWindow;
     private PrayerWindow? _prayerWindow;
+    private AboutWindow? _aboutWindow;
     private HotkeyManager? _hotkeyManager;
     private bool _isRealExit;
 
@@ -39,16 +41,20 @@ public partial class MainWindow : Window
         _viewModel.RequestExpand += () => _viewModel.CurrentMode = PanelMode.Expanded;
         _viewModel.RequestCollapse += () => _viewModel.CurrentMode = PanelMode.Compact;
         _viewModel.RequestOpenSettings += OpenSettings;
+        _viewModel.RequestOpenAbout += OpenAbout;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
         _viewModel.RequestOpenFloatingBrowser += OpenFloatingBrowser;
         _viewModel.RequestOpenRadio += OpenRadio;
+        _viewModel.RequestOpenMusic += OpenMusic;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
             UpdateTodoWindowState();
             UpdatePrayerWindowState();
+        UpdateMusicWindowState();
             UpdateBrowserWindowState();
             UpdateRadioWindowState();
+            UpdateMusicWindowState();
         });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
@@ -57,7 +63,9 @@ public partial class MainWindow : Window
             if (ev.PropertyName == nameof(MainViewModel.CurrentMode) ||
                 ev.PropertyName == nameof(MainViewModel.IsCompactMode) ||
                 ev.PropertyName == nameof(MainViewModel.IsIdleMiniMode) ||
-                ev.PropertyName == nameof(MainViewModel.ShowIdleMiniView))
+                ev.PropertyName == nameof(MainViewModel.ShowIdleMiniView) ||
+                ev.PropertyName == nameof(MainViewModel.IsMusicWindowOpen) ||
+                ev.PropertyName == nameof(MainViewModel.IsTodoDetachedWindowVisible))
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -139,6 +147,7 @@ public partial class MainWindow : Window
 
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
+        UpdateMusicWindowState();
 
         await _viewModel.InitializeAsync();
     }
@@ -155,6 +164,7 @@ public partial class MainWindow : Window
                     Hide();
                     _todoWindow?.Hide();
                     _prayerWindow?.Hide();
+                    _musicWindow?.Hide();
                 }
                 else
                 {
@@ -228,6 +238,7 @@ public partial class MainWindow : Window
                     Hide();
                     _todoWindow?.Hide();
                     _prayerWindow?.Hide();
+                    _musicWindow?.Hide();
                 }
                 else
                 {
@@ -257,7 +268,7 @@ public partial class MainWindow : Window
 
     private void UpdateTodoWindowState()
     {
-        if (_viewModel.IsTodoDetached && _viewModel.ShowTodoSection && _viewModel.IsTodoWindowOpen)
+        if (_viewModel.IsTodoDetached && _viewModel.IsTodoWindowOpen)
         {
             if (_todoWindow == null)
             {
@@ -266,7 +277,12 @@ public partial class MainWindow : Window
             }
             if (!_todoWindow.IsVisible)
             {
+                if (_todoWindow.WindowState == WindowState.Minimized)
+                {
+                    _todoWindow.WindowState = WindowState.Normal;
+                }
                 _todoWindow.Show();
+                _todoWindow.Activate();
             }
         }
         else
@@ -307,6 +323,49 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateMusicWindowState()
+    {
+        if (_viewModel.IsMusicWindowOpen)
+        {
+            OpenMusic();
+        }
+        else
+        {
+            _musicWindow?.Hide();
+        }
+    }
+
+    public void OpenMusic()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsMusicWindowOpen = true;
+
+            if (_musicWindow == null)
+            {
+                _musicWindow = new MusicWindow(_viewModel, _settingsService);
+                _musicWindow.Closed += (s, e) => _musicWindow = null;
+            }
+
+            if (_musicWindow.WindowState == WindowState.Minimized)
+            {
+                _musicWindow.WindowState = WindowState.Normal;
+            }
+
+            _musicWindow.Show();
+            _musicWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Pemutar Musik:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void UpdateRadioWindowState()
     {
         if (_viewModel.IsRadioWindowOpen)
@@ -319,9 +378,47 @@ public partial class MainWindow : Window
         }
     }
 
+    public void OpenAbout()
+    {
+        if (_aboutWindow != null && _aboutWindow.IsVisible)
+        {
+            _aboutWindow.Hide();
+            return;
+        }
+
+        if (_aboutWindow == null)
+        {
+            _aboutWindow = new AboutWindow(_viewModel);
+            _aboutWindow.Closed += (s, e) => _aboutWindow = null;
+        }
+
+        var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+        var workingArea = screen.WorkingArea;
+        var source = PresentationSource.FromVisual(this);
+        double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+        double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+        double areaLeft = workingArea.Left / dpiX;
+        double areaTop = workingArea.Top / dpiY;
+        double areaWidth = workingArea.Width / dpiX;
+
+        double notchBottom = Math.Max(areaTop, Top + Math.Max(ActualHeight, 84));
+        _aboutWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+        _aboutWindow.Left = areaLeft + (areaWidth - 400) / 2.0;
+        _aboutWindow.Top = notchBottom + 6;
+        _aboutWindow.Show();
+        _aboutWindow.Activate();
+    }
+
     private void OpenSettings()
     {
         var settingsVm = new SettingsViewModel(_settingsService, _ => SetupHotkeys(), _viewModel.GoogleDriveSyncService, _viewModel.UpdateService, _viewModel.PrayerService);
+        settingsVm.PropertyChanged += (s, ev) =>
+        {
+            _viewModel.RefreshComponentLayout();
+            UpdatePrayerWindowState();
+            UpdateTodoWindowState();
+        };
         if (_viewModel.HasAvailableUpdate && _viewModel.AvailableUpdateInfo != null)
         {
             settingsVm.AvailableUpdate = _viewModel.AvailableUpdateInfo;
@@ -333,6 +430,7 @@ public partial class MainWindow : Window
         _viewModel.RefreshComponentLayout();
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
+        UpdateMusicWindowState();
         UpdateBrowserWindowState();
         UpdateRadioWindowState();
     }
@@ -594,9 +692,11 @@ public partial class MainWindow : Window
         _ytMusicWindow?.ForceClose();
         _floatingBrowserWindow?.ForceClose();
         _radioWindow?.ForceClose();
+        _musicWindow?.ForceClose();
         _viewModel.RadioService.Dispose();
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
+        _aboutWindow?.Close();
         _hotkeyManager?.Dispose();
         _trayService.Dispose();
         base.OnClosing(e);

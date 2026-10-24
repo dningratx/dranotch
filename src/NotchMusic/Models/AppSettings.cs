@@ -88,4 +88,8 @@ public class AppSettings
     public string LastRadioStationId { get; set; } = string.Empty;
     public List<string> FavoriteRadioStationIds { get; set; } = new();
     public List<RadioStation> CustomRadioStations { get; set; } = new();
+    public bool IsMusicWindowOpen { get; set; } = false;
+    public double MusicWindowLeft { get; set; } = -1;
+    public double MusicWindowTop { get; set; } = -1;
+    public bool IsMusicWindowCompact { get; set; } = false;
 }

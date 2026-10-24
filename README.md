@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🎵 DRANOTCH
 
@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.0)**](https://github.com/dningratx/dranotch/releases/latest) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.1)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -116,7 +116,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Ikon Vektor Kustom Berwarna Silver Metallic**: Menggantikan emoji bawaan Windows dengan **ikon vektor SVG kustom** berlapis gradien **Silver Metallic** (`#FFFFFF` → `#E2E6F0` → `#949BA8` → `#D4D9E6`) yang serasi dengan logo resmi DRANOTCH di dalam lencana *squircle* `28×28` untuk **Waktu Sholat** (Bulan Sabit & Bintang Berlian), **To-Do List** (Bingkai & Centang Tugas), **Browser** (Bola Dunia Meridian), dan **Musik**.
 - **Panggung Lirik Karaoke Lebih Mewah & Bersih**: Memperbesar mode *Lyrics* menjadi `640×400` dengan efek panggung *radial gradient*, kontrol media vektor bertema *Satin Glass*, serta menghapus tombol *Click-Through* agar antarmuka lirik lebih fokus dan elegan.
 
-### 📻 15. Komponen ke-5: Radio Online Indonesia & Dunia, Mode Notch Cerdas (Mini/Idle), & Kunci Pin *(Baru di v1.6.0)*
+### 📻 15. Komponen ke-5: Radio Online Indonesia & Dunia, Mode Notch Cerdas (Mini/Idle), & Kunci Pin *(v1.6.0)*
 - **5 Komponen Modular Terintegrasi**: Menambahkan komponen **Radio Online** tepat di sebelah kanan **Music Player** dengan urutan barisan:
   `[ Pemutar Musik ]` ╎ `[ Radio Online ]` ╎ `[ Waktu Sholat ]` ╎ `[ To-Do List ]` ╎ `[ Browser ]`
 - **Streaming Radio Online Indonesia & Dunia (`RadioWindow`)**:
@@ -131,6 +131,21 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Tombol Pin Notch (`📌`) & Kontrol Tanpa Gangguan Hover**:
   - Saat tombol **Pin (`📌`)** diaktifkan, Notch dikunci agar tidak mengecil otomatis ketika *idle*.
   - Menonaktifkan pembukaan panel otomatis saat kursor melintas (*Expand on Hover*) agar tidak mengganggu aktivitas kerja di bagian atas layar.
+
+### ✨ 16. Mode Idle Simetris Berpusat pada Logo DRANOTCH, Jendela Lepas Pemutar Musik, & Transformasi Ikon Pintar *(Baru di v1.6.1)*
+- **Tampilan Idle Minimalis (Logo DRANOTCH & Waktu Sholat)**:
+  - Saat kondisi *idle*, notch hanya menampilkan **Logo DRANOTCH** beserta **Waktu Sholat** tepat di sampingnya (dapat diatur tampil atau disembunyikan melalui Pengaturan).
+  - Saat kursor diarahkan (*hover*) ke notch, 5 komponen mengembang secara simetris: **Pemutar Musik** & **Radio Online** di sisi kiri, **Browser** & **To-Do List** di sisi kanan, serta **Pengaturan (`⚙`)**, **Waktu Sholat**, & **Tombol Versi** di baris bawah.
+- **Mode Pelepasan Pemutar Musik & Lirik (`MusicWindow`)**:
+  - Mengklik pemutar musik membuka jendela melayang mandiri yang menampilkan lirik *real-time* 3 baris, *progress bar*, kontrol media & offset satu baris, tombol **`▶ YT Music`**, tombol minimize (`▴`), dan tombol satukan kembali ke notch utama (`⇲`), sementara notch utama tetap tampil di atas layar.
+- **Transformasi Otomatis menjadi Tombol Ikon saat Mode Pelebaran**:
+  - Ketika **Pemutar Musik** atau **To-Do List** sedang dibuka ke jendela pelebaran/pelepasan, komponen tersebut di notch utama otomatis berubah menjadi **tombol ikon ringkas (`42×42`)** dengan indikator aktif hijau, dan kembali menjadi *pill* lengkap saat disatukan kembali (`⇲`).
+- **Kartu Info Tentang DRANOTCH (`AboutWindow`) & Auto-Update 1-Klik**:
+  - Mengklik tombol **Logo DRANOTCH** memunculkan kartu info ringkas dengan tombol cek pembaruan dan tautan ke [Halaman Rilis Resmi](https://dningratx.github.io/dranotch/).
+  - Mengklik tombol versi (`v1.6.1`) langsung memeriksa pembaruan, mengunduh installer terbaru, dan menjalankan instalasi otomatis.
+- **Perbaikan Hitung Mundur Subuh Hari Berikutnya & Penyederhanaan Pengaturan**:
+  - Memperbaiki perhitungan hitung mundur menuju waktu **Subuh hari berikutnya** setelah waktu Isya berlalu.
+  - Menyempurnakan kontras teks *dropdown* di jendela Pengaturan dan menempatkan bagian **Pembaruan Aplikasi** di urutan paling atas.
 
 ---
 
@@ -160,7 +175,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

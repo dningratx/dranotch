@@ -25,6 +25,134 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,4"/>
         </Style>
+
+        <!-- High-Contrast Dark ComboBox & ComboBoxItem Style -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#1E1E28"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#343448"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#2C2C3E"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#252532"/>
+            <Setter Property="BorderBrush" Value="#4A4A60"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Focusable="False"
+                                          ClickMode="Press"
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="ComboBorder"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="5">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="22"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Path Grid.Column="1"
+                                                      Data="M 0 0 L 4 4 L 8 0 Z"
+                                                      Fill="#FFFFFF"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ComboBorder" Property="Background" Value="#303042"/>
+                                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="#686884"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <ContentPresenter x:Name="ContentSite"
+                                              IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              Margin="8,2,22,2"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              TextElement.Foreground="#FFFFFF"
+                                              TextElement.FontWeight="Bold">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="FontSize" Value="12.5"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid x:Name="DropDown"
+                                      SnapsToDevicePixels="True"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="#1E1E28"
+                                            BorderBrush="#4A4A60"
+                                            BorderThickness="1"
+                                            CornerRadius="5"
+                                            Margin="0,2,0,0">
+                                        <ScrollViewer Margin="2" SnapsToDevicePixels="True" VerticalScrollBarVisibility="Auto">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="20">
@@ -43,376 +171,8 @@
         <!-- Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <!-- YouTube Music Player -->
+                <!-- 1. Pembaruan Aplikasi (Auto-Update) - Di Paling Atas -->
                 <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="Pemutar YouTube Music (Built-in WebView2)" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
-                        <TextBlock Text="Login dan putar YouTube Music langsung di dalam aplikasi. Login akun Google tersimpan permanen dan kontrol media otomatis tersambung ke DRANOTCH." 
-                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,10"/>
-                        <Button Content="Buka Pemutar YouTube Music" Click="OpenYouTubeMusic_Click" 
-                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="12,6"
-                                HorizontalAlignment="Left" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Browser Mengambang & Video Streaming -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="Browser Mengambang (Floating Browser &amp; Video Streaming)" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
-                        <TextBlock Text="Akses website apa saja (YouTube, LK21, Twitch, Netflix, dll) dalam jendela mengambang fleksibel yang selalu bisa digeser dan di-resize bebas, serta mendukung mode fullscreen di dalam jendela." 
-                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,10"/>
-                        <Button Content="Buka Browser Mengambang" Click="OpenFloatingBrowser_Click" 
-                                Background="#2D2248" Foreground="#E2D4FF" BorderThickness="1" BorderBrush="#8A2BE2" Padding="12,6"
-                                HorizontalAlignment="Left" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Tampilan & Perilaku -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="Tampilan &amp; Perilaku" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
-                        <CheckBox Content="Jalankan otomatis saat login Windows" IsChecked="{Binding StartWithWindows}"/>
-                        <CheckBox Content="Always On Top (Selalu di atas jendela lain)" IsChecked="{Binding AlwaysOnTop}"/>
-                        <CheckBox Content="Perluas panel otomatis saat mouse diarahkan (Hover)" IsChecked="{Binding ExpandOnHover}"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Komponen Tampilan (Musik & To-Do List) -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="Komponen Tampilan" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
-                        <TextBlock Text="Pilih komponen yang ingin ditampilkan pada panel DRANOTCH:" 
-                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,0,0,8"/>
-
-                        <RadioButton GroupName="ComponentModeGroup" Content="Musik &amp; To-Do List (Keduanya)"
-                                     IsChecked="{Binding IsComponentBoth}"/>
-                        <RadioButton GroupName="ComponentModeGroup" Content="Hanya Pemutar Musik"
-                                     IsChecked="{Binding IsComponentMusicOnly}"/>
-                        <RadioButton GroupName="ComponentModeGroup" Content="Hanya To-Do List"
-                                     IsChecked="{Binding IsComponentTodoOnly}"/>
-
-                        <!-- Opsi Lepas / Pisahkan To-Do List -->
-                        <Border Margin="0,8,0,0" Padding="10,8" Background="#141418" CornerRadius="6"
-                                Visibility="{Binding IsComponentMusicOnly, Converter={StaticResource InverseBoolToVis}}">
-                            <StackPanel>
-                                <CheckBox Content="Pisahkan To-Do List ke jendela terpisah (tidak menempel dengan musik)"
-                                          IsChecked="{Binding IsTodoDetached}" Margin="0"/>
-                                <TextBlock Text="To-Do List akan muncul sebagai jendela melayang tersendiri yang dapat dipindahkan ke mana saja."
-                                           FontSize="11" Foreground="#888899" TextWrapping="Wrap" Margin="22,3,0,0"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Border>
-
-                <!-- Lirik -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="Lirik &amp; Integrasi LRCLIB" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
-                        <CheckBox Content="Cari lirik otomatis di LRCLIB saat lagu berganti" IsChecked="{Binding AutoSearchLyrics}"/>
-                        
-                        <TextBlock Text="Catatan privasi: Pencarian mengirim metadata lagu (judul, artis, album) ke API publik LRCLIB." 
-                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,4,0,10"/>
-
-                        <Grid Margin="0,4">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Ukuran font lirik (Mode Lyrics):" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{Binding LyricsFontSize, StringFormat={}{0:0} pt}" FontWeight="Bold" Foreground="#FFFFFF"/>
-                        </Grid>
-                        <Slider Minimum="12" Maximum="32" Value="{Binding LyricsFontSize}" Margin="0,2,0,8"/>
-
-                        <Grid Margin="0,4">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Transparansi latar belakang lirik:" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="{Binding LyricsOpacity, StringFormat={}{0:P0}}" FontWeight="Bold" Foreground="#FFFFFF"/>
-                        </Grid>
-                        <Slider Minimum="0.3" Maximum="1.0" Value="{Binding LyricsOpacity}" Margin="0,2,0,8"/>
-
-                        <Button Content="Bersihkan Cache Lirik" Command="{Binding ClearCacheCommand}" 
-                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="10,6" Margin="0,6,0,0"
-                                HorizontalAlignment="Left" Cursor="Hand"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Integrasi Google Drive (To-Do List Cloud Sync) -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Sinkronisasi Google Drive (To-Do List)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
-                                <TextBlock Text="Sinkronkan to-do list antar komputer / laptop lewat Google Drive" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
-                            </StackPanel>
-                            
-                            <!-- Status Indicator Badge -->
-                            <Border Grid.Column="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#261C20"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
-                                                <Setter Property="Background" Value="#173822"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock FontSize="11" FontWeight="SemiBold">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="Belum Terhubung"/>
-                                            <Setter Property="Foreground" Value="#FFAEAE"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
-                                                    <Setter Property="Text" Value="✓ Terhubung"/>
-                                                    <Setter Property="Foreground" Value="#81C784"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Border>
-                        </Grid>
-
-                        <!-- Saat SUDAH Terhubung -->
-                        <StackPanel Visibility="{Binding IsGoogleDriveConnected, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
-                            <TextBlock Text="{Binding GoogleDriveUserEmail, StringFormat='Akun Google: {0}'}" FontWeight="Medium" Foreground="#FFFFFF" Margin="0,0,0,4"/>
-                            <TextBlock Text="{Binding GoogleDriveLastSyncFormatted, StringFormat='Terakhir sinkron: {0}'}" FontSize="11" Foreground="#888899" Margin="0,0,0,10"/>
-
-                            <CheckBox Content="Otomatis sinkronkan saat ada perubahan tugas" IsChecked="{Binding GoogleDriveAutoSync}"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <Button Content="Sinkronkan Sekarang" Command="{Binding SyncGoogleDriveNowCommand}"
-                                        Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="12,6" Margin="0,0,8,0" Cursor="Hand"/>
-                                <Button Content="Putuskan Sambungan" Command="{Binding DisconnectGoogleDriveCommand}"
-                                        Background="#3A2026" Foreground="#FF99AA" BorderThickness="0" Padding="12,6" Cursor="Hand"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- Saat BELUM Terhubung -->
-                        <StackPanel Visibility="{Binding IsGoogleDriveConnected, Converter={StaticResource InverseBoolToVis}}" Margin="0,6,0,0">
-                            <TextBlock Text="Cukup login dengan akun Google/Gmail Anda untuk menyinkronkan tugas secara otomatis antar perangkat." 
-                                       FontSize="11.5" Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
-
-                            <Button Content="Hubungkan Akun Google" Command="{Binding ConnectGoogleDriveCommand}"
-                                    IsEnabled="{Binding IsGoogleDriveConfigured}"
-                                    Background="#FFFFFF" Foreground="#000000" FontWeight="SemiBold" BorderThickness="0" Padding="16,8"
-                                    HorizontalAlignment="Left" Cursor="Hand"/>
-
-                            <TextBlock Text="{Binding GoogleDriveSyncStatus}" Foreground="#CCCCCC" FontSize="11" Margin="0,6,0,8"/>
-
-                            <!-- Opsi Kredensial Kustom (Opsional) -->
-                            <Button Content="Opsi Lanjutan: Gunakan Kredensial Kustom ▾" Command="{Binding ToggleCustomCredentialsCommand}"
-                                    Background="Transparent" Foreground="#888899" BorderThickness="0" Padding="0,4"
-                                    HorizontalAlignment="Left" Cursor="Hand" FontSize="11"/>
-
-                            <StackPanel Visibility="{Binding ShowCustomCredentials, Converter={StaticResource BoolToVis}}" Margin="0,6,0,0">
-                                <TextBlock Text="Impor file credentials.json atau masukkan Client ID sendiri jika ingin menggunakan project Google Cloud pribadi:" 
-                                           FontSize="10.5" Foreground="#888888" TextWrapping="Wrap" Margin="0,0,0,6"/>
-                                <Button Content="Impor File credentials.json" Command="{Binding ImportCredentialsCommand}"
-                                        Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="10,5"
-                                        HorizontalAlignment="Left" Cursor="Hand" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="Client ID Kustom:" FontSize="10.5" Foreground="#888899" Margin="0,2"/>
-                                <TextBox Text="{Binding GoogleDriveClientId, UpdateSourceTrigger=PropertyChanged}" 
-                                         Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
-
-                                <TextBlock Text="Client Secret Kustom:" FontSize="10.5" Foreground="#888899" Margin="0,2"/>
-                                <TextBox Text="{Binding GoogleDriveClientSecret, UpdateSourceTrigger=PropertyChanged}" 
-                                         Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Waktu Sholat & Pengingat (Prayer Times) -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,6">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="🕌 Waktu Sholat &amp; Pengingat" FontWeight="SemiBold" Foreground="#FFFFFF"/>
-                                <TextBlock Text="Jadwal sholat otomatis, pengingat sebelum &amp; sesudah adzan, dan jeda musik" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <CheckBox Content="Aktifkan fitur Waktu Sholat &amp; Pengingat" IsChecked="{Binding EnablePrayerTimes}"/>
-
-                        <StackPanel Visibility="{Binding EnablePrayerTimes, Converter={StaticResource BoolToVis}}" Margin="0,6,0,0">
-                            <!-- Lokasi / Kota -->
-                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,4,0,8">
-                                <StackPanel>
-                                    <TextBlock Text="Lokasi Kota:" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
-                                    <Grid Margin="0,2,0,6">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <ComboBox Grid.Column="0" ItemsSource="{Binding IndonesianCities}"
-                                                  SelectedItem="{Binding SelectedCity}"
-                                                  DisplayMemberPath="DisplayName"
-                                                  Background="#1E1E24" Foreground="#000000"
-                                                  Margin="0,0,8,0" Height="28"/>
-                                        <Button Grid.Column="1" Content="📍 Deteksi Lokasi" Command="{Binding DetectLocationCommand}"
-                                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="10,4"
-                                                Cursor="Hand" ToolTip="Deteksi lokasi kota dan koordinat otomatis lewat IP"/>
-                                    </Grid>
-                                    <TextBlock Text="{Binding LocationDetectStatus}" Foreground="#AAAAAA" FontSize="10.5" 
-                                               Visibility="{Binding LocationDetectStatus, Converter={StaticResource StringNotEmptyToVis}}" Margin="0,2,0,4"/>
-                                    <TextBlock Text="{Binding TodayPrayerSchedule.HijriDate, StringFormat='Kalender Hijriah: {0}'}" 
-                                               Foreground="#8888AA" FontSize="11"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Pengingat Sebelum Sholat -->
-                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Grid.Column="0" Content="Ingatkan sebelum waktu sholat tiba" 
-                                                  IsChecked="{Binding RemindBeforePrayer}" Margin="0"/>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
-                                                    Visibility="{Binding RemindBeforePrayer, Converter={StaticResource BoolToVis}}">
-                                            <ComboBox ItemsSource="{Binding AvailableMinutesOptions}"
-                                                      SelectedItem="{Binding RemindBeforeMinutes}"
-                                                      Width="55" Height="24" Margin="4,0" Background="#1E1E24" Foreground="#000000"/>
-                                            <TextBlock Text="menit sebelumnya" VerticalAlignment="Center" FontSize="11" Foreground="#AAAAAA"/>
-                                        </StackPanel>
-                                    </Grid>
-                                    <TextBlock Text="Memberikan waktu bersiap-siap wudhu atau menuju masjid sebelum adzan berkumandang." 
-                                               FontSize="10.5" Foreground="#777788" Margin="22,2,0,0" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Pengingat Saat Masuk Waktu Sholat (Adzan) -->
-                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <CheckBox Content="Ingatkan tepat saat masuk waktu sholat (Adzan)" 
-                                              IsChecked="{Binding RemindAtPrayerTime}" Margin="0"/>
-                                    <TextBlock Text="Menampilkan kartu notifikasi Dynamic Island dan notifikasi Windows saat adzan tiba." 
-                                               FontSize="10.5" Foreground="#777788" Margin="22,2,0,0" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Pengingat Sesudah Sholat -->
-                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Grid.Column="0" Content="Ingatkan sesudah waktu sholat berlalu" 
-                                                  IsChecked="{Binding RemindAfterPrayer}" Margin="0"/>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
-                                                    Visibility="{Binding RemindAfterPrayer, Converter={StaticResource BoolToVis}}">
-                                            <ComboBox ItemsSource="{Binding AvailableMinutesOptions}"
-                                                      SelectedItem="{Binding RemindAfterMinutes}"
-                                                      Width="55" Height="24" Margin="4,0" Background="#1E1E24" Foreground="#000000"/>
-                                            <TextBlock Text="menit sesudahnya" VerticalAlignment="Center" FontSize="11" Foreground="#AAAAAA"/>
-                                        </StackPanel>
-                                    </Grid>
-                                    <TextBlock Text="Notifikasi konfirmasi ramah: 'Sudahkah Anda menunaikan sholat?' agar tidak terlewat." 
-                                               FontSize="10.5" Foreground="#777788" Margin="22,2,0,0" TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Opsi Suara & Integrasi Musik -->
-                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,4">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox Grid.Column="0" Content="Bunyikan nada dering / chime saat ada pengingat" 
-                                                  IsChecked="{Binding PrayerSoundAlert}" Margin="0"/>
-                                        <Button Grid.Column="1" Content="🔊 Tes Suara" Command="{Binding TestPrayerChimeCommand}"
-                                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="8,3"
-                                                Cursor="Hand" FontSize="11"/>
-                                    </Grid>
-                                    <TextBlock Text="{Binding TestNotificationStatus}" Foreground="#81C784" FontSize="10.5" 
-                                               Visibility="{Binding TestNotificationStatus, Converter={StaticResource StringNotEmptyToVis}}" Margin="22,0,0,4"/>
-
-                                    <CheckBox Content="Jeda musik otomatis saat masuk waktu sholat (Auto-Pause)" 
-                                              IsChecked="{Binding PrayerAutoPauseMusic}" Margin="0,4"/>
-                                    <TextBlock Text="Otomatis menghentikan lagu saat adzan tiba sehingga Anda dapat langsung mendengarkan adzan dan sholat." 
-                                               FontSize="10.5" Foreground="#777788" Margin="22,0,0,6" TextWrapping="Wrap"/>
-
-                                    <CheckBox Content="Tampilkan jadwal sholat berikutnya di mode compact notch" 
-                                              IsChecked="{Binding ShowPrayerInCompactNotch}" Margin="0,4"/>
-
-                                    <!-- Opsi Pisahkan Waktu Sholat -->
-                                    <Border Margin="0,6,0,0" Padding="10,8" Background="#181820" CornerRadius="6">
-                                        <StackPanel>
-                                            <CheckBox Content="Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"
-                                                      IsChecked="{Binding IsPrayerDetached}" Margin="0"/>
-                                            <TextBlock Text="Waktu Sholat akan muncul sebagai widget melayang tersendiri yang dapat dipindahkan ke mana saja."
-                                                       FontSize="11" Foreground="#888899" TextWrapping="Wrap" Margin="22,3,0,0"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Pratinjau Jadwal Hari Ini -->
-                            <Border Background="#111115" BorderBrush="#262632" BorderThickness="1" CornerRadius="6" Padding="10,8">
-                                <StackPanel>
-                                    <TextBlock Text="Pratinjau Jadwal Sholat Hari Ini:" FontWeight="SemiBold" Foreground="#CCCCCC" FontSize="11.5" Margin="0,0,0,6"/>
-                                    <ItemsControl ItemsSource="{Binding TodayPrayerSchedule.Items}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel Orientation="Horizontal"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#1A1A22" CornerRadius="5" Padding="7,4" Margin="0,0,6,4">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Name}" Foreground="#8888AA" FontSize="11" Margin="0,0,4,0"/>
-                                                        <TextBlock Text="{Binding FormattedTime}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11"/>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Hotkey Global -->
-                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
-                    <StackPanel>
-                        <TextBlock Text="Hotkey Global" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
-                        
-                        <TextBlock Text="Tampilkan / Sembunyikan Panel:" Margin="0,2"/>
-                        <TextBox Text="{Binding ToggleVisibilityHotkey, UpdateSourceTrigger=PropertyChanged}" 
-                                 Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="6" Margin="0,2,0,8"/>
-
-                        <TextBlock Text="Ganti Mode Lirik (Lyrics Mode):" Margin="0,2"/>
-                        <TextBox Text="{Binding ToggleLyricsHotkey, UpdateSourceTrigger=PropertyChanged}" 
-                                 Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="6" Margin="0,2,0,8"/>
-
-                        <TextBlock Text="Contoh kombinasi: Ctrl+Alt+N, Ctrl+Shift+M" FontSize="11" Foreground="#777777"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Pembaruan Aplikasi (Auto-Update) -->
-                <Border Background="#202026" CornerRadius="8" Padding="14">
                     <StackPanel>
                         <Grid Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
@@ -433,7 +193,8 @@
                         <CheckBox Content="Periksa pembaruan otomatis saat aplikasi dijalankan" IsChecked="{Binding AutoCheckUpdates}"/>
 
                         <!-- Status Text -->
-                        <TextBlock Text="{Binding UpdateStatus}" Foreground="#CCCCCC" FontSize="11.5" Margin="0,4,0,4" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding UpdateStatus}" Foreground="#CCCCCC" FontSize="11.5" Margin="0,4,0,0" TextWrapping="Wrap"
+                                   Visibility="{Binding UpdateStatus, Converter={StaticResource StringNotEmptyToVis}}"/>
 
                         <!-- Update Tersedia Panel -->
                         <Border Visibility="{Binding HasAvailableUpdate, Converter={StaticResource BoolToVis}}"
@@ -479,17 +240,304 @@
                                 </StackPanel>
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+                </Border>
 
-                        <!-- Opsi Lanjutan: URL Server Pembaruan Kustom -->
-                        <Button Content="Opsi Lanjutan: URL Server Pembaruan (Hosting Sendiri) ▾" Command="{Binding ToggleCustomUpdateUrlCommand}"
-                                Background="Transparent" Foreground="#888899" BorderThickness="0" Padding="0,4"
-                                HorizontalAlignment="Left" Cursor="Hand" FontSize="11" Margin="0,6,0,0"/>
+                <!-- 2. Tampilan & Perilaku -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Tampilan &amp; Perilaku" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
+                        <CheckBox Content="Jalankan otomatis saat login Windows" IsChecked="{Binding StartWithWindows}"/>
+                        <CheckBox Content="Always On Top (Selalu di atas jendela lain)" IsChecked="{Binding AlwaysOnTop}"/>
+                        <CheckBox Content="Perluas panel otomatis saat mouse diarahkan (Hover)" IsChecked="{Binding ExpandOnHover}"/>
+                    </StackPanel>
+                </Border>
 
-                        <StackPanel Visibility="{Binding ShowCustomUpdateUrl, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
-                            <TextBlock Text="Masukkan URL manifest version.json (contoh: https://dralogy.com/dranotch/version.json). Kosongkan untuk menggunakan rilis resmi GitHub:" 
-                                       FontSize="10.5" Foreground="#888888" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding CustomUpdateUrl, UpdateSourceTrigger=PropertyChanged}" 
-                                     Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="6" Margin="0,0,0,4"/>
+                <!-- 3. Lirik -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="Lirik &amp; Integrasi LRCLIB" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
+                        <CheckBox Content="Cari lirik otomatis di LRCLIB saat lagu berganti" IsChecked="{Binding AutoSearchLyrics}"/>
+                        
+                        <TextBlock Text="Catatan privasi: Pencarian mengirim metadata lagu (judul, artis, album) ke API publik LRCLIB." 
+                                   TextWrapping="Wrap" FontSize="11" Foreground="#999999" Margin="0,4,0,10"/>
+
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Ukuran font lirik (Mode Lyrics):" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding LyricsFontSize, StringFormat={}{0:0} pt}" FontWeight="Bold" Foreground="#FFFFFF"/>
+                        </Grid>
+                        <Slider Minimum="12" Maximum="32" Value="{Binding LyricsFontSize}" Margin="0,2,0,8"/>
+
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Transparansi latar belakang lirik:" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding LyricsOpacity, StringFormat={}{0:P0}}" FontWeight="Bold" Foreground="#FFFFFF"/>
+                        </Grid>
+                        <Slider Minimum="0.3" Maximum="1.0" Value="{Binding LyricsOpacity}" Margin="0,2,0,8"/>
+
+                        <Button Content="Bersihkan Cache Lirik" Command="{Binding ClearCacheCommand}" 
+                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="10,6" Margin="0,6,0,0"
+                                HorizontalAlignment="Left" Cursor="Hand"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4. Integrasi Google Drive (To-Do List Cloud Sync) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Sinkronisasi Google Drive (To-Do List)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                <TextBlock Text="Sinkronkan to-do list antar komputer / laptop lewat Google Drive" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            
+                            <!-- Status Indicator Badge -->
+                            <Border Grid.Column="1" CornerRadius="6" Padding="8,3" VerticalAlignment="Center">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#261C20"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                <Setter Property="Background" Value="#173822"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock FontSize="11" FontWeight="SemiBold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Belum Terhubung"/>
+                                            <Setter Property="Foreground" Value="#FFAEAE"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsGoogleDriveConnected}" Value="True">
+                                                    <Setter Property="Text" Value="&#x2713; Terhubung"/>
+                                                    <Setter Property="Foreground" Value="#81C784"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </Grid>
+
+                        <!-- Saat SUDAH Terhubung -->
+                        <StackPanel Visibility="{Binding IsGoogleDriveConnected, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                            <TextBlock Text="{Binding GoogleDriveUserEmail, StringFormat='Akun Google: {0}'}" FontWeight="Medium" Foreground="#FFFFFF" Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding GoogleDriveLastSyncFormatted, StringFormat='Terakhir sinkron: {0}'}" FontSize="11" Foreground="#888899" Margin="0,0,0,10"/>
+
+                            <CheckBox Content="Otomatis sinkronkan saat ada perubahan tugas" IsChecked="{Binding GoogleDriveAutoSync}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="Sinkronkan Sekarang" Command="{Binding SyncGoogleDriveNowCommand}"
+                                        Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="12,6" Margin="0,0,8,0" Cursor="Hand"/>
+                                <Button Content="Putuskan Sambungan" Command="{Binding DisconnectGoogleDriveCommand}"
+                                        Background="#3A2026" Foreground="#FF99AA" BorderThickness="0" Padding="12,6" Cursor="Hand"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Saat BELUM Terhubung -->
+                        <StackPanel Visibility="{Binding IsGoogleDriveConnected, Converter={StaticResource InverseBoolToVis}}" Margin="0,6,0,0">
+                            <TextBlock Text="Cukup login dengan akun Google/Gmail Anda untuk menyinkronkan tugas secara otomatis antar perangkat." 
+                                       FontSize="11.5" Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                            <Button Content="Hubungkan Akun Google" Command="{Binding ConnectGoogleDriveCommand}"
+                                    IsEnabled="{Binding IsGoogleDriveConfigured}"
+                                    Background="#FFFFFF" Foreground="#000000" FontWeight="SemiBold" BorderThickness="0" Padding="16,8"
+                                    HorizontalAlignment="Left" Cursor="Hand"/>
+
+                            <TextBlock Text="{Binding GoogleDriveSyncStatus}" Foreground="#CCCCCC" FontSize="11" Margin="0,6,0,8"/>
+
+                            <!-- Opsi Kredensial Kustom (Opsional) -->
+                            <Button Content="Opsi Lanjutan: Gunakan Kredensial Kustom &#x25BE;" Command="{Binding ToggleCustomCredentialsCommand}"
+                                    Background="Transparent" Foreground="#888899" BorderThickness="0" Padding="0,4"
+                                    HorizontalAlignment="Left" Cursor="Hand" FontSize="11"/>
+
+                            <StackPanel Visibility="{Binding ShowCustomCredentials, Converter={StaticResource BoolToVis}}" Margin="0,6,0,0">
+                                <TextBlock Text="Impor file credentials.json atau masukkan Client ID sendiri jika ingin menggunakan project Google Cloud pribadi:" 
+                                           FontSize="10.5" Foreground="#888888" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                <Button Content="Impor File credentials.json" Command="{Binding ImportCredentialsCommand}"
+                                        Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="10,5"
+                                        HorizontalAlignment="Left" Cursor="Hand" Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Client ID Kustom:" FontSize="10.5" Foreground="#888899" Margin="0,2"/>
+                                <TextBox Text="{Binding GoogleDriveClientId, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
+
+                                <TextBlock Text="Client Secret Kustom:" FontSize="10.5" Foreground="#888899" Margin="0,2"/>
+                                <TextBox Text="{Binding GoogleDriveClientSecret, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 5. Waktu Sholat & Pengingat (Prayer Times) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="&#x1F54C; Waktu Sholat &amp; Pengingat" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                <TextBlock Text="Jadwal sholat otomatis, pengingat sebelum &amp; sesudah adzan, dan jeda musik" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <CheckBox Content="Aktifkan fitur Waktu Sholat &amp; Pengingat" IsChecked="{Binding EnablePrayerTimes}"/>
+
+                        <StackPanel Visibility="{Binding EnablePrayerTimes, Converter={StaticResource BoolToVis}}" Margin="0,6,0,0">
+                            <!-- Lokasi / Kota -->
+                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,4,0,8">
+                                <StackPanel>
+                                    <TextBlock Text="Lokasi Kota:" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,6"/>
+                                    <Grid Margin="0,2,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0" ItemsSource="{Binding IndonesianCities}"
+                                                  SelectedItem="{Binding SelectedCity}"
+                                                  DisplayMemberPath="DisplayName"
+                                                  Margin="0,0,8,0" Height="28"/>
+                                        <Button Grid.Column="1" Content="&#x1F4CD; Deteksi Lokasi" Command="{Binding DetectLocationCommand}"
+                                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="10,4"
+                                                Cursor="Hand" ToolTip="Deteksi lokasi kota dan koordinat otomatis lewat IP"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding LocationDetectStatus}" Foreground="#AAAAAA" FontSize="10.5" 
+                                               Visibility="{Binding LocationDetectStatus, Converter={StaticResource StringNotEmptyToVis}}" Margin="0,2,0,4"/>
+                                    <TextBlock Text="{Binding TodayPrayerSchedule.HijriDate, StringFormat='Kalender Hijriah: {0}'}" 
+                                               Foreground="#8888AA" FontSize="11"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Pengingat Sebelum Sholat -->
+                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Content="Ingatkan sebelum waktu sholat tiba" 
+                                                  IsChecked="{Binding RemindBeforePrayer}" Margin="0"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                                    Visibility="{Binding RemindBeforePrayer, Converter={StaticResource BoolToVis}}">
+                                            <ComboBox ItemsSource="{Binding AvailableMinutesOptions}"
+                                                      SelectedItem="{Binding RemindBeforeMinutes}"
+                                                      Width="60" Height="26" Margin="4,0"/>
+                                            <TextBlock Text="menit sebelumnya" VerticalAlignment="Center" FontSize="11" Foreground="#CCCCCC"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="Memberikan waktu bersiap-siap wudhu atau menuju masjid sebelum adzan berkumandang." 
+                                               FontSize="10.5" Foreground="#777788" Margin="22,2,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Pengingat Saat Masuk Waktu Sholat (Adzan) -->
+                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <CheckBox Content="Ingatkan tepat saat masuk waktu sholat (Adzan)" 
+                                              IsChecked="{Binding RemindAtPrayerTime}" Margin="0"/>
+                                    <TextBlock Text="Menampilkan kartu notifikasi Dynamic Island dan notifikasi Windows saat adzan tiba." 
+                                               FontSize="10.5" Foreground="#777788" Margin="22,2,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Pengingat Sesudah Sholat -->
+                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Content="Ingatkan sesudah waktu sholat berlalu" 
+                                                  IsChecked="{Binding RemindAfterPrayer}" Margin="0"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                                    Visibility="{Binding RemindAfterPrayer, Converter={StaticResource BoolToVis}}">
+                                            <ComboBox ItemsSource="{Binding AvailableMinutesOptions}"
+                                                      SelectedItem="{Binding RemindAfterMinutes}"
+                                                      Width="60" Height="26" Margin="4,0"/>
+                                            <TextBlock Text="menit sesudahnya" VerticalAlignment="Center" FontSize="11" Foreground="#CCCCCC"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="Notifikasi konfirmasi ramah: 'Sudahkah Anda menunaikan sholat?' agar tidak terlewat." 
+                                               FontSize="10.5" Foreground="#777788" Margin="22,2,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Opsi Suara & Integrasi Musik -->
+                            <Border Background="#141418" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" Content="Bunyikan nada dering / chime saat ada pengingat" 
+                                                  IsChecked="{Binding PrayerSoundAlert}" Margin="0"/>
+                                        <Button Grid.Column="1" Content="&#x1F50A; Tes Suara" Command="{Binding TestPrayerChimeCommand}"
+                                                Background="#25252C" Foreground="#FFFFFF" BorderThickness="0" Padding="8,3"
+                                                Cursor="Hand" FontSize="11"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding TestNotificationStatus}" Foreground="#81C784" FontSize="10.5" 
+                                               Visibility="{Binding TestNotificationStatus, Converter={StaticResource StringNotEmptyToVis}}" Margin="22,0,0,4"/>
+
+                                    <CheckBox Content="Jeda musik otomatis saat masuk waktu sholat (Auto-Pause)" 
+                                              IsChecked="{Binding PrayerAutoPauseMusic}" Margin="0,4"/>
+                                    <TextBlock Text="Otomatis menghentikan lagu saat adzan tiba sehingga Anda dapat langsung mendengarkan adzan dan sholat." 
+                                               FontSize="10.5" Foreground="#777788" Margin="22,0,0,6" TextWrapping="Wrap"/>
+
+                                    <CheckBox Content="Tampilkan Waktu Sholat di samping logo DRANOTCH saat idle" 
+                                              IsChecked="{Binding ShowPrayerInCompactNotch}" Margin="0,4"/>
+
+                                    <!-- Opsi Pisahkan Waktu Sholat -->
+                                    <Border Margin="0,6,0,0" Padding="10,8" Background="#181820" CornerRadius="6">
+                                        <StackPanel>
+                                            <CheckBox Content="Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"
+                                                      IsChecked="{Binding IsPrayerDetached}" Margin="0"/>
+                                            <TextBlock Text="Waktu Sholat akan muncul sebagai widget melayang tersendiri yang dapat dipindahkan ke mana saja."
+                                                       FontSize="11" Foreground="#888899" TextWrapping="Wrap" Margin="22,3,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Pratinjau Jadwal Hari Ini -->
+                            <Border Background="#111115" BorderBrush="#262632" BorderThickness="1" CornerRadius="6" Padding="10,8">
+                                <StackPanel>
+                                    <TextBlock Text="Pratinjau Jadwal Sholat Hari Ini:" FontWeight="SemiBold" Foreground="#CCCCCC" FontSize="11.5" Margin="0,0,0,6"/>
+                                    <ItemsControl ItemsSource="{Binding TodayPrayerSchedule.Items}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#1A1A22" CornerRadius="5" Padding="7,4" Margin="0,0,6,4">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" Foreground="#8888AA" FontSize="11" Margin="0,0,4,0"/>
+                                                        <TextBlock Text="{Binding FormattedTime}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </StackPanel>
                 </Border>

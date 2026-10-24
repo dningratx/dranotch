@@ -358,6 +358,33 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <!-- Style untuk Badge 5 Ikon Notch saat Hover -->
+        <Style x:Key="NotchIconBadgeStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource MetallicIconBadgeBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MetallicIconBadgeBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="CornerRadius" Value="11"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2D2D3D"/>
+                    <Setter Property="BorderBrush" Value="#80FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style untuk Pill Waktu Sholat di Bawah saat Hover -->
+        <Style x:Key="NotchPrayerPillStyle" TargetType="Border">
+            <Setter Property="Background" Value="#121218"/>
+            <Setter Property="BorderBrush" Value="#2C2C3A"/>
+            <Setter Property="BorderThickness" Value="1.2"/>
+            <Setter Property="CornerRadius" Value="13"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1A1A24"/>
+                    <Setter Property="BorderBrush" Value="#50506E"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <!-- Main Outer Container Attached to Top Bezel with Mac-Style Concave Notch Ears & DropShadow -->
@@ -384,6 +411,7 @@
                               Foreground="#FFFFFF" Visibility="{Binding IsCompactMode, Converter={StaticResource BoolToVis}}"/>
                     <MenuItem Header="Perkecil ke Notch" Command="{Binding SetModeCommand}" CommandParameter="Compact"
                               Foreground="#FFFFFF" Visibility="{Binding IsExpandedMode, Converter={StaticResource BoolToVis}}"/>
+                    <MenuItem Header="{Binding PinMenuText}" Command="{Binding TogglePinCommand}" Foreground="#FFFFFF"/>
                     <MenuItem Header="Pengaturan" Command="{Binding OpenSettingsCommand}" Foreground="#FFFFFF"/>
                     <Separator Background="#282834"/>
                     <MenuItem Header="Tutup / Keluar Aplikasi" Command="{Binding ExitApplicationCommand}" Foreground="#FF6666"/>
@@ -391,482 +419,339 @@
             </Border.ContextMenu>
 
             <Grid>
-                <!-- ================= MODE 1A: COMPACT (LUXURY MAC NOTCH: 5 KOMPONEN MODULAR) ================= -->
-                <Grid x:Name="CompactView" Visibility="{Binding ShowCompactMusicView, Converter={StaticResource BoolToVis}}" 
-                      Height="52" MaxWidth="1540" Margin="18,4,14,6" HorizontalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <!-- Kolom 0: Komponen 1 - Musik (Album art, Track info & Standby lyrics, & Tombol Play/Pause) -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 1: Pembatas Garis 1 (Musik | Radio Online) -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 2: Komponen 2 - Radio Online (Di Sebelah Kanan Music Player) -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 3: Pembatas Garis 2 (Radio Online | Waktu Sholat) -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 4: Komponen 3 - Waktu Sholat -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 5: Pembatas Garis 3 (Waktu Sholat | To-Do) -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 6: Komponen 4 - To-Do List -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 7: Pembatas Garis 4 (To-Do | Browser) -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 8: Komponen 5 - Browser Mengambang -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Kolom 9: Tombol Pin, Perluas (Expand ▾), & Tombol Kecilkan Notch di ujung kanan -->
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <!-- ================= MODE 1: COMPACT (DYNAMIC ISLAND NOTCH: 5 KOMPONEN HOVER) ================= -->
+                <!-- Saat idle: Hanya logo DRANOTCH yang muncul. Saat dihover: 5 ikon komponen muncul ke kiri (musik, radio), kanan (todo, browser), dan bawah (waktu sholat) -->
+                <Grid x:Name="CompactView" Visibility="{Binding IsCompactMode, Converter={StaticResource BoolToVis}}" 
+                      Margin="14,4,14,6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <!-- Baris 0: Logo DRANOTCH di tengah, Musik & Radio di kiri, To-Do & Browser di kanan -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Baris 1: Waktu Sholat di bawah -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- KOMPONEN 1: MUSIC PLAYER (Mac Dynamic Notch Style) -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- Luxury Mac Squircle Album Art (Selalu tampil; saat dikecilkan & musik tidak aktif hanya ikon ini yang muncul) -->
-                        <Border Width="46" Height="46" CornerRadius="12" Margin="2,0,2,0" ClipToBounds="True" Cursor="Hand"
-                                Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1.2"
-                                ToolTip="{Binding CurrentTrack.Title, FallbackValue='Pemutar Musik DRANOTCH (Klik untuk buka YouTube Music)'}">
+                    <!-- BARIS 0: HORIZONTAL COMPONENT ROW DENGAN LOGO DI TENGAH -->
+                    <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <!-- Kolom 0: Komponen Kiri (Musik & Radio) -->
+                            <ColumnDefinition Width="Auto"/>
+                            <!-- Kolom 1: Logo DRANOTCH (Pusat / Tengah) -->
+                            <ColumnDefinition Width="Auto"/>
+                            <!-- Kolom 2: Komponen Kanan (Browser & To-Do List) -->
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- SISI KIRI: KOMPONEN 1 (MUSIK LENGKAP DI PALING KIRI) & KOMPONEN 2 (RADIO ONLINE) (Muncul saat Hover) -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
+                                    >
+                            <!-- 1. Pemutar Musik Lengkap (Di Paling Kiri: Album Art, Judul & Artis, Lirik Standby, Play/Pause, & Tombol YT Music) -->
+                            <Border Style="{StaticResource NotchPrayerPillStyle}" Height="44" Margin="2,0,6,0" Padding="6,3,8,3"
+                                    Visibility="{Binding IsMusicWindowOpen, Converter={StaticResource InverseBoolToVis}}"
+                                    VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- Album Art / Ikon Musik Squircle (Klik untuk perluas pemutar musik & lirik) -->
+                                    <Border Width="34" Height="34" CornerRadius="9" ClipToBounds="True" Cursor="Hand"
+                                            Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1"
+                                            ToolTip="{Binding MusicNotchTooltip}">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenMusicWindowCommand}"/>
+                                        </Border.InputBindings>
+                                        <Grid>
+                                            <Path Data="{StaticResource LuxuryMusicNoteGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                                  Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Visibility="{Binding HasTrackThumbnail, Converter={StaticResource InverseBoolToVis}}"/>
+                                            <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   Visibility="{Binding HasTrackThumbnail, Converter={StaticResource BoolToVis}}"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Judul Lagu, Artis & Lirik Real-Time Saat Standby (Klik untuk perluas pemutar musik & lirik) -->
+                                    <StackPanel VerticalAlignment="Center" Margin="8,0,6,0" Width="135" Cursor="Hand"
+                                                Background="Transparent"
+                                                ToolTip="{Binding MusicNotchTooltip}">
+                                        <StackPanel.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenMusicWindowCommand}"/>
+                                        </StackPanel.InputBindings>
+                                        <!-- Baris 1: Judul dan Artis -->
+                                        <DockPanel LastChildFill="True">
+                                            <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue=''}" 
+                                                       Foreground="#A0A0B2" FontSize="11" FontWeight="SemiBold" DockPanel.Dock="Right" 
+                                                       VerticalAlignment="Center" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" 
+                                                       Foreground="#FFFFFF" FontWeight="Bold" FontSize="13"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </DockPanel>
+
+                                        <!-- Baris 2: Lirik Real-Time Saat Standby -->
+                                        <Grid Margin="0,1,0,0" ToolTip="{Binding StandbyLyric}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Path Grid.Column="0" Data="{StaticResource LuxuryMusicNoteGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                                  Width="9.5" Height="9.5" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding StandbyLyric, FallbackValue='Siap memutar...'}" 
+                                                       Foreground="#E6E6F2" FontSize="11.5" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <!-- Tombol Play / Pause -->
+                                    <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" 
+                                            Width="32" Height="32" Padding="0" Margin="0,0,4,0" ToolTip="Putar / Jeda" VerticalAlignment="Center">
+                                        <Border Width="30" Height="30" CornerRadius="15" Background="{StaticResource MetallicIconBadgeBgBrush}" BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1">
+                                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <!-- Play icon (when paused) -->
+                                                <Path Data="M 0 0 L 10 6 L 0 12 Z" Fill="{StaticResource MetallicSilverBrush}" Margin="2,0,0,0"
+                                                      Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
+                                                <!-- Pause icon (when playing) -->
+                                                <Path Data="M 0 0 H 3 V 11 H 0 Z M 5.5 0 H 8.5 V 11 H 5.5 Z" Fill="{StaticResource MetallicSilverBrush}"
+                                                      Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
+                                            </Grid>
+                                        </Border>
+                                    </Button>
+
+                                    <!-- Tombol YT Music di dalam Komponen Musik -->
+                                    <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
+                                            ToolTip="Buka Pemutar YouTube Music" Padding="7,4" Margin="0" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="&#x25B6;" Foreground="#FF4D6D" FontSize="9" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                            <TextBlock Text="YT Music" FontSize="10.5" FontWeight="SemiBold" Foreground="#EDEDF5" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 1b. Tombol Ikon Musik Saja (Muncul saat Pemutar Musik dalam Mode Pelebaran / Pelepasan) -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,6,0" Cursor="Hand"
+                                    Visibility="{Binding IsMusicWindowOpen, Converter={StaticResource BoolToVis}}"
+                                    ToolTip="Pemutar Musik sedang dibuka (Klik untuk satukan kembali ke notch utama)">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding CloseMusicWindowCommand}"/>
+                                </Border.InputBindings>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryMusicNoteGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 2. Radio Online -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,6,0" Cursor="Hand"
+                                    ToolTip="{Binding RadioNotchTooltip}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenRadioCommand}"/>
+                                </Border.InputBindings>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Indikator Hijau saat Radio sedang Memutar -->
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                                             Visibility="{Binding IsRadioPlaying, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- TENGAH: LOGO DRANOTCH (Selalu Tampil; Saat Idle Hanya Ini yang Terlihat) -->
+                        <!-- TENGAH: LOGO DRANOTCH & WAKTU SHOLAT SAAT IDLE -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="44" Height="44" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,2,0" Cursor="Hand"
+                                ToolTip="DRANOTCH (Klik untuk melihat info tentang DRANOTCH)">
                             <Border.InputBindings>
-                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenYouTubeMusicCommand}"/>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenAboutCommand}"/>
                             </Border.InputBindings>
-                            <Grid>
-                                <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" Width="28" Height="28" Stretch="Uniform"
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" 
+                                       Width="28" Height="28" Stretch="Uniform"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <Image Source="{Binding CurrentTrack.Thumbnail}" Stretch="UniformToFill"
-                                       RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Grid>
                         </Border>
 
-                        <!-- Track Title, Live Standby Lyrics & Tombol Play/Pause (Muncul saat Notch penuh ATAU saat Musik sedang aktif diputar) -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                                    Visibility="{Binding ShowFullMusicInCompact, Converter={StaticResource BoolToVis}}">
-                            <StackPanel VerticalAlignment="Center" Margin="9,0,10,0" MaxWidth="290">
-                                <!-- Baris 1: Judul dan Artis -->
-                                <DockPanel LastChildFill="True">
-                                    <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue=''}" 
-                                               Foreground="#A0A0B2" FontSize="12.5" FontWeight="SemiBold" DockPanel.Dock="Right" 
-                                               VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='DRANOTCH'}" 
-                                               Foreground="#FFFFFF" FontWeight="Bold" FontSize="15"
-                                               TextTrimming="CharacterEllipsis"/>
-                                </DockPanel>
 
-                                <!-- Baris 2: Lirik Real-Time Saat Standby -->
-                                <Grid Margin="0,2,0,0" ToolTip="{Binding StandbyLyric}">
+                            <!-- Waktu Sholat di Samping Logo DRANOTCH saat Idle (Dapat diatur tampil/tidak di Pengaturan) -->
+                            <Border Style="{StaticResource NotchPrayerPillStyle}"
+                                    Height="44" Margin="6,0,2,0" Padding="8,4,10,4" Cursor="Hand"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding ShowIdlePrayerBesideLogo, Converter={StaticResource BoolToVis}}"
+                                    ToolTip="{Binding PrayerScheduleTooltip}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
+                                </Border.InputBindings>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border Width="26" Height="26" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
+                                            BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,7,0" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                              Width="13.5" Height="13.5" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="5" Padding="5,1.5" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#30D158" FontSize="11" FontWeight="Bold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- SISI KANAN: KOMPONEN 4 (BROWSER) & KOMPONEN 5 (TO-DO LIST LENGKAP DI PALING KANAN) (Muncul saat Hover) -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
+                                    >
+                            <!-- 4. Browser Mengambang (Di sebelah kanan Logo DRANOTCH) -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="6,0,2,0" Cursor="Hand"
+                                    ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFloatingBrowserCommand}"/>
+                                </Border.InputBindings>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
+                                          StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Indikator Hijau saat Browser sedang Terbuka -->
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                                             Visibility="{Binding IsBrowserWindowOpen, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 5. To-Do List Lengkap (Di Bagian Paling Sebelah Kanan: Quick Complete, Badge Jumlah, & Live Ticker) -->
+                            <!-- 5b. Tombol Ikon To-Do List Saja (Muncul saat To-Do List dalam Mode Pelebaran / Pelepasan) -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="6,0,2,0" Cursor="Hand"
+                                    Visibility="{Binding IsTodoDetachedWindowVisible, Converter={StaticResource BoolToVis}}"
+                                    ToolTip="To-Do List sedang dibuka (Klik untuk satukan kembali ke notch utama)">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding AttachTodoCommand}"/>
+                                </Border.InputBindings>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"/>
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource NotchPrayerPillStyle}" Height="44" Margin="6,0,2,0" Padding="8,4,10,4" Cursor="Hand"
+                                    Visibility="{Binding IsTodoDetachedWindowVisible, Converter={StaticResource InverseBoolToVis}}"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{Binding CurrentTickerText, StringFormat='To-Do: {0} (Klik untuk buka daftar tugas)'}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenTodoCommand}"/>
+                                </Border.InputBindings>
+                                <Grid VerticalAlignment="Center">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Path Grid.Column="0" Data="{StaticResource LuxuryMusicNoteGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                          Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding StandbyLyric, FallbackValue='Siap memutar...'}" 
-                                               Foreground="#E6E6F2" FontSize="13" FontWeight="SemiBold"
-                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                </Grid>
-                            </StackPanel>
 
-                            <!-- Tombol Play / Pause (Luxury Satin Glass Circle) -->
-                            <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" 
-                                    Width="40" Height="40" Padding="0" ToolTip="Putar / Jeda" VerticalAlignment="Center" Margin="0,0,2,0">
-                                <Border Width="36" Height="36" CornerRadius="18" Background="{StaticResource MetallicIconBadgeBgBrush}" BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1">
-                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <!-- Play icon (when paused) -->
-                                        <Path Data="M 0 0 L 12 7 L 0 14 Z" Fill="{StaticResource MetallicSilverBrush}" Margin="2,0,0,0"
-                                              Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
-                                        <!-- Pause icon (when playing) -->
-                                        <Path Data="M 0 0 H 3.5 V 13 H 0 Z M 6.5 0 H 10 V 13 H 6.5 Z" Fill="{StaticResource MetallicSilverBrush}"
-                                              Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
+                                    <!-- Tombol Cepat Selesai jika ada tugas tertunda -->
+                                    <Button Grid.Column="0" Command="{Binding CompleteCurrentTickerCommand}"
+                                            ToolTip="Tandai tugas pertama selesai" Style="{StaticResource ControlButtonStyle}"
+                                            Padding="0" Width="30" Height="30" VerticalAlignment="Center"
+                                            Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
+                                        <Border Width="30" Height="30" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
+                                                BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1">
+                                            <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                                  Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Button>
+
+                                    <!-- Ikon Luxury To-Do jika tidak ada tugas tertunda -->
+                                    <Border Grid.Column="0" Width="30" Height="30" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
+                                            BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" VerticalAlignment="Center"
+                                            Visibility="{Binding HasPendingTodos, Converter={StaticResource InverseBoolToVis}}">
+                                        <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                              Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Detail Tugas: Badge Jumlah Tugas + Marquee Live Ticker -->
+                                    <Grid Grid.Column="1" Margin="8,0,2,0" Width="225" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Badge Jumlah Tugas (misal 3) -->
+                                        <Border Grid.Column="0" Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="6" Padding="5,1.5" Margin="0,0,6,0"
+                                                VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
+                                            <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#E8E8F2" FontSize="11" FontWeight="Bold"/>
+                                        </Border>
+
+                                        <!-- Teks Judul Tugas yang Berjalan dari Kanan ke Kiri -->
+                                        <helpers:MarqueeTextBlock Grid.Column="1" Text="{Binding CurrentTickerText}" 
+                                                                  Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"
+                                                                  Speed="36" VerticalAlignment="Center"/>
                                     </Grid>
-                                </Border>
-                            </Button>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- PEMBATAS GARIS 1 (Snap Divider): Musik | Radio Online -->
-                    <Border Grid.Column="1" Width="1.2" Height="32" Background="#282836" Margin="7,0" VerticalAlignment="Center"
-                            ToolTip="Batas modular komponen Musik &amp; Radio Online"/>
-
-                    <!-- KOMPONEN 2: RADIO ONLINE (Di Sebelah Kanan Music Player) -->
-                    <Border Grid.Column="2" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="2,0,2,0" Padding="8,4" Cursor="Hand"
-                            ToolTip="{Binding RadioNotchTooltip}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenRadioCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <!-- Luxury Silver Metallic Radio Badge (Selalu tampil) -->
-                            <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                      Width="15.5" Height="15.5" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <!-- Detail Radio (Muncul saat Notch penuh ATAU saat Radio sedang aktif) -->
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,4,0"
-                                        Visibility="{Binding ShowFullRadioInCompact, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding RadioCompactLabel}" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold"
-                                           VerticalAlignment="Center" MaxWidth="115" TextTrimming="CharacterEllipsis"/>
-                                <!-- Quick Play / Pause Radio Button -->
-                                <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding ToggleRadioPlayPauseCommand}"
-                                        Width="26" Height="26" Padding="0" Margin="6,0,0,0" ToolTip="Putar / Jeda Radio Online" VerticalAlignment="Center">
-                                    <Border Width="22" Height="22" CornerRadius="11" Background="#222230" BorderBrush="#36364A" BorderThickness="1">
-                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Path Data="M 0 0 L 7 4.2 L 0 8.4 Z" Fill="{StaticResource MetallicSilverBrush}" Margin="1.5,0,0,0"
-                                                  Visibility="{Binding IsRadioPlaying, Converter={StaticResource InverseBoolToVis}}"/>
-                                            <Path Data="M 0 0 H 2.2 V 8 H 0 Z M 4 0 H 6.2 V 8 H 4 Z" Fill="#30D158"
-                                                  Visibility="{Binding IsRadioPlaying, Converter={StaticResource BoolToVis}}"/>
-                                        </Grid>
-                                    </Border>
-                                </Button>
-                                <Ellipse Width="6" Height="6" Fill="#30D158" Margin="6,0,0,0" VerticalAlignment="Center"
-                                         Visibility="{Binding IsRadioActiveOrOpen, Converter={StaticResource BoolToVis}}"
-                                         ToolTip="{Binding RadioStatusMessage}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- PEMBATAS GARIS 2 (Snap Divider): Radio Online | Waktu Sholat -->
-                    <Border Grid.Column="3" Width="1.2" Height="32" Background="#282836" Margin="7,0" VerticalAlignment="Center"
-                            Visibility="{Binding ShowPrayerDivider1, Converter={StaticResource BoolToVis}}"
-                            ToolTip="Batas modular komponen Radio Online &amp; Waktu Sholat"/>
-
-                    <!-- KOMPONEN 3: WAKTU SHOLAT (Selalu muncul utuh walaupun idle/dikecilkan) -->
-                    <Border Grid.Column="4" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="2,0,2,0" Padding="9,4,12,4" Cursor="Hand"
-                            Visibility="{Binding ShowCompactPrayerPill, Converter={StaticResource BoolToVis}}"
-                            ToolTip="{Binding PrayerScheduleTooltip}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <!-- Luxury Silver Metallic Prayer Icon Badge -->
-                            <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,8,0" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                      Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,7,0"/>
-                            <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="6" Padding="6,2" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#D4D4E4" FontSize="11.5" FontWeight="SemiBold"/>
+                                </Grid>
                             </Border>
                         </StackPanel>
-                    </Border>
+                    </Grid>
 
-                    <!-- PEMBATAS GARIS 3 (Snap Divider): Waktu Sholat | To-Do List -->
-                    <Border Grid.Column="5" Width="1.2" Height="32" Background="#282836" Margin="7,0" VerticalAlignment="Center"
-                            Visibility="{Binding ShowPrayerDivider2, Converter={StaticResource BoolToVis}}"
-                            ToolTip="Batas modular komponen Waktu Sholat &amp; To-Do"/>
+                    <!-- BARIS 1: SEJAJAR WAKTU SHOLAT (Sebelah Kiri: Pengaturan | Tengah: Waktu Sholat | Sebelah Kanan: Versi) -->
+                    <Grid Grid.Row="1" Grid.IsSharedSizeScope="True" Margin="0,6,0,2"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- KOMPONEN 4: TO-DO LIST (Ticker) -->
-                    <Border Grid.Column="6" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="2,0,2,0" Padding="8,4" Cursor="Hand"
-                            Visibility="{Binding ShowTodoTicker, Converter={StaticResource BoolToVis}}"
-                            ToolTip="{Binding CurrentTickerText, StringFormat='To-Do: {0} (Klik untuk buka panel)'}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding SetModeCommand}" CommandParameter="Expanded"/>
-                        </Border.InputBindings>
-                        <Grid VerticalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <!-- Checkmark / Quick Complete Silver Metallic Badge -->
-                                <ColumnDefinition Width="Auto"/>
-                                <!-- Detail Ticker (Muncul saat Notch penuh ATAU saat ada tugas aktif) -->
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <!-- Sebelah Kiri: Tombol Pengaturan -->
+                        <Border Grid.Column="0" Style="{StaticResource NotchPrayerPillStyle}"
+                                Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
+                                Width="30" Height="30" Margin="0,0,6,0" Padding="0" Cursor="Hand"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                ToolTip="Pengaturan DRANOTCH">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenSettingsCommand}"/>
+                            </Border.InputBindings>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="&#x2699;" Foreground="#E8E8F2" FontSize="13.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-                            <!-- Tombol Cepat Selesai jika ada tugas tertunda (Silver Metallic Squircle Badge) -->
-                            <Button Grid.Column="0" Command="{Binding CompleteCurrentTickerCommand}"
-                                    ToolTip="Tandai tugas pertama selesai" Style="{StaticResource ControlButtonStyle}"
-                                    Padding="0" Width="28" Height="28" VerticalAlignment="Center"
-                                    Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                                <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                        BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1">
-                                    <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                          Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Button>
-
-                            <!-- Ikon Luxury To-Do jika tidak ada tugas tertunda (Proportional Silver Metallic Badge) -->
-                            <Border Grid.Column="0" Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" VerticalAlignment="Center"
-                                    Visibility="{Binding HasPendingTodos, Converter={StaticResource InverseBoolToVis}}">
-                                <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                      Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-
-                            <!-- Detail Tugas (Muncul saat Notch penuh ATAU saat To-Do memiliki tugas aktif) -->
-                            <Grid Grid.Column="1" Margin="8,0,4,0" MinWidth="145" MaxWidth="255" VerticalAlignment="Center"
-                                  Visibility="{Binding ShowFullTodoInCompact, Converter={StaticResource BoolToVis}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Badge Jumlah Tugas (misal 3) -->
-                                <Border Grid.Column="0" Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="6" Padding="5,1.5" Margin="0,0,6,0"
-                                        VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#E8E8F2" FontSize="11" FontWeight="Bold"/>
-                                </Border>
-
-                                <!-- Teks Judul Tugas yang Berjalan dari Kanan ke Kiri Terus Bersambung Lintas Kategori -->
-                                <helpers:MarqueeTextBlock Grid.Column="1" Text="{Binding CurrentTickerText}" 
-                                                          Foreground="#FFFFFF" FontSize="13.5" FontWeight="SemiBold"
-                                                          Speed="36" VerticalAlignment="Center"/>
-                            </Grid>
-                        </Grid>
-                    </Border>
-
-                    <!-- PEMBATAS GARIS 4 (Snap Divider): To-Do List | Browser -->
-                    <Border Grid.Column="7" Width="1.2" Height="32" Background="#282836" Margin="7,0" VerticalAlignment="Center"
-                            ToolTip="Batas modular komponen To-Do List &amp; Browser"/>
-
-                    <!-- KOMPONEN 5: BROWSER MENGAMBANG -->
-                    <Border Grid.Column="8" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="2,0,8,0" Padding="8,4" Cursor="Hand"
-                            ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFloatingBrowserCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <!-- Luxury Silver Metallic Globe Badge (Selalu tampil) -->
-                            <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
-                                      StrokeThickness="2.0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Width="15.5" Height="15.5" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <!-- Detail Teks Browser (Muncul saat Notch penuh ATAU saat Browser sedang aktif dibuka) -->
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,5,0"
-                                        Visibility="{Binding ShowFullBrowserInCompact, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Browser" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold" VerticalAlignment="Center"/>
-                                <Ellipse Width="6" Height="6" Fill="#30D158" Margin="7,0,0,0" VerticalAlignment="Center"
-                                         Visibility="{Binding IsBrowserWindowOpen, Converter={StaticResource BoolToVis}}"
-                                         ToolTip="Browser Mengambang sedang aktif"/>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- TOMBOL KOMPONEN, PIN, PERLUAS PANEL (Expand ▾), & TOMBOL MENGECILKAN NOTCH DI UJUNG SEBELAH KANAN -->
-                    <StackPanel Grid.Column="9" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleComponentsMenuCommand}"
-                                ToolTip="Munculkan komponen notch yang ditutup" Visibility="{Binding HasClosedComponents, Converter={StaticResource BoolToVis}}"
-                                Padding="10,8" Margin="2,0,4,0">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryComponentsGridGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                      Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,3,0"/>
-                                <TextBlock Text="+" FontSize="12.5" FontWeight="Bold" Foreground="#FFAA44" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePinCommand}"
-                                ToolTip="{Binding PinButtonTooltip}" Padding="10,8" Margin="2,0,3,0">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="📌" FontSize="11.5" VerticalAlignment="Center"/>
-                                <Ellipse Width="5" Height="5" Fill="#30D158" Margin="4,0,0,0" VerticalAlignment="Center"
-                                         Visibility="{Binding IsPinned, Converter={StaticResource BoolToVis}}"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" 
-                                CommandParameter="Expanded" Padding="11,10" ToolTip="Perluas Panel" Margin="1,0,3,0">
-                            <Path Data="M 0,0 L 5.5,5.5 L 11,0" Stroke="{StaticResource MetallicSilverBrush}"
-                                  StrokeThickness="2.0" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
-                        <!-- Tombol Mengecilkan / Memperbesar Notch di ujung sebelah kanan (Menggantikan tombol Close di Gambar 1) -->
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleMiniModeCommand}"
-                                Padding="10,9" ToolTip="{Binding MiniModeButtonTooltip}" Margin="1,0,0,0">
-                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <!-- Ikon Mengecilkan Notch (Panah Masuk ›‹ saat Notch sedang Penuh) -->
-                                <Path Data="M 0,1 L 4,5 L 0,9 M 11,1 L 7,5 L 11,9" Stroke="{StaticResource MetallicSilverBrush}"
-                                      StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Visibility="{Binding IsIdleMiniMode, Converter={StaticResource InverseBoolToVis}}"/>
-                                <!-- Ikon Memperbesar Notch (Panah Keluar ‹› saat Notch sedang Dikecilkan) -->
-                                <Path Data="M 4,1 L 0,5 L 4,9 M 7,1 L 11,5 L 7,9" Stroke="#30D158"
-                                      StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Visibility="{Binding IsIdleMiniMode, Converter={StaticResource BoolToVis}}"/>
-                            </Grid>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-
-                <!-- ================= MODE 1B: COMPACT (TODO ONLY NOTCH) ================= -->
-                <Grid x:Name="CompactTodoView" Visibility="{Binding ShowCompactTodoOnlyView, Converter={StaticResource BoolToVis}}" 
-                      Height="52" MaxWidth="1180" Margin="18,4,14,6" HorizontalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- To-Do Icon Badge (Mac Squircle Silver Metallic) -->
-                    <Border Grid.Column="0" Width="46" Height="46" CornerRadius="12" Margin="2,0,10,0" Cursor="Hand"
-                            Background="{StaticResource MetallicIconBadgeBgBrush}" BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1.2">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding SetModeCommand}" CommandParameter="Expanded"/>
-                        </Border.InputBindings>
-                        <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                              Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-
-                    <!-- Ticker Task Info (Click to Expand - Muncul saat Notch penuh ATAU ada tugas aktif) -->
-                    <Border Grid.Column="1" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="0,0,10,0" Padding="12,4" MinWidth="180" Cursor="Hand"
-                            Visibility="{Binding ShowFullTodoInCompact, Converter={StaticResource BoolToVis}}"
-                            ToolTip="{Binding CurrentTickerText, StringFormat='To-Do: {0} (Klik untuk buka daftar)'}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding SetModeCommand}" CommandParameter="Expanded"/>
-                        </Border.InputBindings>
-                        <Grid VerticalAlignment="Center">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Badge Jumlah Tugas -->
-                            <Border Grid.Column="0" Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="6" Padding="6,2" Margin="0,0,8,0"
-                                    VerticalAlignment="Center" Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding CurrentTickerBadge}" Foreground="#FFFFFF" FontSize="11.5" FontWeight="Bold"/>
-                            </Border>
-
-                            <helpers:MarqueeTextBlock Grid.Column="1" Text="{Binding CurrentTickerText}" 
-                                                      Foreground="#FFFFFF" FontSize="13.5" FontWeight="SemiBold"
-                                                      Speed="36" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-
-                    <!-- Quick Complete Button -->
-                    <Button Grid.Column="2" Command="{Binding CompleteCurrentTickerCommand}"
-                            ToolTip="Tandai tugas selesai" Style="{StaticResource ControlButtonStyle}"
-                            Width="36" Height="36" VerticalAlignment="Center" Margin="0,0,8,0"
-                            Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                        <Border Width="30" Height="30" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1.2">
-                            <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                  Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                    </Button>
 
-                    <!-- Prayer Times Pill (Compact Mode - Selalu muncul walaupun idle) -->
-                    <Border Grid.Column="3" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="0,0,2,0" Padding="9,4,12,4" Cursor="Hand"
-                            Visibility="{Binding ShowCompactPrayerPill, Converter={StaticResource BoolToVis}}"
-                            ToolTip="{Binding PrayerScheduleTooltip}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,8,0" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                      Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="6" Padding="5,2" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#D4D4E4" FontSize="11.5" FontWeight="SemiBold"/>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Pembatas Garis: To-Do/Sholat | Radio Online -->
-                    <Border Grid.Column="4" Width="1.2" Height="32" Background="#282836" Margin="7,0" VerticalAlignment="Center"
-                            ToolTip="Batas modular komponen To-Do List &amp; Radio Online"/>
-
-                    <!-- Komponen Radio Online -->
-                    <Border Grid.Column="5" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="2,0,2,0" Padding="8,4" Cursor="Hand"
-                            ToolTip="{Binding RadioNotchTooltip}">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenRadioCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                      Width="15.5" Height="15.5" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,4,0"
-                                        Visibility="{Binding ShowFullRadioInCompact, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="{Binding RadioCompactLabel}" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold"
-                                           VerticalAlignment="Center" MaxWidth="115" TextTrimming="CharacterEllipsis"/>
-                                <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding ToggleRadioPlayPauseCommand}"
-                                        Width="26" Height="26" Padding="0" Margin="6,0,0,0" ToolTip="Putar / Jeda Radio Online" VerticalAlignment="Center">
-                                    <Border Width="22" Height="22" CornerRadius="11" Background="#222230" BorderBrush="#36364A" BorderThickness="1">
-                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Path Data="M 0 0 L 7 4.2 L 0 8.4 Z" Fill="{StaticResource MetallicSilverBrush}" Margin="1.5,0,0,0"
-                                                  Visibility="{Binding IsRadioPlaying, Converter={StaticResource InverseBoolToVis}}"/>
-                                            <Path Data="M 0 0 H 2.2 V 8 H 0 Z M 4 0 H 6.2 V 8 H 4 Z" Fill="#30D158"
-                                                  Visibility="{Binding IsRadioPlaying, Converter={StaticResource BoolToVis}}"/>
-                                        </Grid>
-                                    </Border>
-                                </Button>
-                                <Ellipse Width="6" Height="6" Fill="#30D158" Margin="6,0,0,0" VerticalAlignment="Center"
-                                         Visibility="{Binding IsRadioActiveOrOpen, Converter={StaticResource BoolToVis}}"
-                                         ToolTip="{Binding RadioStatusMessage}"/>
+                        <!-- Tengah: Komponen 3 (Waktu Sholat) -->
+                        <Border Grid.Column="1" Style="{StaticResource NotchPrayerPillStyle}" Visibility="{Binding EnablePrayerTimes, Converter={StaticResource BoolToVis}}"
+                                Height="30" Padding="8,2,10,2" Cursor="Hand"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                ToolTip="{Binding PrayerScheduleTooltip}">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
+                            </Border.InputBindings>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Ikon Bulan Sabit & Bintang Luxury -->
+                                <Border Width="22" Height="22" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
+                                        BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                          Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <!-- Nama Sholat Berikutnya -->
+                                <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <!-- Waktu / Jam Sholat -->
+                                <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <!-- Badge Hitung Mundur Sholat -->
+                                <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="5" Padding="5,1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#30D158" FontSize="10.5" FontWeight="Bold"/>
+                                </Border>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
 
-                    <!-- Pembatas Garis: Radio Online | Browser -->
-                    <Border Grid.Column="6" Width="1.2" Height="32" Background="#282836" Margin="7,0" VerticalAlignment="Center"
-                            ToolTip="Batas modular komponen Radio Online &amp; Browser"/>
-
-                    <!-- Komponen 4: Browser Mengambang -->
-                    <Border Grid.Column="7" Background="#121218" BorderBrush="#2C2C3A" BorderThickness="1.2"
-                            CornerRadius="15" Height="44" Margin="2,0,8,0" Padding="8,4" Cursor="Hand"
-                            ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)">
-                        <Border.InputBindings>
-                            <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFloatingBrowserCommand}"/>
-                        </Border.InputBindings>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="28" Height="28" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                    BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
-                                      StrokeThickness="2.0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                      Width="15.5" Height="15.5" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,5,0"
-                                        Visibility="{Binding ShowFullBrowserInCompact, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Browser" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold" VerticalAlignment="Center"/>
-                                <Ellipse Width="6" Height="6" Fill="#30D158" Margin="7,0,0,0" VerticalAlignment="Center"
-                                         Visibility="{Binding IsBrowserWindowOpen, Converter={StaticResource BoolToVis}}"
-                                         ToolTip="Browser Mengambang sedang aktif"/>
+                        <!-- Sebelah Kanan: Tombol Versi -->
+                        <Border Grid.Column="2" Style="{StaticResource NotchPrayerPillStyle}"
+                                Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
+                                Height="30" Margin="6,0,0,0" Padding="10,2" Cursor="Hand"
+                                HorizontalAlignment="Left" VerticalAlignment="Center"
+                                ToolTip="{Binding VersionButtonTooltip}">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenUpdateCommand}"/>
+                            </Border.InputBindings>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="&#x2B06;" Foreground="#30D158" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"
+                                           Visibility="{Binding HasAvailableUpdate, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Text="{Binding VersionButtonText}" Foreground="#E8E8F2" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Actions (Pin, Expand, Settings, & Tombol Mengecilkan Notch di ujung kanan) -->
-                    <StackPanel Grid.Column="8" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePinCommand}"
-                                ToolTip="{Binding PinButtonTooltip}" Padding="10,8" Margin="0,0,3,0">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="📌" FontSize="11.5" VerticalAlignment="Center"/>
-                                <Ellipse Width="5" Height="5" Fill="#30D158" Margin="4,0,0,0" VerticalAlignment="Center"
-                                         Visibility="{Binding IsPinned, Converter={StaticResource BoolToVis}}"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Expanded" Padding="11,10" ToolTip="Perluas To-Do">
-                            <Path Data="M 0,0 L 5.5,5.5 L 11,0" Stroke="{StaticResource MetallicSilverBrush}"
-                                  StrokeThickness="2.0" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" FontSize="13.5" Padding="10,7" ToolTip="Pengaturan" Margin="3,0,3,0"/>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleMiniModeCommand}"
-                                Padding="10,9" ToolTip="{Binding MiniModeButtonTooltip}" Margin="0">
-                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <Path Data="M 0,1 L 4,5 L 0,9 M 11,1 L 7,5 L 11,9" Stroke="{StaticResource MetallicSilverBrush}"
-                                      StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Visibility="{Binding IsIdleMiniMode, Converter={StaticResource InverseBoolToVis}}"/>
-                                <Path Data="M 4,1 L 0,5 L 4,9 M 7,1 L 11,5 L 7,9" Stroke="#30D158"
-                                      StrokeThickness="1.9" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                      Visibility="{Binding IsIdleMiniMode, Converter={StaticResource BoolToVis}}"/>
-                            </Grid>
-                        </Button>
-                    </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
-
                     <!-- ================= MODE 2: EXPANDED (SIDE-BY-SIDE: MUSIC & TO-DO) ================= -->
                 <Grid x:Name="ExpandedView" Visibility="{Binding IsExpandedMode, Converter={StaticResource BoolToVis}}" 
                       Width="{Binding ExpandedPanelWidth}" Margin="22,16,22,18">
@@ -889,7 +774,6 @@
                     <!-- ===== SISI KIRI: PEMUTAR MUSIK ===== -->
                     <Grid Grid.Column="0" Visibility="{Binding ShowMusicSection, Converter={StaticResource BoolToVis}}">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -925,7 +809,7 @@
                                            Foreground="#84849A" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
                             </StackPanel>
 
-                            <!-- Top actions (Update, Pin, YouTube Music, Lyrics, Komponen Symbol, Settings, Minimize, Close) -->
+                            <!-- Top actions (Update, YouTube Music, Minimize, Close) -->
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                 <Button Style="{StaticResource SmallPillButton}" 
                                         Command="{Binding OpenUpdateCommand}" 
@@ -933,211 +817,22 @@
                                         ToolTip="Versi baru tersedia! Klik untuk memperbarui DRANOTCH" 
                                         Background="#222228" Padding="6,3" Margin="0,0,3,0">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="✨" FontSize="10" Margin="0,0,3,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="&#x2728;" FontSize="10" Margin="0,0,3,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding AvailableUpdateVersion, StringFormat='Update {0}'}" 
                                                    Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePinCommand}" ToolTip="Pin agar tetap terbuka" Padding="5,3" Margin="0,0,3,0">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="📌" FontSize="10" VerticalAlignment="Center" Margin="0,0,2,0"/>
-                                        <TextBlock Text="Pin" FontSize="11" VerticalAlignment="Center">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#888899"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                                                            <Setter Property="Foreground" Value="#FFFFFF"/>
-                                                            <Setter Property="FontWeight" Value="SemiBold"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}" 
                                         ToolTip="Buka Pemutar YouTube Music untuk ganti lagu" Padding="6,3" Margin="0,0,3,0">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="9" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                        <TextBlock Text="&#x25B6;" Foreground="#FF4D6D" FontSize="9" VerticalAlignment="Center" Margin="0,0,3,0"/>
                                         <TextBlock Text="YT Music" FontSize="11" Foreground="#CCCCCC" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Lyrics" Content="Lirik" ToolTip="Mode Layar Lirik Penuh" Padding="6,3" Margin="0,0,3,0"/>
-                                
-                                <!-- Komponen Radio Online di sebelah kanan Music Player -->
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenRadioCommand}"
-                                        ToolTip="{Binding RadioNotchTooltip}" Padding="7,3" Margin="0,0,3,0">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                              Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                        <TextBlock Text="Radio" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                                        <Ellipse Width="5" Height="5" Fill="#30D158" Margin="4,0,0,0" VerticalAlignment="Center"
-                                                 Visibility="{Binding IsRadioActiveOrOpen, Converter={StaticResource BoolToVis}}"/>
-                                    </StackPanel>
-                                </Button>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="&#x21F2;" ToolTip="Menyatu kembali dengan notch utama" Padding="7,3" Margin="0"/>
 
-                                <!-- Tombol Komponen (Ikon Grid Silver Metallic) -->
-                                <Button x:Name="ComponentsButton" Style="{StaticResource SmallPillButton}" Command="{Binding ToggleComponentsMenuCommand}"
-                                        ToolTip="{Binding ComponentsButtonTooltip}" Padding="7,4" Margin="0,0,3,0">
-                                    <Path Data="{StaticResource LuxuryComponentsGridGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                          Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center"/>
-                                </Button>
 
-                                <!-- Popup Menu Komponen Notch -->
-                                <Popup x:Name="ComponentsPopup" IsOpen="{Binding IsComponentsMenuOpen, Mode=TwoWay}"
-                                       PlacementTarget="{Binding ElementName=ComponentsButton}"
-                                       Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                                    <Border Background="#14141A" BorderBrush="#282836" BorderThickness="1.2"
-                                            CornerRadius="14" Padding="12,10" Width="290" Margin="0,4,0,0">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="4" BlurRadius="12" Opacity="0.75"/>
-                                        </Border.Effect>
-                                        <StackPanel>
-                                            <!-- Popup Header -->
-                                            <DockPanel LastChildFill="True" Margin="0,0,0,8">
-                                                <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
-                                                        Command="{Binding ToggleComponentsMenuCommand}" Content="✕" Padding="4,1" FontSize="10"/>
-                                                <StackPanel>
-                                                    <TextBlock Text="Komponen Notch" Foreground="#FFFFFF" FontSize="12.5" FontWeight="Bold"/>
-                                                    <TextBlock Text="Atur dan munculkan kembali komponen" Foreground="#777788" FontSize="9.5"/>
-                                                </StackPanel>
-                                            </DockPanel>
 
-                                            <Border Height="1" Background="#242430" Margin="0,0,0,8"/>
-
-                                            <!-- Item 1: Radio Online (Di sebelah kanan Music Player) -->
-                                            <Border Background="#0E0E12" BorderBrush="#202028" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,0,0,6">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Path Data="{StaticResource LuxuryRadioIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                            <TextBlock Text="Radio Online" Foreground="#FFFFFF" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding RadioStatusSummary}" Foreground="#888899" FontSize="9.5" Margin="19,1,0,0" TextTrimming="CharacterEllipsis"/>
-                                                    </StackPanel>
-
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleRadioPlayPauseCommand}"
-                                                                ToolTip="Putar atau jeda siaran radio" Padding="7,3" Margin="2,0">
-                                                            <Grid>
-                                                                <TextBlock Text="Putar" FontSize="10.5" Visibility="{Binding IsRadioPlaying, Converter={StaticResource InverseBoolToVis}}"/>
-                                                                <TextBlock Text="Jeda" FontSize="10.5" Visibility="{Binding IsRadioPlaying, Converter={StaticResource BoolToVis}}"/>
-                                                            </Grid>
-                                                        </Button>
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleRadioWindowCommand}"
-                                                                ToolTip="Buka atau tutup jendela Radio Online" Padding="8,3" Margin="2,0">
-                                                            <TextBlock Text="{Binding RadioButtonActionText}" FontSize="10.5"/>
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-
-                                            <!-- Item 2: Waktu Sholat -->
-                                            <Border Background="#0E0E12" BorderBrush="#202028" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,0,0,6">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                            <TextBlock Text="Waktu Sholat" Foreground="#FFFFFF" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding NextPrayerCountdownBadge, StringFormat='Next: {0}'}" Foreground="#888899" FontSize="9.5" Margin="19,1,0,0"/>
-                                                    </StackPanel>
-
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachPrayerCommand}"
-                                                                ToolTip="Pasang kembali ke notch utama" Padding="6,3" Margin="2,0">
-                                                            <TextBlock Text="Di Notch" FontSize="10.5"/>
-                                                        </Button>
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}"
-                                                                ToolTip="Buka di jendela melayang" Padding="6,3" Margin="2,0">
-                                                            <TextBlock Text="Melayang" FontSize="10.5"/>
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-
-                                            <!-- Item 3: To-Do List -->
-                                            <Border Background="#0E0E12" BorderBrush="#202028" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,0,0,6">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                            <TextBlock Text="To-Do List" Foreground="#FFFFFF" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding TodoSummaryText}" Foreground="#888899" FontSize="9.5" Margin="19,1,0,0"/>
-                                                    </StackPanel>
-
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachTodoCommand}"
-                                                                ToolTip="Pasang kembali ke notch utama" Padding="6,3" Margin="2,0">
-                                                            <TextBlock Text="Di Notch" FontSize="10.5"/>
-                                                        </Button>
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachTodoCommand}"
-                                                                ToolTip="Buka di jendela melayang" Padding="6,3" Margin="2,0">
-                                                            <TextBlock Text="Melayang" FontSize="10.5"/>
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-
-                                            <!-- Item 4: Browser Mengambang -->
-                                            <Border Background="#0E0E12" BorderBrush="#202028" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,0,0,6">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
-                                                                  StrokeThickness="1.8" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                            <TextBlock Text="Browser Mengambang" Foreground="#FFFFFF" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="{Binding BrowserStatusSummary}" Foreground="#888899" FontSize="9.5" Margin="19,1,0,0"/>
-                                                    </StackPanel>
-
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleBrowserCommand}"
-                                                                ToolTip="Buka atau tutup jendela browser mengambang" Padding="8,3" Margin="2,0">
-                                                            <TextBlock Text="{Binding BrowserButtonActionText}" FontSize="10.5"/>
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-
-                                            <!-- Tombol Reset / Pulihkan Semua ke Notch -->
-                                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding RestoreAllComponentsCommand}"
-                                                    Background="#1F1F2A" Margin="0,2,0,0" Padding="8,5" HorizontalAlignment="Stretch">
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                    <TextBlock Text="↺" FontSize="11" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                                    <TextBlock Text="Munculkan Semua di Notch" FontSize="10.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
-                                        </StackPanel>
-                                    </Border>
-                                </Popup>
-
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan" Padding="5,3" Margin="0,0,3,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="▴" ToolTip="Tutup ke Compact"
-                                        Visibility="{Binding ShowMusicMinimizeButton, Converter={StaticResource BoolToVis}}" Padding="5,3" Margin="0,0,3,0"/>
-                                <Button Style="{StaticResource CloseAppButtonStyle}" Command="{Binding ExitApplicationCommand}" Content="✕" ToolTip="Tutup Aplikasi DRANOTCH"
-                                        Visibility="{Binding ShowMusicMinimizeButton, Converter={StaticResource BoolToVis}}" Padding="5,3" Margin="0"/>
                             </StackPanel>
                         </Grid>
 
@@ -1151,8 +846,8 @@
                                     <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
                                             ToolTip="Buka Pemutar YouTube Music" Background="#23171F" BorderBrush="#4A2534" BorderThickness="1.2"
                                             Padding="14,8" Cursor="Hand">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="&#x25B6;" Foreground="#FF4D6D" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                             <TextBlock Text="YT Music" Foreground="#FFD0DD" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
@@ -1192,53 +887,52 @@
                             </Grid>
                         </Grid>
 
-                        <!-- Media Controls (Previous, Play/Pause, Next) -->
-                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,8">
-                            <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding PreviousCommand}" Width="36" Height="36" ToolTip="Sebelumnya">
-                                <Path Data="M 0 0 H 2.5 V 12 H 0 Z M 11 0 L 3 6 L 11 12 Z" Fill="#EEEEEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Button>
-                            <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" 
-                                    Width="44" Height="44" Margin="12,0" Padding="0" ToolTip="Putar / Jeda">
-                                <Border Width="40" Height="40" CornerRadius="20" Background="#FFFFFF">
-                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <!-- Play icon (triangle) -->
-                                        <Path Data="M 0 0 L 13 8 L 0 16 Z" Fill="#000000" Margin="2,0,0,0"
-                                              Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
-                                        <!-- Pause icon (two bars) -->
-                                        <Path Data="M 0 0 H 4 V 14 H 0 Z M 7 0 H 11 V 14 H 7 Z" Fill="#000000"
-                                              Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
-                                    </Grid>
-                                </Border>
-                            </Button>
-                            <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding NextCommand}" Width="36" Height="36" ToolTip="Berikutnya">
-                                <Path Data="M 0 0 L 8 6 L 0 12 Z M 8.5 0 H 11 V 12 H 8.5 Z" Fill="#EEEEEE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Button>
-                        </StackPanel>
-
-                        <!-- Quick Tools (Offset, Import) -->
-                        <Grid Grid.Row="4" Margin="0,4,0,0">
+                        <!-- Satu Baris: Tombol Offset (Kiri), Control Play (Tengah), dan Import File (Kanan) -->
+                        <Grid Grid.Row="3" Margin="0,4,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Offset controls -->
+                            <!-- Kiri: Offset controls -->
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="Offset:" Foreground="#777788" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetSubtractCommand}" Content="-0.5s" ToolTip="Lirik terlambat (geser mundur)"/>
-                                <TextBlock Text="{Binding ManualOffsetSeconds, StringFormat='{}{0:0.0}s'}" Foreground="#FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="4,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetAddCommand}" Content="+0.5s" ToolTip="Lirik terlalu cepat (geser maju)"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetResetCommand}" Content="Reset" ToolTip="Reset offset ke 0s"/>
+                                <TextBlock Text="Offset:" Foreground="#777788" FontSize="10.5" VerticalAlignment="Center" Margin="0,0,3,0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetSubtractCommand}" Content="-0.5s" FontSize="10.5" Padding="6,3" Margin="1,0" ToolTip="Lirik terlambat (geser mundur)"/>
+                                <TextBlock Text="{Binding ManualOffsetSeconds, StringFormat='{}{0:0.0}s'}" Foreground="#FFFFFF" FontSize="10.5" VerticalAlignment="Center" Margin="3,0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetAddCommand}" Content="+0.5s" FontSize="10.5" Padding="6,3" Margin="1,0" ToolTip="Lirik terlalu cepat (geser maju)"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OffsetResetCommand}" Content="Reset" FontSize="10.5" Padding="6,3" Margin="1,0" ToolTip="Reset offset ke 0s"/>
                             </StackPanel>
 
-                            <!-- Import LRC / TXT -->
+                            <!-- Tengah: Media Controls (Previous, Play/Pause, Next) -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding PreviousCommand}" Width="30" Height="30" Padding="0" ToolTip="Sebelumnya">
+                                    <Path Data="M 0 0 H 2.5 V 12 H 0 Z M 11 0 L 3 6 L 11 12 Z" Fill="#EEEEEE" Width="10" Height="10" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+                                <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding TogglePlayPauseCommand}" 
+                                        Width="36" Height="36" Margin="6,0" Padding="0" ToolTip="Putar / Jeda">
+                                    <Border Width="34" Height="34" CornerRadius="17" Background="#FFFFFF">
+                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <!-- Play icon (triangle) -->
+                                            <Path Data="M 0 0 L 11 7 L 0 14 Z" Fill="#000000" Margin="2,0,0,0"
+                                                  Visibility="{Binding IsPlaying, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible, TargetNullValue=Visible}"/>
+                                            <!-- Pause icon (two bars) -->
+                                            <Path Data="M 0 0 H 3.5 V 12 H 0 Z M 6 0 H 9.5 V 12 H 6 Z" Fill="#000000"
+                                                  Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"/>
+                                        </Grid>
+                                    </Border>
+                                </Button>
+                                <Button Style="{StaticResource ControlButtonStyle}" Command="{Binding NextCommand}" Width="30" Height="30" Padding="0" ToolTip="Berikutnya">
+                                    <Path Data="M 0 0 L 8 6 L 0 12 Z M 8.5 0 H 11 V 12 H 8.5 Z" Fill="#EEEEEE" Width="10" Height="10" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Kanan: Import LRC / TXT -->
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ImportLyricsCommand}" Content="Impor File (.lrc/.txt)"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ImportLyricsCommand}" Content="Impor File (.lrc/.txt)" FontSize="10.5" Padding="7,3" Margin="0"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
-
                     <!-- ===== PEMISAH VERTIKAL 1: MUSIK | WAKTU SHOLAT ===== -->
                     <Border Grid.Column="1" Width="1" Background="#222228" Margin="10,2"
                             Visibility="{Binding ShowExpandedPrayerDivider1, Converter={StaticResource BoolToVis}}"/>
@@ -1260,7 +954,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Border Width="24" Height="24" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
                                             BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,7,0" VerticalAlignment="Center">
                                         <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
@@ -1454,7 +1148,7 @@
                                 <!-- Komponen Browser Mengambang -->
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenFloatingBrowserCommand}"
                                         ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)" Padding="8,4" Margin="0,0,5,0">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
                                               StrokeThickness="1.8" Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0"/>
                                         <TextBlock Text="Browser" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
@@ -1466,7 +1160,7 @@
                                         Content="✕" ToolTip="Tutup Aplikasi DRANOTCH" Padding="7,4" Margin="0"/>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Border Width="24" Height="24" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
                                         BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,7,0" VerticalAlignment="Center">
                                     <Path Data="{StaticResource LuxuryTodoIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
@@ -1480,7 +1174,7 @@
                                 <!-- Tombol Status Google Drive (Klik untuk Login / Sync) -->
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SyncGoogleDriveCommand}"
                                         ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="6,2" Margin="6,0,0,0">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <TextBlock Text="☁" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
@@ -1800,7 +1494,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Border Width="26" Height="26" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
                                         BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,7,0" VerticalAlignment="Center">
                                     <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"

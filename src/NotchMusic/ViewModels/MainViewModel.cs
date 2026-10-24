@@ -65,6 +65,7 @@ public class MainViewModel : ViewModelBase
     private DispatcherTimer? _idleTimer;
     private bool _isClickThrough;
     private bool _isHovering;
+    private bool _isHoveringWindow;
     private double _currentPositionSeconds;
     private double _durationSeconds;
     private string _formattedTime = "0:00 / 0:00";
@@ -88,6 +89,7 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenYouTubeMusic;
     public event Action? RequestOpenFloatingBrowser;
     public event Action? RequestOpenRadio;
+    public event Action? RequestOpenMusic;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
 
@@ -110,6 +112,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowIdleMiniView));
                 OnPropertyChanged(nameof(ShowCompactMusicView));
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
+                OnPropertyChanged(nameof(ShowComponentIcons));
+                OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
             }
         }
     }
@@ -117,6 +121,37 @@ public class MainViewModel : ViewModelBase
     public bool IsCompactMode => CurrentMode == PanelMode.Compact;
     public bool IsExpandedMode => CurrentMode == PanelMode.Expanded;
     public bool IsLyricsMode => CurrentMode == PanelMode.Lyrics;
+
+    public bool IsHovering
+    {
+        get => _isHovering;
+        private set
+        {
+            if (SetProperty(ref _isHovering, value))
+            {
+                OnPropertyChanged(nameof(ShowComponentIcons));
+                OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(IsNotchActive));
+            }
+        }
+    }
+
+    public bool ShowComponentIcons => IsCompactMode && (_isHovering || IsPinned);
+    public bool ShowIdlePrayerBesideLogo => IsCompactMode && !ShowComponentIcons && Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch;
+
+    public string MusicNotchTooltip => HasTrack
+        ? $"{CurrentTrack?.Title} - {CurrentTrack?.Artist}\nKlik untuk perluas pemutar & lirik"
+        : "Pemutar Musik DRANOTCH (Klik untuk perluas pemutar & lirik)";
+
+    public bool HasTrackThumbnail => CurrentTrack?.Thumbnail != null;
+
+    public string TodoNotchTooltip => HasPendingTodos
+        ? $"To-Do List: {PendingTodosCount} tugas aktif\nKlik untuk buka daftar tugas"
+        : "To-Do List DRANOTCH (Klik untuk buka daftar tugas)";
+
+    public string PendingTodoCountText => PendingTodosCount > 99 ? "99+" : PendingTodosCount.ToString();
+
+    public string PinMenuText => IsPinned ? "Lepas Pin Notch (Otomatis ke Logo saat Idle)" : "📌 Pin Notch (Tetap Tampilkan 5 Ikon)";
 
     public bool IsIdleMiniMode
     {
@@ -129,6 +164,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowIdleMiniView));
                 OnPropertyChanged(nameof(ShowCompactMusicView));
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
+                OnPropertyChanged(nameof(ShowComponentIcons));
+                OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
                 OnPropertyChanged(nameof(ShowFullMusicInCompact));
                 OnPropertyChanged(nameof(ShowFullRadioInCompact));
                 OnPropertyChanged(nameof(ShowFullTodoInCompact));
@@ -220,6 +257,7 @@ public class MainViewModel : ViewModelBase
 
     public bool IsPrayerClosed => IsPrayerDetached && !IsPrayerWindowOpen;
     public bool IsTodoClosed => IsTodoDetached && !IsTodoWindowOpen;
+    public bool IsTodoDetachedWindowVisible => IsTodoDetached && IsTodoWindowOpen;
     public bool HasClosedComponents => IsPrayerClosed || IsTodoClosed;
     public int ClosedComponentsCount => (IsPrayerClosed ? 1 : 0) + (IsTodoClosed ? 1 : 0);
     public string ComponentsButtonText => HasClosedComponents ? $"Komponen ({ClosedComponentsCount})" : "Komponen";
@@ -251,7 +289,38 @@ public class MainViewModel : ViewModelBase
     // Radio Online Properties (Di sebelah kanan Music Player)
     public IRadioService RadioService => _radioService;
     public ObservableCollection<RadioStation> RadioStations { get; } = new();
+    public bool IsMusicWindowOpen
+    {
+        get => Settings.IsMusicWindowOpen;
+        set
+        {
+            if (Settings.IsMusicWindowOpen != value)
+            {
+                Settings.IsMusicWindowOpen = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsMusicWindowOpen));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
     public ICollectionView FilteredRadioStations => _filteredRadioStations;
+
+    public bool IsMusicWindowCompact
+    {
+        get => Settings.IsMusicWindowCompact;
+        set
+        {
+            if (Settings.IsMusicWindowCompact != value)
+            {
+                Settings.IsMusicWindowCompact = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsMusicWindowCompact));
+                OnPropertyChanged(nameof(IsMusicWindowExpanded));
+            }
+        }
+    }
+
+    public bool IsMusicWindowExpanded => !IsMusicWindowCompact;
 
     public bool IsRadioWindowOpen
     {
@@ -561,6 +630,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowFullMusicInCompact));
                 OnPropertyChanged(nameof(IsNotchActive));
                 OnPropertyChanged(nameof(HasTrack));
+                OnPropertyChanged(nameof(HasTrackThumbnail));
+                OnPropertyChanged(nameof(MusicNotchTooltip));
             }
         }
     }
@@ -610,6 +681,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowIdleMiniView));
                 OnPropertyChanged(nameof(ShowCompactMusicView));
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
+                OnPropertyChanged(nameof(ShowComponentIcons));
+                OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
                 OnPropertyChanged(nameof(ShowFullMusicInCompact));
                 OnPropertyChanged(nameof(ShowFullRadioInCompact));
                 OnPropertyChanged(nameof(ShowFullTodoInCompact));
@@ -617,6 +690,7 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(MiniModeButtonTooltip));
                 OnPropertyChanged(nameof(IsExpandedMode));
                 OnPropertyChanged(nameof(PinButtonTooltip));
+                OnPropertyChanged(nameof(PinMenuText));
             }
         }
     }
@@ -799,19 +873,57 @@ public class MainViewModel : ViewModelBase
     // Google Drive Sync Properties
     public IGoogleDriveSyncService GoogleDriveSyncService => _googleDriveSyncService;
     public IUpdateService UpdateService => _updateService;
+    private bool _isCheckingOrInstallingUpdate;
+    private string _updateActionStatusText = string.Empty;
+    public string UpdateActionStatusText
+    {
+        get => _updateActionStatusText;
+        private set
+        {
+            if (SetProperty(ref _updateActionStatusText, value))
+            {
+                OnPropertyChanged(nameof(VersionButtonText));
+                OnPropertyChanged(nameof(VersionButtonTooltip));
+            }
+        }
+    }
+
+    public string CurrentVersionText => $"v{_updateService.CurrentVersion}";
+    public string VersionButtonText => !string.IsNullOrWhiteSpace(_updateActionStatusText)
+        ? _updateActionStatusText
+        : (HasAvailableUpdate && !string.IsNullOrWhiteSpace(AvailableUpdateVersion)
+            ? $"Update {(AvailableUpdateVersion.StartsWith("v", StringComparison.OrdinalIgnoreCase) ? AvailableUpdateVersion : "v" + AvailableUpdateVersion)}"
+            : CurrentVersionText);
+    public string VersionButtonTooltip => HasAvailableUpdate && !string.IsNullOrWhiteSpace(AvailableUpdateVersion)
+        ? $"Pembaruan v{AvailableUpdateVersion} tersedia! (Saat ini: {CurrentVersionText}) — Klik untuk langsung download & install"
+        : $"Versi Aplikasi DRANOTCH {CurrentVersionText} — Klik untuk langsung cek, download, dan install pembaruan";
 
     private bool _hasAvailableUpdate;
     public bool HasAvailableUpdate
     {
         get => _hasAvailableUpdate;
-        set => SetProperty(ref _hasAvailableUpdate, value);
+        set
+        {
+            if (SetProperty(ref _hasAvailableUpdate, value))
+            {
+                OnPropertyChanged(nameof(VersionButtonText));
+                OnPropertyChanged(nameof(VersionButtonTooltip));
+            }
+        }
     }
 
     private string _availableUpdateVersion = string.Empty;
     public string AvailableUpdateVersion
     {
         get => _availableUpdateVersion;
-        set => SetProperty(ref _availableUpdateVersion, value);
+        set
+        {
+            if (SetProperty(ref _availableUpdateVersion, value))
+            {
+                OnPropertyChanged(nameof(VersionButtonText));
+                OnPropertyChanged(nameof(VersionButtonTooltip));
+            }
+        }
     }
 
     private UpdateInfo? _availableUpdateInfo;
@@ -856,7 +968,7 @@ public class MainViewModel : ViewModelBase
         ? $"Jadwal Sholat ({CurrentPrayerSchedule.CityName}): {CurrentPrayerSchedule.CountdownSummary}\nKlik untuk melihat jadwal lengkap hari ini"
         : "Waktu Sholat";
 
-    public bool HasActivePrayerNotification => _activePrayerNotification != null;
+    public bool HasActivePrayerNotification => EnablePrayerTimes && _activePrayerNotification != null;
     public PrayerNotificationEvent? ActivePrayerNotification
     {
         get => _activePrayerNotification;
@@ -877,7 +989,9 @@ public class MainViewModel : ViewModelBase
     public ICommand SetModeCommand { get; }
     public ICommand TogglePinCommand { get; }
     public ICommand OpenSettingsCommand { get; }
+    public ICommand OpenAboutCommand { get; }
     public ICommand OpenYouTubeMusicCommand { get; }
+    public ICommand OpenTodoCommand { get; }
     public ICommand OpenFloatingBrowserCommand { get; }
     public ICommand ImportLyricsCommand { get; }
     public ICommand OffsetAddCommand { get; }
@@ -913,6 +1027,10 @@ public class MainViewModel : ViewModelBase
     public ICommand OpenBrowserCommand { get; }
     public ICommand CloseBrowserCommand { get; }
     public ICommand OpenRadioCommand { get; }
+    public ICommand OpenMusicWindowCommand { get; }
+    public ICommand CloseMusicWindowCommand { get; }
+    public ICommand MinimizeMusicWindowCommand { get; }
+    public ICommand ExpandMusicWindowCommand { get; }
     public ICommand ToggleRadioWindowCommand { get; }
     public ICommand CloseRadioWindowCommand { get; }
     public ICommand MinimizeRadioWindowCommand { get; }
@@ -935,6 +1053,7 @@ public class MainViewModel : ViewModelBase
     public ICommand ExitApplicationCommand { get; }
 
     public event Action? RequestExit;
+    public event Action? RequestOpenAbout;
 
     public MainViewModel(
         IMediaSessionService mediaService,
@@ -972,8 +1091,16 @@ public class MainViewModel : ViewModelBase
         TogglePrayerPanelCommand = new RelayCommand(() => IsPrayerPanelOpen = !IsPrayerPanelOpen);
         OpenPrayerScheduleCommand = new RelayCommand(() =>
         {
-            CurrentMode = PanelMode.Expanded;
-            IsPrayerPanelOpen = true;
+            if (IsPrayerDetached)
+            {
+                IsPrayerWindowOpen = true;
+                RequestComponentLayoutChanged?.Invoke();
+            }
+            else
+            {
+                CurrentMode = PanelMode.Expanded;
+                IsPrayerPanelOpen = true;
+            }
         });
         DismissPrayerNotificationCommand = new RelayCommand(() =>
         {
@@ -987,13 +1114,14 @@ public class MainViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(CurrentPrayerSchedule));
             OnPropertyChanged(nameof(ShowCompactPrayerPill));
+        OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
             OnPropertyChanged(nameof(NextPrayerName));
             OnPropertyChanged(nameof(NextPrayerTimeFormatted));
             OnPropertyChanged(nameof(NextPrayerCountdownBadge));
             OnPropertyChanged(nameof(PrayerScheduleTooltip));
         };
 
-        OpenUpdateCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
+        OpenUpdateCommand = new RelayCommand(async () => await CheckAndInstallUpdateAsync());
 
         _googleDriveSyncService.StatusChanged += () =>
         {
@@ -1064,10 +1192,12 @@ public class MainViewModel : ViewModelBase
         {
             if (modeObj is PanelMode mode)
             {
+                if (mode == PanelMode.Expanded) IsPrayerPanelOpen = false;
                 CurrentMode = mode;
             }
             else if (modeObj is string modeStr && Enum.TryParse<PanelMode>(modeStr, true, out var parsed))
             {
+                if (parsed == PanelMode.Expanded) IsPrayerPanelOpen = false;
                 CurrentMode = parsed;
             }
         });
@@ -1076,7 +1206,23 @@ public class MainViewModel : ViewModelBase
         WakeFromIdleCommand = new RelayCommand(WakeFromIdle);
         ToggleMiniModeCommand = new RelayCommand(ToggleMiniMode);
         OpenSettingsCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
+        OpenAboutCommand = new RelayCommand(() => RequestOpenAbout?.Invoke());
         OpenYouTubeMusicCommand = new RelayCommand(() => RequestOpenYouTubeMusic?.Invoke());
+        OpenTodoCommand = new RelayCommand(() =>
+        {
+            CurrentMode = PanelMode.Compact;
+            IsTodoWindowCompact = false;
+            IsTodoDetached = true;
+            if (IsTodoDetached)
+            {
+                IsTodoWindowOpen = true;
+                RequestComponentLayoutChanged?.Invoke();
+            }
+            else
+            {
+                CurrentMode = PanelMode.Expanded;
+            }
+        });
         OpenFloatingBrowserCommand = new RelayCommand(() => RequestOpenFloatingBrowser?.Invoke());
         ImportLyricsCommand = new RelayCommand(ImportLocalLyrics);
         OffsetAddCommand = new RelayCommand(() => AdjustOffset(0.5));
@@ -1176,6 +1322,17 @@ public class MainViewModel : ViewModelBase
             IsComponentsMenuOpen = false;
             RequestOpenRadio?.Invoke();
         });
+        OpenMusicWindowCommand = new RelayCommand(() =>
+        {
+            IsMusicWindowOpen = true;
+            IsComponentsMenuOpen = false;
+            RequestOpenMusic?.Invoke();
+        });
+        CloseMusicWindowCommand = new RelayCommand(() =>
+        {
+            IsMusicWindowOpen = false;
+            IsComponentsMenuOpen = false;
+        });
         ToggleRadioWindowCommand = new RelayCommand(() =>
         {
             IsRadioWindowOpen = !IsRadioWindowOpen;
@@ -1191,6 +1348,8 @@ public class MainViewModel : ViewModelBase
             IsComponentsMenuOpen = false;
         });
         MinimizeRadioWindowCommand = new RelayCommand(() => IsRadioWindowCompact = true);
+        MinimizeMusicWindowCommand = new RelayCommand(() => IsMusicWindowCompact = true);
+        ExpandMusicWindowCommand = new RelayCommand(() => IsMusicWindowCompact = false);
         ExpandRadioWindowCommand = new RelayCommand(() => IsRadioWindowCompact = false);
 
         ToggleRadioPlayPauseCommand = new RelayCommand(() => _radioService.TogglePlayPause());
@@ -1294,6 +1453,7 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsPrayerWindowOpen));
         OnPropertyChanged(nameof(IsPrayerClosed));
         OnPropertyChanged(nameof(IsTodoClosed));
+        OnPropertyChanged(nameof(IsTodoDetachedWindowVisible));
         OnPropertyChanged(nameof(HasClosedComponents));
         OnPropertyChanged(nameof(ClosedComponentsCount));
         OnPropertyChanged(nameof(ComponentsButtonText));
@@ -1321,7 +1481,10 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(TodoColumnWidth));
         OnPropertyChanged(nameof(ExpandedPanelWidth));
         OnPropertyChanged(nameof(EnablePrayerTimes));
+        if (!EnablePrayerTimes) ActivePrayerNotification = null;
+        OnPropertyChanged(nameof(HasActivePrayerNotification));
         OnPropertyChanged(nameof(ShowCompactPrayerPill));
+        OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
         OnPropertyChanged(nameof(CurrentPrayerSchedule));
         OnPropertyChanged(nameof(NextPrayerName));
         OnPropertyChanged(nameof(NextPrayerTimeFormatted));
@@ -1529,6 +1692,78 @@ public class MainViewModel : ViewModelBase
                 }
                 catch { }
             });
+        }
+    }
+
+    public async Task CheckAndInstallUpdateAsync()
+    {
+        if (_isCheckingOrInstallingUpdate) return;
+        _isCheckingOrInstallingUpdate = true;
+
+        try
+        {
+            if (!HasAvailableUpdate || AvailableUpdateInfo == null)
+            {
+                UpdateActionStatusText = "Mengecek...";
+                var update = await _updateService.CheckForUpdatesAsync();
+                if (update != null && update.IsNewerVersion)
+                {
+                    AvailableUpdateInfo = update;
+                    AvailableUpdateVersion = $"v{update.Version.TrimStart('v', 'V')}";
+                    HasAvailableUpdate = true;
+                }
+                else if (update != null)
+                {
+                    UpdateActionStatusText = "Sudah terbaru ✓";
+                    RequestShowTrayNotification?.Invoke("Pembaruan DRANOTCH", $"Aplikasi sudah menggunakan versi terbaru ({CurrentVersionText}).");
+                    await Task.Delay(2200);
+                    UpdateActionStatusText = string.Empty;
+                    return;
+                }
+                else
+                {
+                    UpdateActionStatusText = "Gagal cek";
+                    await Task.Delay(2200);
+                    UpdateActionStatusText = string.Empty;
+                    return;
+                }
+            }
+
+            if (AvailableUpdateInfo != null)
+            {
+                if (!string.IsNullOrWhiteSpace(AvailableUpdateInfo.DownloadUrl))
+                {
+                    UpdateActionStatusText = "Unduh 0%";
+                    var progress = new Progress<double>(pct =>
+                    {
+                        UpdateActionStatusText = $"Unduh {pct:0}%";
+                    });
+                    var installerPath = await _updateService.DownloadUpdateAsync(AvailableUpdateInfo.DownloadUrl, progress);
+                    UpdateActionStatusText = "Menginstal...";
+                    await Task.Delay(400);
+                    _updateService.LaunchInstallerAndExit(installerPath);
+                }
+                else if (!string.IsNullOrWhiteSpace(AvailableUpdateInfo.ReleasePageUrl))
+                {
+                    UpdateActionStatusText = string.Empty;
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo(AvailableUpdateInfo.ReleasePageUrl) { UseShellExecute = true });
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateActionStatusText = "Gagal update";
+            RequestShowTrayNotification?.Invoke("Pembaruan DRANOTCH", $"Gagal mengunduh pembaruan: {ex.Message}");
+            await Task.Delay(2200);
+            UpdateActionStatusText = string.Empty;
+        }
+        finally
+        {
+            _isCheckingOrInstallingUpdate = false;
         }
     }
 
@@ -2256,12 +2491,13 @@ public class MainViewModel : ViewModelBase
             return;
         }
 
-        _idleTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+        _idleTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
         _idleTimer.Tick += (s, e) =>
         {
             _idleTimer?.Stop();
-            if (!_isHovering && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification)
+            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification)
             {
+                IsHovering = false;
                 EnterIdleMiniMode();
             }
         };
@@ -2270,7 +2506,8 @@ public class MainViewModel : ViewModelBase
 
     public void OnMouseEnter()
     {
-        _isHovering = true;
+        _isHoveringWindow = true;
+        IsHovering = true;
         _expandHoverTimer?.Stop();
         _idleTimer?.Stop();
         OnPropertyChanged(nameof(IsNotchActive));
@@ -2299,7 +2536,7 @@ public class MainViewModel : ViewModelBase
 
     public void OnMouseLeave()
     {
-        _isHovering = false;
+        _isHoveringWindow = false;
         _expandHoverTimer?.Stop();
         OnPropertyChanged(nameof(IsNotchActive));
 

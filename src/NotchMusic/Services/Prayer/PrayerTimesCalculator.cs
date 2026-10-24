@@ -140,9 +140,15 @@ public static class PrayerTimesCalculator
         }
 
         // If all prayers today have passed, next prayer is Subuh tomorrow
+        bool isNextPrayerTomorrow = false;
         if (nextPrayer == null && items.Count > 1)
         {
+            isNextPrayerTomorrow = true;
+            var tomorrowSubuh = CalculateTomorrowSubuhItem(date.AddDays(1), latitude, longitude, timezone);
             var subuh = items[1]; // Subuh
+            subuh.Time = tomorrowSubuh.Time;
+            subuh.FormattedTime = tomorrowSubuh.FormattedTime;
+            subuh.IsNext = true;
             timeUntilNext = (TimeSpan.FromHours(24) - nowTime) + subuh.Time;
             nextPrayer = subuh;
         }
@@ -155,7 +161,14 @@ public static class PrayerTimesCalculator
         // Update countdown text and status badges
         foreach (var item in items)
         {
-            if (item.Time <= nowTime)
+            if (isNextPrayerTomorrow && item == nextPrayer)
+            {
+                item.StatusBadge = "Segera";
+                item.CountdownText = timeUntilNext.TotalMinutes < 60
+                    ? $"{Math.Max(1, (int)timeUntilNext.TotalMinutes)}m lagi"
+                    : $"{(int)timeUntilNext.TotalHours}j {timeUntilNext.Minutes}m lagi";
+            }
+            else if (item.Time <= nowTime)
             {
                 item.StatusBadge = "Selesai";
                 var elapsed = nowTime - item.Time;
@@ -183,6 +196,35 @@ public static class PrayerTimesCalculator
             CurrentPrayer = currentPrayer,
             TimeUntilNextPrayer = timeUntilNext
         };
+    }
+
+    private static PrayerTimeItem CalculateTomorrowSubuhItem(DateTime date, double latitude, double longitude, double timezone)
+    {
+        int y = date.Year, m = date.Month, d = date.Day;
+        if (m <= 2) { y -= 1; m += 12; }
+        double a = Math.Floor(y / 100.0);
+        double b = 2 - a + Math.Floor(a / 4.0);
+        double jd = Math.Floor(365.25 * (y + 4716)) + Math.Floor(30.6001 * (m + 1)) + d + b - 1524.5;
+        double D = jd - 2451545.0;
+        double g = NormalizeAngle(357.529 + 0.98560028 * D);
+        double q = NormalizeAngle(280.459 + 0.98564736 * D);
+        double gRad = DegreesToRadians(g);
+        double L = NormalizeAngle(q + 1.915 * Math.Sin(gRad) + 0.020 * Math.Sin(2 * gRad));
+        double e = 23.439 - 0.00000036 * D;
+        double eRad = DegreesToRadians(e);
+        double LRad = DegreesToRadians(L);
+        double delta = Math.Asin(Math.Sin(eRad) * Math.Sin(LRad));
+        double alphaDeg = NormalizeAngle(RadiansToDegrees(Math.Atan2(Math.Cos(eRad) * Math.Sin(LRad), Math.Cos(LRad))));
+        double eotHours = (q - alphaDeg) / 15.0;
+        while (eotHours > 12) eotHours -= 24;
+        while (eotHours < -12) eotHours += 24;
+        double noon = 12.0 + timezone - (longitude / 15.0) - eotHours;
+        double latRad = DegreesToRadians(latitude);
+        double altRad = DegreesToRadians(-20.0);
+        double cosW = (Math.Sin(altRad) - Math.Sin(latRad) * Math.Sin(delta)) / (Math.Cos(latRad) * Math.Cos(delta));
+        double wFajr = (cosW > 1.0 || cosW < -1.0) ? double.NaN : RadiansToDegrees(Math.Acos(cosW)) / 15.0;
+        double fajrH = noon - wFajr + (2.0 / 60.0);
+        return CreateItem("Subuh", "الفجر", fajrH, isMandatory: true);
     }
 
     private static PrayerTimeItem CreateItem(string name, string arabic, double hours, bool isMandatory)
