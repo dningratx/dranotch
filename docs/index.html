@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DRANOTCH — Dynamic Bezel Notch & Productivity Companion for Windows</title>
-  <meta name="description" content="Hadirkan pengalaman Dynamic Bezel Notch modern yang menyatu di tepi atas layar Windows 10 & 11. Pemutar Musik & Lirik Karaoke, Jadwal Waktu Sholat, Cloud To-Do List (Google Drive Sync), dan Browser Mengambang." />
-  <meta property="og:title" content="DRANOTCH — Dynamic Bezel Notch for Windows" />
-  <meta property="og:description" content="4-in-1 Top-Mounted Bezel Notch untuk Windows: Smart Media & Karaoke Lyrics, Waktu Sholat, Cloud To-Do List, dan Floating Browser." />
+  <title>DRANOTCH — Dynamic Bezel Notch &amp; Floating Productivity Ecosystem for Windows</title>
+  <meta name="description" content="Dokumentasi dan halaman resmi DRANOTCH: Aplikasi Dynamic Island & Bezel Notch 4-in-1 untuk Windows 10 & 11. Pemutar Musik & Lirik Karaoke, Jadwal Waktu Sholat & Adzan, Cloud To-Do List (Google Drive Sync), serta Browser Mengambang PiP." />
+  <meta property="og:title" content="DRANOTCH — Aesthetic Dynamic Bezel Notch & Productivity Companion for Windows" />
+  <meta property="og:description" content="Ekosistem produktivitas 4-in-1 di tepi atas layar Windows: Smart Media & Karaoke Lyrics, Waktu Sholat & Pengingat Adzan, Cloud To-Do List (Google Drive Realtime Sync), dan Floating Browser." />
   <meta property="og:image" content="https://dningratx.github.io/dranotch/assets/screenshot-expanded.png" />
   <link rel="icon" href="assets/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,13 +16,13 @@
     :root {
       --bg: #050508;
       --bg-card: #0c0c12;
-      --bg-elevated: #13131d;
+      --bg-elevated: #12121c;
       --border: #222233;
-      --border-glow: rgba(138, 43, 226, 0.45);
+      --border-glow: rgba(138, 43, 226, 0.48);
       --text: #f4f4fa;
       --text-muted: #9494ad;
       --accent: #8a2be2;
-      --accent-2: #4f46e5;
+      --accent-2: #6366f1;
       --accent-cyan: #06b6d4;
       --success: #10b981;
     }
@@ -37,11 +37,11 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.65;
       overflow-x: hidden;
       background-image:
-        radial-gradient(circle at 50% 0%, rgba(138, 43, 226, 0.16) 0%, transparent 55%),
-        radial-gradient(circle at 85% 25%, rgba(6, 182, 212, 0.1) 0%, transparent 45%);
+        radial-gradient(circle at 50% 0%, rgba(138, 43, 226, 0.16) 0%, transparent 52%),
+        radial-gradient(circle at 85% 22%, rgba(6, 182, 212, 0.1) 0%, transparent 45%);
     }
 
     a {
@@ -49,8 +49,18 @@
       text-decoration: none;
     }
 
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84em;
+      background: #171726;
+      border: 1px solid #292940;
+      padding: 2px 6px;
+      border-radius: 5px;
+      color: #d8b4fe;
+    }
+
     .container {
-      max-width: 1200px;
+      max-width: 1220px;
       margin: 0 auto;
       padding: 0 24px;
     }
@@ -62,7 +72,7 @@
       z-index: 100;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      background: rgba(5, 5, 8, 0.78);
+      background: rgba(5, 5, 8, 0.82);
       border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     }
 
@@ -94,7 +104,7 @@
     .version-pill {
       font-size: 0.72rem;
       font-weight: 600;
-      padding: 2px 8px;
+      padding: 2px 9px;
       border-radius: 999px;
       background: rgba(138, 43, 226, 0.18);
       border: 1px solid rgba(138, 43, 226, 0.45);
@@ -104,8 +114,8 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 26px;
-      font-size: 0.92rem;
+      gap: 22px;
+      font-size: 0.9rem;
       color: var(--text-muted);
       font-weight: 500;
     }
@@ -152,7 +162,7 @@
 
     /* Hero Section */
     .hero {
-      padding: 64px 0 40px;
+      padding: 64px 0 44px;
       text-align: center;
     }
 
@@ -160,7 +170,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 15px;
+      padding: 6px 16px;
       border-radius: 999px;
       background: rgba(19, 19, 29, 0.9);
       border: 1px solid var(--border);
@@ -178,22 +188,22 @@
     }
 
     .hero h1 {
-      font-size: clamp(2.3rem, 5vw, 4rem);
+      font-size: clamp(2.25rem, 4.8vw, 3.85rem);
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.12;
-      max-width: 900px;
+      line-height: 1.13;
+      max-width: 940px;
       margin: 0 auto 20px;
-      background: linear-gradient(180deg, #ffffff 20%, #a5a5c4 100%);
+      background: linear-gradient(180deg, #ffffff 25%, #a5a5c4 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .hero p.subtitle {
-      font-size: clamp(1rem, 1.8vw, 1.18rem);
+      font-size: clamp(1rem, 1.75vw, 1.16rem);
       color: var(--text-muted);
-      max-width: 740px;
-      margin: 0 auto 34px;
+      max-width: 820px;
+      margin: 0 auto 32px;
     }
 
     .hero-actions {
@@ -205,14 +215,43 @@
     }
 
     .hero-meta {
-      font-size: 0.82rem;
+      font-size: 0.83rem;
       color: var(--text-muted);
-      margin-bottom: 48px;
+      margin-bottom: 44px;
+    }
+
+    /* Quick Stats Strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      max-width: 1080px;
+      margin: 0 auto 42px;
+    }
+
+    .stat-box {
+      background: rgba(14, 14, 22, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+
+    .stat-box .stat-val {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .stat-box .stat-lbl {
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
 
     /* Interactive Bezel Monitor Showcase */
     .monitor-frame {
-      max-width: 1080px;
+      max-width: 1100px;
       margin: 0 auto;
       background: linear-gradient(180deg, #10162a 0%, #090d1a 100%);
       border-radius: 22px;
@@ -224,7 +263,6 @@
       position: relative;
     }
 
-    /* Physical Top Screen Bezel */
     .monitor-bezel-top {
       height: 18px;
       background: #050507;
@@ -243,11 +281,9 @@
       border: 1px solid #28283c;
     }
 
-    /* Live Interactive Top-Attached Notch */
     .bezel-notch-stage {
       position: relative;
-      padding: 0 20px 36px;
-      min-height: 360px;
+      padding: 0 20px 34px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -280,25 +316,25 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
-    /* Screenshot Tabs Switcher */
     .preview-tabs {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      margin: 28px auto 18px;
+      margin: 26px auto 18px;
     }
 
     .preview-tab {
       background: #12121c;
       color: var(--text-muted);
       border: 1px solid var(--border);
-      padding: 9px 18px;
+      padding: 9px 16px;
       border-radius: 999px;
-      font-size: 0.86rem;
+      font-size: 0.84rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -306,20 +342,21 @@
 
     .preview-tab.active,
     .preview-tab:hover {
-      background: rgba(138, 43, 226, 0.2);
+      background: rgba(138, 43, 226, 0.22);
       color: #ffffff;
       border-color: #8a2be2;
     }
 
     .screenshot-viewer {
       width: 100%;
-      max-width: 1020px;
+      max-width: 1040px;
       margin: 0 auto;
       border-radius: 14px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.1);
       background: #07070c;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+      cursor: zoom-in;
     }
 
     .screenshot-viewer img {
@@ -328,15 +365,15 @@
       display: block;
     }
 
-    /* Section Headings */
+    /* Section Styling */
     section {
-      padding: 80px 0;
+      padding: 78px 0;
     }
 
     .section-header {
       text-align: center;
-      max-width: 720px;
-      margin: 0 auto 52px;
+      max-width: 780px;
+      margin: 0 auto 50px;
     }
 
     .section-tag {
@@ -350,7 +387,7 @@
     }
 
     .section-header h2 {
-      font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+      font-size: clamp(1.75rem, 3.2vw, 2.45rem);
       font-weight: 800;
       letter-spacing: -0.02em;
       margin-bottom: 12px;
@@ -361,11 +398,117 @@
       font-size: 1.02rem;
     }
 
+    /* Overview Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .pillar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .pillar-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pillar-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Deep Dive 4 Components */
+    .deep-dive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+      gap: 24px;
+    }
+
+    .deep-card {
+      background: linear-gradient(180deg, rgba(20, 20, 32, 0.78) 0%, rgba(11, 11, 17, 0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px 28px;
+      transition: all 0.22s ease;
+    }
+
+    .deep-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-3px);
+    }
+
+    .deep-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
+      background: rgba(138, 43, 226, 0.16);
+      border: 1px solid rgba(138, 43, 226, 0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .deep-head h3 {
+      font-size: 1.22rem;
+      font-weight: 800;
+    }
+
+    .deep-head span {
+      display: block;
+      font-size: 0.82rem;
+      color: #c084fc;
+      font-weight: 600;
+    }
+
+    .deep-card > p {
+      font-size: 0.93rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .feature-list {
+      list-style: none;
+      font-size: 0.88rem;
+      color: #d6d6ea;
+    }
+
+    .feature-list li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+    }
+
+    .feature-list li::before {
+      content: "✦";
+      color: #a855f7;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
     /* Gallery Grid */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
     }
 
     .gallery-card {
@@ -374,7 +517,7 @@
       border-radius: 18px;
       overflow: hidden;
       transition: transform 0.22s ease, border-color 0.22s ease;
-      cursor: pointer;
+      cursor: zoom-in;
     }
 
     .gallery-card:hover {
@@ -384,7 +527,7 @@
 
     .gallery-card img {
       width: 100%;
-      height: 220px;
+      height: 200px;
       object-fit: cover;
       object-position: top center;
       border-bottom: 1px solid var(--border);
@@ -396,86 +539,73 @@
     }
 
     .gallery-card-body h3 {
-      font-size: 1.08rem;
+      font-size: 1.04rem;
       font-weight: 700;
       margin-bottom: 6px;
     }
 
     .gallery-card-body p {
-      font-size: 0.9rem;
+      font-size: 0.87rem;
       color: var(--text-muted);
     }
 
-    /* 4 Modular Components Grid */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 22px;
+    /* Timeline / Version History */
+    .timeline {
+      max-width: 920px;
+      margin: 0 auto;
+      position: relative;
+      border-left: 2px solid #282840;
+      padding-left: 28px;
     }
 
-    .feature-card {
-      background: linear-gradient(180deg, rgba(22, 22, 34, 0.7) 0%, rgba(12, 12, 18, 0.9) 100%);
+    .timeline-item {
+      position: relative;
+      margin-bottom: 28px;
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 26px 24px;
-      transition: all 0.22s ease;
+      border-radius: 16px;
+      padding: 20px 24px;
     }
 
-    .feature-card:hover {
-      border-color: var(--border-glow);
-      transform: translateY(-3px);
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -36px;
+      top: 24px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #8a2be2;
+      border: 3px solid var(--bg);
+      box-shadow: 0 0 0 2px #8a2be2;
     }
 
-    .feature-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: rgba(138, 43, 226, 0.16);
-      border: 1px solid rgba(138, 43, 226, 0.35);
+    .timeline-head {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      margin-bottom: 16px;
-    }
-
-    .feature-card h3 {
-      font-size: 1.12rem;
-      font-weight: 700;
-      margin-bottom: 9px;
-    }
-
-    .feature-card p {
-      font-size: 0.91rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-    }
-
-    .feature-list {
-      list-style: none;
-      font-size: 0.85rem;
-      color: #cfcfe6;
-    }
-
-    .feature-list li {
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .feature-list li::before {
-      content: "✓";
-      color: #a855f7;
+    .timeline-head h3 {
+      font-size: 1.06rem;
       font-weight: 700;
+      color: #ffffff;
     }
 
-    /* Showcase + Hotkeys 2-Col */
+    .timeline-item p {
+      font-size: 0.89rem;
+      color: var(--text-muted);
+    }
+
+    /* Split Section: Poster + Shortcuts & Tech */
     .split-section {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
+      grid-template-columns: 360px 1fr;
       gap: 36px;
-      align-items: center;
+      align-items: start;
     }
 
     .poster-box {
@@ -483,8 +613,7 @@
       overflow: hidden;
       border: 1px solid var(--border);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-      max-width: 380px;
-      margin: 0 auto;
+      cursor: zoom-in;
     }
 
     .poster-box img {
@@ -501,25 +630,30 @@
     }
 
     .table-card h3 {
-      font-size: 1.15rem;
+      font-size: 1.14rem;
       margin-bottom: 14px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
 
     th, td {
       text-align: left;
-      padding: 11px 10px;
+      padding: 10px 10px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    th {
+      color: #c084fc;
+      font-weight: 600;
     }
 
     kbd {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-size: 0.77rem;
       padding: 3px 7px;
       border-radius: 6px;
       background: #1c1c2b;
@@ -527,10 +661,9 @@
       color: #e2e2f5;
     }
 
-    /* Footer */
     footer {
       border-top: 1px solid rgba(255, 255, 255, 0.07);
-      padding: 40px 0;
+      padding: 44px 0;
       text-align: center;
       color: var(--text-muted);
       font-size: 0.88rem;
@@ -541,12 +674,13 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
+      background: rgba(0, 0, 0, 0.9);
       backdrop-filter: blur(8px);
       z-index: 999;
       align-items: center;
       justify-content: center;
       padding: 24px;
+      cursor: zoom-out;
     }
 
     .lightbox.open {
@@ -560,9 +694,16 @@
       border: 1px solid #383854;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 920px) {
+      .deep-dive-grid {
+        grid-template-columns: 1fr;
+      }
       .split-section {
         grid-template-columns: 1fr;
+      }
+      .poster-box {
+        max-width: 360px;
+        margin: 0 auto;
       }
       .nav-links {
         display: none;
@@ -581,10 +722,12 @@
         <span id="nav-version" class="version-pill">v1.5.1</span>
       </a>
       <nav class="nav-links">
-        <a href="#tangkapan-layar">Tangkapan Layar</a>
-        <a href="#fitur">4 Komponen Utama</a>
-        <a href="#pintasan">Shortcut & Instalasi</a>
-        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener">GitHub Repo</a>
+        <a href="#tentang">Tentang</a>
+        <a href="#ekosistem">4 Komponen Inti</a>
+        <a href="#mode-tampilan">5 Mode Tampilan</a>
+        <a href="#evolusi">Riwayat Fitur</a>
+        <a href="#instalasi">Shortcut &amp; Instalasi</a>
+        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener">GitHub</a>
       </nav>
       <a id="nav-download-btn" href="https://github.com/dningratx/dranotch/releases/latest/download/DRANOTCH-Setup-1.5.1.exe" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
         ⬇ Unduh Gratis
@@ -597,11 +740,11 @@
     <div class="container">
       <div class="hero-badge">
         <span class="dot"></span>
-        <span>Rilis Terbaru <strong id="hero-version-text">v1.5.1</strong> — Desain Bezel Notch Menyatu di Tepi Atas Windows</span>
+        <span>Aesthetic Dynamic Island &amp; Floating Productivity Companion untuk Windows 10 &amp; 11</span>
       </div>
-      <h1>Dynamic Bezel Notch &amp; Produktivitas 4-in-1 untuk Windows</h1>
+      <h1>Ubah Tepi Atas Layar Windows Menjadi Pusat Kendali &amp; Produktivitas Pintar</h1>
       <p class="subtitle">
-        Menyatu secara elegan di tepi paling atas layar monitor Anda. Menggabungkan <strong>Pemutar Musik &amp; Lirik Karaoke</strong>, <strong>Jadwal Waktu Sholat</strong>, <strong>Cloud To-Do List (Google Drive Sync)</strong>, serta <strong>Browser Mengambang (PiP)</strong> dalam satu kapsul hitam OLED.
+        <strong>DRANOTCH</strong> menghadirkan pengalaman <em>Dynamic Bezel Notch</em> bernuansa hitam OLED yang menyatu mulus dengan bingkai atas monitor Anda. Mengintegrasikan <strong>Smart Media Player &amp; Lirik Karaoke</strong>, <strong>Jadwal Waktu Sholat &amp; Pengingat Adzan</strong>, <strong>Cloud To-Do List (Google Drive Sync)</strong>, serta <strong>Browser Mengambang (PiP)</strong> dalam satu aplikasi ringan.
       </p>
 
       <div class="hero-actions">
@@ -609,21 +752,41 @@
           <span>📥</span>
           <span id="download-btn-label">Unduh Installer Windows (v1.5.1)</span>
         </a>
-        <a href="https://github.com/dningratx/dranotch/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
-          <span>✨</span>
-          <span>Lihat Catatan Rilis</span>
+        <a href="https://github.com/dningratx/dranotch/releases" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span>📦</span>
+          <span>Semua Rilis &amp; Changelog</span>
         </a>
         <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener" class="btn btn-secondary">
           <span>⭐</span>
-          <span>Source Code di GitHub</span>
+          <span>Lihat Source Code di GitHub</span>
         </a>
       </div>
       <div class="hero-meta">
-        Mendukung Windows 10 (1809+) &amp; Windows 11 (64-bit) • Self-Contained (.NET 10) • Digitally Signed SHA-256
+        Windows 10 (1809+) &amp; Windows 11 (x64) • .NET 10 WPF Self-Contained • Gratis &amp; Open Source (MIT License)
+      </div>
+
+      <!-- Key Metrics Strip -->
+      <div class="stats-strip">
+        <div class="stat-box">
+          <div class="stat-val">4-in-1</div>
+          <div class="stat-lbl">Komponen Modular Terpadu (Musik, Sholat, To-Do, Browser)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">5 Mode</div>
+          <div class="stat-lbl">Compact, Expanded, Karaoke Lyrics, Detached, &amp; PiP</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">40+ Kota</div>
+          <div class="stat-lbl">Jadwal Sholat Kemenag/MABIMS &amp; Deteksi IP Otomatis</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">Realtime</div>
+          <div class="stat-lbl">Auto-Sync To-Do Lintas Komputer via Google Drive</div>
+        </div>
       </div>
 
       <!-- Interactive Monitor Preview -->
-      <div class="monitor-frame" id="tangkapan-layar">
+      <div class="monitor-frame" id="mode-tampilan">
         <div class="monitor-bezel-top">
           <div class="camera-dot"></div>
         </div>
@@ -658,13 +821,16 @@
           <!-- Interactive Screenshot Mode Switcher -->
           <div class="preview-tabs">
             <button class="preview-tab active" onclick="switchShot('assets/screenshot-expanded.png', this)">
-              🎛️ Mode Expanded (3 Kolom Lengkap)
+              🎛️ 1. Expanded Panel (3 Kolom Modular)
             </button>
             <button class="preview-tab" onclick="switchShot('assets/screenshot-compact.png', this)">
-              🖥️ Mode Compact Bezel Notch
+              🖥️ 2. Compact Bezel Notch
+            </button>
+            <button class="preview-tab" onclick="switchShot('assets/screenshot-lyrics.png', this)">
+              🎤 3. Layar Lirik Karaoke &amp; Jendela Lepas
             </button>
             <button class="preview-tab" onclick="switchShot('assets/screenshot-browser.png', this)">
-              🌐 Mode Browser Mengambang (v1.5.1)
+              🌐 4. Browser Mengambang &amp; Video PiP
             </button>
           </div>
 
@@ -676,133 +842,262 @@
     </div>
   </section>
 
-  <!-- Screenshot Gallery Section -->
-  <section>
+  <!-- About & Design Philosophy -->
+  <section id="tentang">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">Galeri Tangkapan Aplikasi</span>
-        <h2>Dirancang Menyatu dengan Bezel Atas Windows</h2>
-        <p>Klik pada gambar mana pun untuk memperbesar tampilan detail antarmuka DRANOTCH v1.5.1.</p>
+        <span class="section-tag">Gambaran Umum &amp; Filosofi Desain</span>
+        <h2>Mengapa DRANOTCH Dibuat?</h2>
+        <p>Mengubah ruang kosong di tepi atas monitor Windows menjadi asisten produktivitas dan hiburan yang selalu siap diakses tanpa mengganggu pekerjaan utama Anda.</p>
+      </div>
+
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <h3>🖥️ Menyatu dengan Bezel Atas</h3>
+          <p>Dirancang menempel langsung (<em>flush</em>, <code>Top = 0</code>) di tepi atas layar dengan bahu lengkung cekung (<em>concave ears</em>) di kiri-kanan atas dan fitur <em>auto-dock</em> saat digeser antar monitor.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>🖤 Estetika OLED Monokrom</h3>
+          <p>Palet warna hitam pekat (<code>#050507</code>) dengan aksen kontras tajam yang nyaman di mata saat bekerja malam hari serta menyatu sempurna dengan bingkai fisik monitor.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>⚡ Hover Pintar &amp; Anti-Ganggu</h3>
+          <p>Dilengkapi <em>Intelligent Hover Delay (650ms)</em> agar notch tidak terbuka secara tidak sengaja saat kursor hanya melintas cepat, serta opsi <em>Pin</em> (<code>📌</code>) untuk mengunci panel tetap terbuka.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>🧩 Modular: Pasang atau Lepas</h3>
+          <p>Setiap komponen dapat disatukan di dalam kapsul Notch utama atau dilepas (<code>⧉</code>) menjadi jendela mengambang mandiri di posisi mana pun, bahkan di monitor kedua.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comprehensive Deep Dive: 4 Core Components -->
+  <section id="ekosistem" style="padding-top: 10px;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Penjabaran Menyeluruh 4 Komponen Inti</span>
+        <h2>Ekosistem Lengkap Hiburan, Ibadah, Tugas, &amp; Peramban</h2>
+        <p>Seluruh fitur dirancang saling terhubung secara harmonis di dalam satu aplikasi.</p>
+      </div>
+
+      <div class="deep-dive-grid">
+        <!-- Component 1 -->
+        <div class="deep-card">
+          <div class="deep-head">
+            <div class="feature-icon">🎧</div>
+            <div>
+              <span>KOMPONEN 1</span>
+              <h3>Smart Media Player &amp; Karaoke Lyrics</h3>
+            </div>
+          </div>
+          <p>Pusat kendali musik universal yang terhubung langsung ke <em>Windows System Media Transport Controls (SMTC)</em> dan database lirik sinkronisasi.</p>
+          <ul class="feature-list">
+            <li><strong>Deteksi Musik Otomatis:</strong> Mengenali lagu, nama artis, dan sampul album secara instan dari Spotify, Apple Music, YouTube (Chrome, Edge, Brave, Firefox), atau pemutar lokal.</li>
+            <li><strong>Lirik Real-Time di Mode Standby:</strong> Menampilkan bait lirik lagu yang sedang dinyanyikan secara langsung di kapsul compact (<code>♪</code>) tanpa perlu memperluas panel.</li>
+            <li><strong>Auto-Search LRCLIB &amp; Lirik 3-Baris:</strong> Mencari lirik tersinkronisasi waktu (<em>timed lyrics</em>) secara otomatis saat lagu berganti, lengkap dengan tampilan fokus 3 baris (<em>Previous, Active, Next</em>).</li>
+            <li><strong>Built-in YouTube Music Player:</strong> Dilengkapi jendela pemutar YouTube Music bawaan berbasis WebView2 dengan penyimpanan sesi login Google permanen.</li>
+            <li><strong>Click-Through &amp; Manual Offset:</strong> Mode layar lirik penuh yang dapat dibuat tembus klik mouse (aman untuk <em>gaming</em>/kerja), koreksi waktu lirik (<code>-0.5s</code> / <code>+0.5s</code>), serta impor file <code>.lrc</code> dan <code>.txt</code> lokal.</li>
+          </ul>
+        </div>
+
+        <!-- Component 2 -->
+        <div class="deep-card">
+          <div class="deep-head">
+            <div class="feature-icon">🕌</div>
+            <div>
+              <span>KOMPONEN 2</span>
+              <h3>Waktu Sholat, Kalender Hijriah &amp; Adzan</h3>
+            </div>
+          </div>
+          <p>Pendamping pengingat ibadah harian yang presisi bagi pengguna di seluruh wilayah waktu Indonesia (WIB, WITA, WIT) maupun koordinat global.</p>
+          <ul class="feature-list">
+            <li><strong>Perhitungan Astronomis Kemenag RI / MABIMS:</strong> Menghitung jadwal Imsak, Subuh, Terbit, Dzuhur, Ashar, Maghrib, dan Isya secara <em>offline</em> beserta konversi tanggal <strong>Kalender Hijriah</strong>.</li>
+            <li><strong>40+ Kota Indonesia &amp; Deteksi IP Otomatis:</strong> Pilih langsung dari daftar kota besar di Indonesia atau gunakan deteksi koordinat lokasi otomatis via IP satu klik.</li>
+            <li><strong>3 Tahap Pengingat Pintar:</strong>
+              (1) Peringatan sebelum masuk waktu (5–30 menit sebelumnya),
+              (2) Pengingat tepat saat <strong>Adzan</strong> dengan banner Dynamic Island &amp; nada <em>chime</em> lembut, serta
+              (3) Pengingat konfirmasi sesudah waktu sholat berlalu.</li>
+            <li><strong>Auto-Pause Musik Saat Adzan:</strong> Opsi cerdas untuk menjeda pemutaran musik secara otomatis ketika waktu sholat tiba.</li>
+            <li><strong>Pill Ringkas &amp; Jendela Mandiri:</strong> Pantau hitung mundur (misal <code>🕌 Dzuhur 11:52 (-18m)</code>) dari mode compact, lihat tabel lengkap di mode expanded, atau lepas menjadi <code>PrayerWindow</code> mandiri.</li>
+          </ul>
+        </div>
+
+        <!-- Component 3 -->
+        <div class="deep-card">
+          <div class="deep-head">
+            <div class="feature-icon">✅</div>
+            <div>
+              <span>KOMPONEN 3</span>
+              <h3>Cloud To-Do List &amp; Google Drive Sync</h3>
+            </div>
+          </div>
+          <p>Manajer tugas produktif yang selalu terlihat di atas layar dengan sinkronisasi awan lintas komputer secara <em>real-time</em>.</p>
+          <ul class="feature-list">
+            <li><strong>Continuous Live Ticker:</strong> Teks tugas yang belum selesai mengalir mulus dari kanan ke kiri di kapsul compact (dengan jeda otomatis saat didekati kursor) beserta tombol centang selesai cepat (<code>✓</code>).</li>
+            <li><strong>Google Drive Realtime Multi-PC Sync:</strong> Terhubung ke akun Google Drive pribadi Anda. Menambah, mengedit, mencentang, atau menghapus tugas di satu komputer akan otomatis memperbarui daftar di komputer lain dalam hitungan detik.</li>
+            <li><strong>Drag &amp; Drop Urutan Prioritas (<code>⋮⋮</code>):</strong> Geser tugas ke atas atau ke bawah secara visual untuk menyusun prioritas harian Anda.</li>
+            <li><strong>Inline Editing &amp; Kategori Tag:</strong> Klik dua kali pada teks tugas untuk mengedit langsung di tempat, kelompokkan dengan tag bebas (<code>#KERJA</code>, <code>#KULIAH</code>, <code>#PRIBADI</code>), dan saring dengan tab <em>Semua / Aktif / Selesai</em>.</li>
+            <li><strong>Mode Jendela Mandiri (Detachable):</strong> Lepas To-Do List dari notch utama kapan saja untuk diletakkan di sudut desktop atau layar kedua.</li>
+          </ul>
+        </div>
+
+        <!-- Component 4 -->
+        <div class="deep-card">
+          <div class="deep-head">
+            <div class="feature-icon">🌐</div>
+            <div>
+              <span>KOMPONEN 4</span>
+              <h3>Browser Mengambang &amp; Video PiP</h3>
+            </div>
+          </div>
+          <p>Peramban web dan pemutar video mengambang berbasis Microsoft Edge WebView2 yang dirancang khusus untuk <em>multitasking</em>.</p>
+          <ul class="feature-list">
+            <li><strong>In-Window Fullscreen (Layar Penuh Terkungkung):</strong> Saat Anda menekan tombol fullscreen pada pemutar video web (YouTube, kursus online, film), video otomatis memenuhi jendela mengambang tanpa menutupi seluruh layar monitor Windows Anda.</li>
+            <li><strong>Selalu Bisa Digeser &amp; Di-Resize:</strong> Dilengkapi pegangan <code>⋮⋮ Geser</code> dan bingkai pelindung resize sehingga jendela tidak pernah macet meski sedang memutar video layar penuh.</li>
+            <li><strong>Preset Rasio 16:9 Instan (<code>📐</code>):</strong> Ubah ukuran jendela secara presisi dalam 1 klik: <em>Mini PiP (360×202)</em>, <em>Kecil (480×270)</em>, <em>Sedang (720×405)</em>, <em>Standar (960×540)</em>, hingga <em>Layar HD (1280×720)</em>.</li>
+            <li><strong>Header Minimalis &amp; Mode Bioskop (<code>▲</code>):</strong> Kolom omnibox pencarian/URL penuh yang bersih, tombol Pin <em>Always on Top</em> (<code>📌</code>), serta tombol sembunyikan bar navigasi untuk tampilan video murni.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visual Modes Gallery -->
+  <section style="padding-top: 20px;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Galeri Visual Antarmuka</span>
+        <h2>Setiap Mode Tampilan DRANOTCH</h2>
+        <p>Klik pada gambar untuk memperbesar tampilan resolusi penuh.</p>
       </div>
 
       <div class="gallery-grid">
         <div class="gallery-card" onclick="openLightbox('assets/screenshot-compact.png')">
           <img src="assets/screenshot-compact.png" alt="Compact Bezel Notch Mode" />
           <div class="gallery-card-body">
-            <h3>1. Top-Mounted Bezel Notch (Compact)</h3>
-            <p>Menempel langsung di titik <code>Top = 0</code> layar dengan bahu lengkung cekung (<em>concave ears</em>) di kiri-kanan atas. Menampilkan musik, lirik berjalan, jadwal sholat berikutnya, dan ticker tugas.</p>
+            <h3>Mode Compact Bezel Notch</h3>
+            <p>Kapsul ramping di tepi atas layar berisi info lagu, lirik berjalan saat standby, hitung mundur waktu sholat, dan live ticker tugas aktif.</p>
           </div>
         </div>
 
         <div class="gallery-card" onclick="openLightbox('assets/screenshot-expanded.png')">
           <img src="assets/screenshot-expanded.png" alt="Expanded 3-Column Mode" />
           <div class="gallery-card-body">
-            <h3>2. Panel Expanded Modular 3-Kolom</h3>
-            <p>Melebar mulus menampilkan kontrol penuh pemutar musik &amp; lirik sinkronisasi LRCLIB, jadwal sholat harian 40+ kota Indonesia, serta daftar tugas Cloud To-Do.</p>
+            <h3>Mode Expanded Modular 3-Kolom</h3>
+            <p>Panel penuh yang menampilkan Pemutar Musik &amp; Lirik, Jadwal Waktu Sholat harian, serta Cloud To-Do List secara berdampingan.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card" onclick="openLightbox('assets/screenshot-lyrics.png')">
+          <img src="assets/screenshot-lyrics.png" alt="Karaoke Lyrics and Detached Windows" />
+          <div class="gallery-card-body">
+            <h3>Mode Lirik Karaoke &amp; Jendela Lepas</h3>
+            <p>Layar fokus lirik dengan dukungan <em>Click-Through</em> serta fleksibilitas melepas Waktu Sholat dan To-Do List menjadi jendela mandiri.</p>
           </div>
         </div>
 
         <div class="gallery-card" onclick="openLightbox('assets/screenshot-browser.png')">
           <img src="assets/screenshot-browser.png" alt="Floating Browser PiP Mode" />
           <div class="gallery-card-body">
-            <h3>3. Browser Mengambang &amp; Video PiP Bersih</h3>
-            <p>Header minimalis dengan handle <code>⋮⋮ Geser</code>, kolom URL omnibox penuh, tombol Pin ikonik <code>📌</code>, preset rasio 16:9, serta <em>in-window fullscreen</em>.</p>
+            <h3>Mode Browser Mengambang (PiP)</h3>
+            <p>Jendela web &amp; video streaming <em>Always-on-Top</em> dengan omnibox penuh, preset ukuran 16:9, dan <em>in-window fullscreen</em>.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 4 Modular Features Section -->
-  <section id="fitur" style="padding-top: 20px;">
+  <!-- Complete Evolution & Changelog Timeline -->
+  <section id="evolusi">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">Arsitektur 4 Komponen Modular</span>
-        <h2>Satu Notch, Empat Kekuatan Produktivitas</h2>
-        <p>Setiap komponen dapat dipasang menyatu di dalam kapsul Bezel Notch atau dilepas menjadi jendela mandiri sesuai alur kerja Anda.</p>
+        <span class="section-tag">Perjalanan Pengembangan</span>
+        <h2>Evolusi Fitur DRANOTCH dari Masa ke Masa</h2>
+        <p>Rangkuman perkembangan DRANOTCH dari versi awal hingga ekosistem 4-komponen saat ini.</p>
       </div>
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🎧</div>
-          <h3>Smart Media &amp; Lirik Karaoke</h3>
-          <p>Otomatis mendeteksi lagu yang diputar di Spotify, YouTube, Apple Music, atau browser.</p>
-          <ul class="feature-list">
-            <li>Pencarian lirik tersinkronisasi (LRCLIB)</li>
-            <li>Built-in YouTube Music WebView2</li>
-            <li>Mode layar lirik penuh &amp; Click-Through</li>
-            <li>Pengaturan offset waktu (+0.5s / -0.5s) &amp; impor .lrc</li>
-          </ul>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-head">
+            <h3>v1.5.1 — Top-Mounted Hardware Bezel Notch &amp; Clean Browser UI</h3>
+            <span class="version-pill">Terbaru</span>
+          </div>
+          <p>Transformasi siluet kapsul menjadi menyatu langsung ke tepi atas layar Windows (<code>Top = 0</code>) dengan bahu lengkung cekung (<em>concave ears</em>), <em>auto-dock</em> ke bezel atas, serta penyederhanaan antarmuka Browser Mengambang (omnibox penuh &amp; tombol Pin ikonik).</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon">🕌</div>
-          <h3>Waktu Sholat &amp; Adzan Otomatis</h3>
-          <p>Perhitungan astronomis presisi standar Kemenag RI / MABIMS dengan kalender Hijriah.</p>
-          <ul class="feature-list">
-            <li>40+ Kota Indonesia &amp; Deteksi IP Otomatis</li>
-            <li>Pengingat sebelum waktu, saat Adzan, &amp; sesudah</li>
-            <li>Auto-pause musik saat waktu Adzan tiba</li>
-            <li>Dapat dilepas menjadi jendela melayang mandiri</li>
-          </ul>
+        <div class="timeline-item">
+          <div class="timeline-head">
+            <h3>v1.5.0 — Komponen ke-4: Browser Mengambang &amp; Pemutar Streaming PiP</h3>
+            <span class="version-pill">Major Feature</span>
+          </div>
+          <p>Menambahkan komponen ke-4 berupa Browser Mengambang berbasis WebView2 dengan <em>In-Window Fullscreen</em>, grip geser permanen (<code>⋮⋮ Geser</code>), preset rasio video 16:9 instan, dan mode <em>Always on Top</em>.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon">✅</div>
-          <h3>Cloud To-Do List &amp; Live Ticker</h3>
-          <p>Kelola daftar pekerjaan harian langsung dari atas layar dengan sinkronisasi Google Drive.</p>
-          <ul class="feature-list">
-            <li>Auto-sync real-time lintas perangkat via Google Drive</li>
-            <li>Drag &amp; drop urutan prioritas tugas (<code>⋮⋮</code>)</li>
-            <li>Edit tugas instan dengan klik ganda (Inline Edit)</li>
-            <li>Live Ticker berjalan tanpa jeda di mode compact</li>
-          </ul>
+        <div class="timeline-item">
+          <div class="timeline-head">
+            <h3>v1.4.0 – v1.4.4 — Arsitektur Modular 3-Kolom, Cloud Auto-Sync Lintas PC, &amp; Code Signing</h3>
+            <span class="version-pill">v1.4 Series</span>
+          </div>
+          <p>Menyatukan Musik, Waktu Sholat, dan To-Do List berdampingan di mode Expanded; fitur <em>Drag &amp; Drop</em> urutan tugas; <em>Inline Editing</em> klik ganda; sinkronisasi real-time otomatis antar beberapa komputer via Google Drive; manajer komponen simbolik (<code>🍱</code>); serta sertifikat digital SHA-256 resmi.</p>
         </div>
 
-        <div class="feature-card">
-          <div class="feature-icon">🌐</div>
-          <h3>Browser Mengambang (PiP)</h3>
-          <p>Tonton video tutorial, live streaming, atau buka referensi web sambil tetap fokus bekerja.</p>
-          <ul class="feature-list">
-            <li>In-Window Fullscreen (tidak menutupi seluruh monitor)</li>
-            <li>Header bersih dengan grip <code>⋮⋮ Geser</code> &amp; Pin <code>📌</code></li>
-            <li>Preset ukuran 16:9 instan (Mini PiP hingga HD)</li>
-            <li>Mode Bioskop (sembunyikan bar alamat URL)</li>
-          </ul>
+        <div class="timeline-item">
+          <div class="timeline-head">
+            <h3>v1.3.0 — Jadwal Waktu Sholat, Kalender Hijriah, &amp; Pengingat Adzan Otomatis</h3>
+            <span class="version-pill">v1.3 Series</span>
+          </div>
+          <p>Integrasi perhitungan waktu sholat standar Kemenag RI / MABIMS untuk 40+ kota Indonesia &amp; deteksi IP, kalender Hijriah, pengingat 3 tahap (sebelum, saat adzan, sesudah), serta fitur <em>auto-pause</em> musik saat adzan.</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-head">
+            <h3>v1.1.2 – v1.2.1 — Dynamic Media Island, Karaoke Lyrics, Detachable To-Do, &amp; OLED Theme</h3>
+            <span class="version-pill">v1.1 – v1.2</span>
+          </div>
+          <p>Fondasi Dynamic Island Windows dengan deteksi sesi media otomatis, lirik sinkronisasi LRCLIB, mode lirik <em>Click-Through</em>, To-Do List yang dapat dilepas (<em>detachable</em>) dengan backup Google Drive, aplikasi <em>In-App Auto Updater</em>, serta tema monokrom OLED.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Showcase Poster & Shortcuts -->
-  <section id="pintasan">
+  <!-- Showcase Poster, Shortcuts, Tech Stack & Installation -->
+  <section id="instalasi">
     <div class="container split-section">
-      <div class="poster-box" onclick="openLightbox('assets/showcase.jpg')" style="cursor: pointer;">
+      <div class="poster-box" onclick="openLightbox('assets/showcase.jpg')">
         <img src="assets/showcase.jpg" alt="DRANOTCH Visual Showcase Poster" />
       </div>
 
       <div>
         <div class="table-card">
-          <h3>⌨️ Pintasan Keyboard (Global Hotkeys)</h3>
+          <h3>⌨️ Pintasan Keyboard &amp; Interaksi Cepat</h3>
           <table>
             <thead>
               <tr>
-                <th>Shortcut</th>
+                <th>Pintasan / Aksi</th>
                 <th>Fungsi</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd></td>
-                <td>Tampilkan / Sembunyikan DRANOTCH</td>
+                <td>Tampilkan / Sembunyikan panel DRANOTCH (dapat diubah di Pengaturan)</td>
               </tr>
               <tr>
                 <td><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>L</kbd></td>
                 <td>Buka / Tutup Mode Layar Lirik Karaoke</td>
               </tr>
               <tr>
-                <td><kbd>Double Click</kbd> Tugas</td>
-                <td>Edit teks tugas To-Do secara langsung</td>
+                <td><kbd>Klik Kiri &amp; Geser</kbd> Notch</td>
+                <td>Geser posisi horizontal notch di sepanjang tepi atas layar / antar monitor</td>
+              </tr>
+              <tr>
+                <td><kbd>Klik Kanan</kbd> Notch</td>
+                <td>Menu cepat: Perluas/Perkecil Panel, Pengaturan, atau Keluar Aplikasi</td>
+              </tr>
+              <tr>
+                <td><kbd>Klik Ganda</kbd> Teks Tugas</td>
+                <td>Edit teks tugas To-Do secara langsung (<kbd>Enter</kbd> simpan, <kbd>Esc</kbd> batal)</td>
               </tr>
               <tr>
                 <td><kbd>Esc</kbd> (di Browser)</td>
@@ -813,15 +1108,27 @@
         </div>
 
         <div class="table-card">
-          <h3>🛡️ Panduan Cepat Instalasi</h3>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
-            1. Unduh berkas installer <strong id="guide-installer-name">DRANOTCH-Setup-1.5.1.exe</strong> melalui tombol di atas.<br/>
-            2. Jika muncul jendela informasi Windows SmartScreen, klik <strong>"More info"</strong> lalu pilih <strong>"Run anyway"</strong> (atau jalankan <code>Install-Certificate.bat</code> pada halaman rilis untuk mempercayai sertifikat digital DRANOTCH secara permanen).<br/>
-            3. Aplikasi akan otomatis menempel dengan rapi di tepi atas layar Windows Anda!
+          <h3>🛠️ Teknologi &amp; Arsitektur</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Dibangun menggunakan <strong>.NET 10</strong> &amp; <strong>WPF (Windows Presentation Foundation)</strong> dengan kompilasi <em>Self-Contained Single-File</em> (tidak perlu menginstal runtime .NET terpisah), <strong>Windows System Media Transport Controls API</strong>, <strong>Microsoft Edge WebView2</strong>, <strong>LRCLIB Lyrics API</strong>, <strong>Google Drive REST API v3</strong>, serta paket instalasi <strong>Inno Setup 6</strong>.
           </p>
-          <a href="https://github.com/dningratx/dranotch/releases/latest" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%;">
-            🚀 Buka Halaman Rilis GitHub Resmi
-          </a>
+        </div>
+
+        <div class="table-card">
+          <h3>📥 Panduan Pemasangan &amp; Pembaruan</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px;">
+            1. Unduh installer terbaru <strong id="guide-installer-name">DRANOTCH-Setup-1.5.1.exe</strong> lalu jalankan.<br/>
+            2. <strong>Catatan Windows SmartScreen:</strong> Jika muncul layar informasi biru saat instalasi pertama, klik <strong>"More info"</strong> lalu klik <strong>"Run anyway"</strong> (atau jalankan berkas <code>Install-Certificate.bat</code> di halaman rilis untuk mendaftarkan sertifikat digital DRANOTCH secara permanen).<br/>
+            3. Untuk pembaruan versi selanjutnya, Anda cukup menekan tombol <strong>Periksa Pembaruan / Update</strong> langsung dari dalam menu Pengaturan aplikasi!
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a id="bottom-download-btn" href="https://github.com/dningratx/dranotch/releases/download/v1.5.1/DRANOTCH-Setup-1.5.1.exe" class="btn btn-primary" style="flex: 1;">
+              📥 Unduh Installer Sekarang
+            </a>
+            <a href="https://github.com/dningratx/dranotch/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
+              📄 Halaman Rilis GitHub
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -830,10 +1137,11 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p><strong>DRANOTCH</strong> — Dibuat dengan ❤️ menggunakan .NET 10 &amp; WPF untuk mempercantik dan meningkatkan produktivitas desktop Windows.</p>
+      <p><strong>DRANOTCH</strong> — Aesthetic Dynamic Island &amp; Floating Productivity Companion for Windows.</p>
       <p style="margin-top: 8px;">
-        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener" style="color: #c084fc;">GitHub Repository</a> •
-        <a href="https://github.com/dningratx/dranotch/releases" target="_blank" rel="noopener" style="color: #c084fc;">Semua Rilis</a> •
+        <a href="https://github.com/dningratx/dranotch" target="_blank" rel="noopener" style="color: #c084fc;">Repositori GitHub</a> •
+        <a href="https://github.com/dningratx/dranotch/releases" target="_blank" rel="noopener" style="color: #c084fc;">Daftar Rilis</a> •
+        <a href="https://github.com/dningratx/dranotch/issues" target="_blank" rel="noopener" style="color: #c084fc;">Laporkan Bug / Saran Fitur</a> •
         <span>Lisensi MIT</span>
       </p>
     </div>
@@ -861,18 +1169,18 @@
       document.getElementById('lightbox').classList.remove('open');
     }
 
-    // Otomatis ambil versi & link installer terbaru dari GitHub Releases API
+    // Otomatis sinkronkan versi & tautan unduhan terbaru dari GitHub Releases API
     fetch('https://api.github.com/repos/dningratx/dranotch/releases/latest')
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (!data || !data.tag_name) return;
         const ver = data.tag_name;
         document.getElementById('nav-version').textContent = ver;
-        document.getElementById('hero-version-text').textContent = ver;
         const exeAsset = (data.assets || []).find(a => a.name && a.name.endsWith('.exe'));
         if (exeAsset && exeAsset.browser_download_url) {
           document.getElementById('main-download-btn').href = exeAsset.browser_download_url;
           document.getElementById('nav-download-btn').href = exeAsset.browser_download_url;
+          document.getElementById('bottom-download-btn').href = exeAsset.browser_download_url;
           document.getElementById('download-btn-label').textContent = `Unduh Installer Windows (${ver})`;
           document.getElementById('guide-installer-name').textContent = exeAsset.name;
         }
