@@ -1,4 +1,4 @@
-<Window x:Class="NotchMusic.MainWindow"
+﻿<Window x:Class="NotchMusic.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
@@ -271,7 +271,7 @@
                                              FontSize="11" CaretBrush="#FFFFFF"/>
 
                                     <!-- Placeholder when empty -->
-                                    <TextBlock Grid.Column="0" Text="Kategori ▾" Foreground="#666677" FontSize="10.5"
+                                    <TextBlock Grid.Column="0" Text="Kategori â–¾" Foreground="#666677" FontSize="10.5"
                                                IsHitTestVisible="False" Margin="7,0,0,0" VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -388,10 +388,11 @@
     </Window.Resources>
 
     <!-- Main Outer Container Attached to Top Bezel with Mac-Style Concave Notch Ears & DropShadow -->
-    <Grid Margin="24,0,24,26" SnapsToDevicePixels="True" UseLayoutRounding="True">
-        <Grid.Effect>
-            <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="10" BlurRadius="28" Opacity="0.92"/>
-        </Grid.Effect>
+    <!-- Main Outer Container Attached to Top Bezel -->
+    <Grid Margin="6,0,6,8" SnapsToDevicePixels="True" UseLayoutRounding="True">
+
+
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -403,20 +404,11 @@
                 Background="#000000"
                 BorderBrush="{StaticResource LuxuryNotchBorderBrush}"
                 BorderThickness="1.2,0,1.2,1.2"
+                CornerRadius="0,0,22,22"
+                Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}"
                 MouseDown="Island_MouseDown">
 
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="0,0,24,24"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsBezelMinimized}" Value="True">
-                            <Setter Property="CornerRadius" Value="0,0,10,10"/>
-                            <Setter Property="MinWidth" Value="64"/>
-                            <Setter Property="MinHeight" Value="8"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
+
 
             <Border.ContextMenu>
                 <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
@@ -996,9 +988,9 @@
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}"
-                                        Content="⧉" ToolTip="Lepas Waktu Sholat ke jendela terpisah" Margin="0,0,3,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan Waktu Sholat" Margin="0,0,3,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ClosePrayerCommand}" Content="✕" ToolTip="Tutup Waktu Sholat"/>
+                                        Content="â§‰" ToolTip="Lepas Waktu Sholat ke jendela terpisah" Margin="0,0,3,0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="âš™" ToolTip="Pengaturan Waktu Sholat" Margin="0,0,3,0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding ClosePrayerCommand}" Content="âœ•" ToolTip="Tutup Waktu Sholat"/>
                             </StackPanel>
                         </Grid>
 
@@ -1118,7 +1110,7 @@
 
                         <!-- Footer: Pengingat Status -->
                         <Grid Grid.Row="3" Margin="2,4,2,0">
-                            <TextBlock Text="Pengingat: -10m • Adzan • +15m" FontSize="9.5" Foreground="#666677" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Pengingat: -10m â€¢ Adzan â€¢ +15m" FontSize="9.5" Foreground="#666677" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"/>
                         </Grid>
                     </Grid>
 
@@ -1141,29 +1133,29 @@
                                 <!-- Tombol Pin & Pengaturan saat mode Hanya To-Do (Music disembunyikan) -->
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePinCommand}" ToolTip="Pin agar tetap terbuka"
                                         Visibility="{Binding ShowMusicSection, Converter={StaticResource InverseBoolToVis}}" Margin="0,0,4,0">
-                                    <TextBlock Text="📌" FontSize="10"/>
+                                    <TextBlock Text="ðŸ“Œ" FontSize="10"/>
                                 </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleComponentsMenuCommand}" ToolTip="Kelola komponen notch"
                                         Visibility="{Binding ShowMusicSection, Converter={StaticResource InverseBoolToVis}}" Margin="0,0,4,0">
-                                    <TextBlock Text="🍱" FontSize="10"/>
+                                    <TextBlock Text="ðŸ±" FontSize="10"/>
                                 </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan"
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="âš™" ToolTip="Pengaturan"
                                         Visibility="{Binding ShowMusicSection, Converter={StaticResource InverseBoolToVis}}" Margin="0,0,4,0"/>
 
                                 <!-- Tombol Lepas Jendela To-Do ke jendela melayang tersendiri -->
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachTodoCommand}"
-                                        Content="⧉" ToolTip="Lepas To-Do List ke jendela terpisah" Margin="0,0,4,0"/>
+                                        Content="â§‰" ToolTip="Lepas To-Do List ke jendela terpisah" Margin="0,0,4,0"/>
 
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding ClearCompletedTodosCommand}" 
                                         Visibility="{Binding HasCompletedTodos, Converter={StaticResource BoolToVis}}"
                                         ToolTip="Hapus semua tugas yang selesai" Padding="6,2" Margin="0,0,4,0">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="🗑" FontSize="10" Margin="0,0,3,0"/>
+                                        <TextBlock Text="ðŸ—‘" FontSize="10" Margin="0,0,3,0"/>
                                         <TextBlock Text="Bersihkan" FontSize="10.5"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="▴" ToolTip="Tutup ke Compact" Margin="0,0,3,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseTodoCommand}" Content="✕" ToolTip="Tutup To-Do List" Margin="0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="â–´" ToolTip="Tutup ke Compact" Margin="0,0,3,0"/>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseTodoCommand}" Content="âœ•" ToolTip="Tutup To-Do List" Margin="0"/>
 
                                 <!-- Pembatas Garis: To-Do List | Browser -->
                                 <Border Width="1.2" Height="20" Background="#2C2C3A" Margin="7,0" VerticalAlignment="Center"
@@ -1181,7 +1173,7 @@
 
                                 <!-- Tombol Close Aplikasi di ujung sebelah kanan -->
                                 <Button Style="{StaticResource CloseAppButtonStyle}" Command="{Binding ExitApplicationCommand}"
-                                        Content="✕" ToolTip="Tutup Aplikasi DRANOTCH" Padding="7,4" Margin="0"/>
+                                        Content="âœ•" ToolTip="Tutup Aplikasi DRANOTCH" Padding="7,4" Margin="0"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -1199,7 +1191,7 @@
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SyncGoogleDriveCommand}"
                                         ToolTip="{Binding GoogleDriveSyncTooltip}" Padding="6,2" Margin="6,0,0,0">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="☁" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center">
+                                        <TextBlock Text="â˜" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="#FFAA44"/>
@@ -1371,7 +1363,7 @@
                                 <!-- Tampilan saat kosong -->
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                             Visibility="{Binding FilteredTodos.IsEmpty, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="🎉" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                    <TextBlock Text="ðŸŽ‰" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                                     <TextBlock Text="Tidak ada tugas saat ini" Foreground="#666677" FontSize="11" HorizontalAlignment="Center"/>
                                 </StackPanel>
 
@@ -1403,10 +1395,10 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <!-- Drag Grip Handle ⋮⋮ -->
+                                                        <!-- Drag Grip Handle â‹®â‹® -->
                                                         <Border Grid.Column="0" Width="14" Height="20" Background="Transparent" Cursor="SizeAll"
                                                                 VerticalAlignment="Center" Margin="0,0,4,0" ToolTip="Tahan dan geser naik/turun untuk ubah urutan">
-                                                            <TextBlock Text="⋮⋮" Foreground="#555566" FontSize="11" FontWeight="Bold"
+                                                            <TextBlock Text="â‹®â‹®" Foreground="#555566" FontSize="11" FontWeight="Bold"
                                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                         </Border>
 
@@ -1461,33 +1453,33 @@
                                                             </TextBox>
                                                         </Grid>
 
-                                                        <!-- Tombol Aksi saat Normal (Edit ✎ & Hapus ×) -->
+                                                        <!-- Tombol Aksi saat Normal (Edit âœŽ & Hapus Ã—) -->
                                                         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
                                                                     Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
                                                             <Button Command="{Binding StartEditCommand}"
                                                                     Style="{StaticResource TodoDeleteButtonStyle}"
                                                                     ToolTip="Edit tugas" Width="20" Height="20" Margin="0,0,2,0">
-                                                                <TextBlock Text="✎" FontSize="11" Foreground="#777788" Margin="0,-1,0,0"/>
+                                                                <TextBlock Text="âœŽ" FontSize="11" Foreground="#777788" Margin="0,-1,0,0"/>
                                                             </Button>
                                                             <Button Command="{Binding DeleteCommand}"
                                                                     Style="{StaticResource TodoDeleteButtonStyle}"
                                                                     ToolTip="Hapus tugas" Width="20" Height="20">
-                                                                <TextBlock Text="×" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
+                                                                <TextBlock Text="Ã—" FontSize="14" FontWeight="Bold" Margin="0,-2,0,0"/>
                                                             </Button>
                                                         </StackPanel>
 
-                                                        <!-- Tombol Aksi saat Mode Edit (Simpan ✓ & Batal ✕) -->
+                                                        <!-- Tombol Aksi saat Mode Edit (Simpan âœ“ & Batal âœ•) -->
                                                         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
                                                                     Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
                                                             <Button Command="{Binding SaveEditCommand}"
                                                                     Style="{StaticResource TodoDeleteButtonStyle}"
                                                                     ToolTip="Simpan (Enter)" Width="20" Height="20" Margin="0,0,2,0">
-                                                                <TextBlock Text="✓" FontSize="12" Foreground="#4CD964" FontWeight="Bold"/>
+                                                                <TextBlock Text="âœ“" FontSize="12" Foreground="#4CD964" FontWeight="Bold"/>
                                                             </Button>
                                                             <Button Command="{Binding CancelEditCommand}"
                                                                     Style="{StaticResource TodoDeleteButtonStyle}"
                                                                     ToolTip="Batal (Esc)" Width="20" Height="20">
-                                                                <TextBlock Text="✕" FontSize="11" Foreground="#FF4D6D"/>
+                                                                <TextBlock Text="âœ•" FontSize="11" Foreground="#FF4D6D"/>
                                                             </Button>
                                                         </StackPanel>
                                                     </Grid>
@@ -1533,9 +1525,9 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}" Content="⧉" ToolTip="Lepas Waktu Sholat ke Jendela Sendiri" Margin="0,0,4,0"/>
-                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="⚙" ToolTip="Pengaturan Waktu Sholat" Margin="0,0,4,0"/>
-                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePrayerPanelCommand}" Content="✕" ToolTip="Kembali ke Pemutar"/>
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding DetachPrayerCommand}" Content="â§‰" ToolTip="Lepas Waktu Sholat ke Jendela Sendiri" Margin="0,0,4,0"/>
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSettingsCommand}" Content="âš™" ToolTip="Pengaturan Waktu Sholat" Margin="0,0,4,0"/>
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePrayerPanelCommand}" Content="âœ•" ToolTip="Kembali ke Pemutar"/>
                         </StackPanel>
                     </Grid>
 
@@ -1655,9 +1647,9 @@
                     <!-- Bottom Status & Actions -->
                     <DockPanel Grid.Row="3" LastChildFill="True">
                         <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}" Command="{Binding TogglePrayerPanelCommand}" 
-                                Content="← Kembali" Padding="10,4" Margin="6,0,0,0"/>
+                                Content="â† Kembali" Padding="10,4" Margin="6,0,0,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Pengingat aktif: Sebelum (-10m) • Saat Adzan • Sesudah (+15m)" FontSize="10" Foreground="#666677"/>
+                            <TextBlock Text="Pengingat aktif: Sebelum (-10m) â€¢ Saat Adzan â€¢ Sesudah (+15m)" FontSize="10" Foreground="#666677"/>
                         </StackPanel>
                     </DockPanel>
                 </Grid>
@@ -1705,7 +1697,7 @@
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact"
                                     Content="Compact" FontSize="12.5" Padding="14,6" Margin="0,0,6,0" ToolTip="Kembali ke Notch"/>
                             <Button Style="{StaticResource CloseAppButtonStyle}" Command="{Binding ExitApplicationCommand}"
-                                    Content="✕" FontSize="12.5" Padding="10,6" Margin="0" ToolTip="Tutup Aplikasi DRANOTCH"/>
+                                    Content="âœ•" FontSize="12.5" Padding="10,6" Margin="0" ToolTip="Tutup Aplikasi DRANOTCH"/>
                         </StackPanel>
                     </Grid>
 
@@ -1721,7 +1713,7 @@
                             <!-- Standby / Empty State when no track is playing -->
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                         Visibility="{Binding HasTrack, Converter={StaticResource InverseBoolToVis}}">
-                                <TextBlock Text="♪" FontSize="32" FontWeight="Bold" Foreground="#4A4A64" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="â™ª" FontSize="32" FontWeight="Bold" Foreground="#4A4A64" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                                 <TextBlock Text="Belum Ada Lagu yang Diputar" FontSize="16" FontWeight="Bold" Foreground="#EDEDF6" HorizontalAlignment="Center"/>
                                 <TextBlock Text="Putar musik dari YouTube Music, Spotify, atau browser untuk menampilkan lirik karaoke otomatis."
                                            FontSize="12.5" Foreground="#88889E" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420" Margin="0,6,0,16"/>
@@ -1729,7 +1721,7 @@
                                     <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
                                             Padding="14,7">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="▶" Foreground="#FF4D6D" FontSize="11.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="â–¶" Foreground="#FF4D6D" FontSize="11.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                             <TextBlock Text="Buka YT Music" FontSize="12.5" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
@@ -1815,7 +1807,7 @@
 
                         <!-- Icon -->
                         <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#1C1C26" Margin="0,0,10,0">
-                            <TextBlock Text="🕌" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="ðŸ•Œ" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
 
                         <!-- Info -->
@@ -1831,7 +1823,7 @@
 
                         <!-- Dismiss button -->
                         <Button Grid.Column="2" Command="{Binding DismissPrayerNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="×" ToolTip="Tutup Notifikasi"
+                                Style="{StaticResource SmallPillButton}" Content="Ã—" ToolTip="Tutup Notifikasi"
                                 Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
                     </Grid>
                 </Border>
@@ -1844,80 +1836,78 @@
                 Command="{Binding ToggleBezelMinimizeCommand}"
                 ToolTip="{Binding BezelMinimizeButtonTooltip}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Margin="0,0,0,-5.5"
-                 Panel.ZIndex="10"
+                Panel.ZIndex="10"
                 Cursor="Hand">
-            <Button.Template>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="TogglePillBorder"
-                            Background="#0E0E15"
-                            BorderBrush="#3C3C52"
-                            BorderThickness="1.2"
-                            CornerRadius="6"
-                            Padding="10,1.5">
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <!-- Panah ke Atas (▲) saat Notch Terbuka / Idle (Klik untuk minimize ke bezel) -->
-                            <Path Data="M 1,5.2 L 5,1.2 L 9,5.2"
-                                  Stroke="{StaticResource MetallicSilverBrush}"
-                                  StrokeThickness="1.7"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  StrokeLineJoin="Round"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"
-                                  Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}"/>
-                            <!-- Panah ke Bawah (▼) saat Notch Diminimize ke Bezel (Klik untuk membuka kembali notch) -->
-                            <Path Data="M 1,1.2 L 5,5.2 L 9,1.2"
-                                  Stroke="{StaticResource MetallicSilverBrush}"
-                                  StrokeThickness="1.7"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  StrokeLineJoin="Round"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"
-                                  Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}"/>
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="TogglePillBorder" Property="Background" Value="#262638"/>
-                            <Setter TargetName="TogglePillBorder" Property="BorderBrush" Value="#80FFFFFF"/>
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="TogglePillBorder" Property="Background" Value="#36364E"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Button.Template>
+            <Button.ContextMenu>
+                <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
+                    <MenuItem Header="{Binding BezelMinimizeMenuText}" Command="{Binding ToggleBezelMinimizeCommand}" Foreground="#FFFFFF"/>
+                    <MenuItem Header="Pengaturan" Command="{Binding OpenSettingsCommand}" Foreground="#FFFFFF"/>
+                    <Separator Background="#282834"/>
+                    <MenuItem Header="Tutup / Keluar Aplikasi" Command="{Binding ExitApplicationCommand}" Foreground="#FF6666"/>
+                </ContextMenu>
+            </Button.ContextMenu>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="VerticalAlignment" Value="Bottom"/>
+                    <Setter Property="Margin" Value="0,0,0,-5.5"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="TogglePillBorder"
+                                        Background="#0B0B10"
+                                        BorderBrush="#3C3C52"
+                                        BorderThickness="1.2"
+                                        CornerRadius="6"
+                                        Padding="10,1.5">
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <!-- Panah ke Atas (â–²) saat Notch Terbuka / Idle (Klik untuk minimize ke bezel) -->
+                                        <Path Data="M 1,5.2 L 5,1.2 L 9,5.2"
+                                              Stroke="{StaticResource MetallicSilverBrush}"
+                                              StrokeThickness="1.7"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}"/>
+                                        <!-- Panah ke Bawah (â–¼) saat Notch Diminimize ke Bezel (Klik untuk membuka kembali notch) -->
+                                        <Path Data="M 1,1.2 L 5,5.2 L 9,1.2"
+                                              Stroke="{StaticResource MetallicSilverBrush}"
+                                              StrokeThickness="1.7"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}"/>
+                                    </Grid>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsBezelMinimized}" Value="True">
+                                        <Setter TargetName="TogglePillBorder" Property="Background" Value="#000000"/>
+                                        <Setter TargetName="TogglePillBorder" Property="BorderThickness" Value="1.2,0,1.2,1.2"/>
+                                        <Setter TargetName="TogglePillBorder" Property="CornerRadius" Value="0,0,10,10"/>
+                                        <Setter TargetName="TogglePillBorder" Property="Padding" Value="16,3.5,16,4.5"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="TogglePillBorder" Property="Background" Value="#242436"/>
+                                        <Setter TargetName="TogglePillBorder" Property="BorderBrush" Value="#80FFFFFF"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="TogglePillBorder" Property="Background" Value="#34344C"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBezelMinimized}" Value="True">
+                            <Setter Property="VerticalAlignment" Value="Top"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
         </Button>
-
-        <!-- Left Top Bezel Concave Ear (Mac-Style Larger Luxury Concave Fillet 28x28) -->
-        <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Top" Margin="0,0,-1.4,0" IsHitTestVisible="False"
-              Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}">
-            <Path Data="M 0,0 L 28,0 L 28,28 C 28,12.54 15.46,0 0,0 Z" Fill="#000000"/>
-            <Path Data="M 28,28 C 28,12.54 15.46,0 0,0" Stroke="#242432" StrokeThickness="1.2"/>
-        </Grid>
-
-        <!-- Right Top Bezel Concave Ear (Mac-Style Larger Luxury Concave Fillet 28x28) -->
-        <Grid Grid.Column="2" Width="28" Height="28" VerticalAlignment="Top" Margin="-1.4,0,0,0" IsHitTestVisible="False"
-              Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}">
-            <Path Data="M 0,0 L 28,0 C 12.54,0 0,12.54 0,28 Z" Fill="#000000"/>
-            <Path Data="M 28,0 C 12.54,0 0,12.54 0,28" Stroke="#242432" StrokeThickness="1.2"/>
-        </Grid>
-
-        <!-- Mini Left Top Bezel Concave Ear (Saat Diminimize ke Bezel 12x12) -->
-        <Grid Grid.Column="0" Width="12" Height="12" VerticalAlignment="Top" Margin="0,0,-1.2,0" IsHitTestVisible="False"
-              Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}">
-            <Path Data="M 0,0 L 12,0 L 12,12 C 12,5.37 6.63,0 0,0 Z" Fill="#000000"/>
-            <Path Data="M 12,12 C 12,5.37 6.63,0 0,0" Stroke="#242432" StrokeThickness="1.2"/>
-        </Grid>
-
-        <!-- Mini Right Top Bezel Concave Ear (Saat Diminimize ke Bezel 12x12) -->
-        <Grid Grid.Column="2" Width="12" Height="12" VerticalAlignment="Top" Margin="-1.2,0,0,0" IsHitTestVisible="False"
-              Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}">
-            <Path Data="M 0,0 L 12,0 C 5.37,0 0,5.37 0,12 Z" Fill="#000000"/>
-            <Path Data="M 12,0 C 5.37,0 0,5.37 0,12" Stroke="#242432" StrokeThickness="1.2"/>
-        </Grid>
     </Grid>
 </Window>
