@@ -61,6 +61,7 @@ public class MainViewModel : ViewModelBase
     private SongLyrics? _currentLyrics;
     private int _activeLyricIndex = -1;
     private bool _isPinned;
+    private bool _isBezelMinimized;
     private bool _isIdleMiniMode;
     private DispatcherTimer? _idleTimer;
     private bool _isClickThrough;
@@ -107,7 +108,18 @@ public class MainViewModel : ViewModelBase
                     OnPropertyChanged(nameof(IsIdleMiniMode));
                     OnPropertyChanged(nameof(ShowIdleMiniView));
                 }
+                if (value != PanelMode.Compact && _isBezelMinimized)
+                {
+                    _isBezelMinimized = false;
+                    Settings.IsBezelMinimized = false;
+                    _settingsService.Save();
+                    OnPropertyChanged(nameof(IsBezelMinimized));
+                    OnPropertyChanged(nameof(IsNotBezelMinimized));
+                    OnPropertyChanged(nameof(BezelMinimizeButtonTooltip));
+                    OnPropertyChanged(nameof(BezelMinimizeMenuText));
+                }
                 OnPropertyChanged(nameof(IsCompactMode));
+                OnPropertyChanged(nameof(ShowCompactView));
                 OnPropertyChanged(nameof(IsExpandedMode));
                 OnPropertyChanged(nameof(IsLyricsMode));
                 OnPropertyChanged(nameof(ShowIdleMiniView));
@@ -143,11 +155,52 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    public bool ShowComponentIcons => IsCompactMode && (_isHovering || IsPinned);
-    public bool ShowMusicInNotch => IsCompactMode && (ShowComponentIcons || IsPlaying);
+    public bool IsBezelMinimized
+    {
+        get => _isBezelMinimized;
+        set
+        {
+            if (SetProperty(ref _isBezelMinimized, value))
+            {
+                Settings.IsBezelMinimized = value;
+                _settingsService.Save();
+                if (value && _currentMode != PanelMode.Compact)
+                {
+                    _currentMode = PanelMode.Compact;
+                    OnPropertyChanged(nameof(CurrentMode));
+                    OnPropertyChanged(nameof(IsCompactMode));
+                    OnPropertyChanged(nameof(IsExpandedMode));
+                    OnPropertyChanged(nameof(IsLyricsMode));
+                }
+                OnPropertyChanged(nameof(IsNotBezelMinimized));
+                OnPropertyChanged(nameof(ShowCompactView));
+                OnPropertyChanged(nameof(ShowComponentIcons));
+                OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
+                OnPropertyChanged(nameof(BezelMinimizeButtonTooltip));
+                OnPropertyChanged(nameof(BezelMinimizeMenuText));
+            }
+        }
+    }
+
+    public bool IsNotBezelMinimized => !_isBezelMinimized;
+    public bool ShowCompactView => IsCompactMode && !_isBezelMinimized;
+
+    public string BezelMinimizeButtonTooltip => IsBezelMinimized
+        ? "Buka kembali Notch DRANOTCH"
+        : "Minimize Notch ke Bezel Atas (Agar tidak mengganggu jendela lain)";
+
+    public string BezelMinimizeMenuText => IsBezelMinimized
+        ? "▼ Buka Kembali Notch dari Bezel"
+        : "▲ Minimize Notch ke Bezel Atas";
+
+    public bool ShowComponentIcons => IsCompactMode && !_isBezelMinimized && (_isHovering || IsPinned);
+    public bool ShowMusicInNotch => IsCompactMode && !_isBezelMinimized && (ShowComponentIcons || IsPlaying);
     public bool ShowMusicPillInNotch => ShowMusicInNotch && !IsMusicWindowOpen;
     public bool ShowMusicIconInNotch => ShowMusicInNotch && IsMusicWindowOpen;
-    public bool ShowIdlePrayerBesideLogo => IsCompactMode && !ShowComponentIcons && Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch;
+    public bool ShowIdlePrayerBesideLogo => IsCompactMode && !_isBezelMinimized && !ShowComponentIcons && Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch;
 
     public string MusicNotchTooltip => HasTrack
         ? $"{CurrentTrack?.Title} - {CurrentTrack?.Artist}\nKlik untuk perluas pemutar & lirik"
@@ -1029,6 +1082,7 @@ public class MainViewModel : ViewModelBase
     public ICommand SeekCommand { get; }
     public ICommand SetModeCommand { get; }
     public ICommand TogglePinCommand { get; }
+    public ICommand ToggleBezelMinimizeCommand { get; }
     public ICommand OpenSettingsCommand { get; }
     public ICommand OpenAboutCommand { get; }
     public ICommand OpenYouTubeMusicCommand { get; }
@@ -1113,6 +1167,7 @@ public class MainViewModel : ViewModelBase
         _lyricsService = lyricsService;
         _settingsService = settingsService;
         _isPinned = _settingsService.CurrentSettings.IsPinned;
+        _isBezelMinimized = _settingsService.CurrentSettings.IsBezelMinimized;
         _todoService = todoService ?? new TodoService(settingsService);
         _googleDriveSyncService = googleDriveSyncService ?? new GoogleDriveSyncService(settingsService);
         _updateService = updateService ?? new UpdateService(settingsService);
@@ -1246,6 +1301,7 @@ public class MainViewModel : ViewModelBase
         });
 
         TogglePinCommand = new RelayCommand(() => IsPinned = !IsPinned);
+        ToggleBezelMinimizeCommand = new RelayCommand(() => IsBezelMinimized = !IsBezelMinimized);
         WakeFromIdleCommand = new RelayCommand(WakeFromIdle);
         ToggleMiniModeCommand = new RelayCommand(ToggleMiniMode);
         OpenSettingsCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());

@@ -403,8 +403,21 @@
                 Background="#000000"
                 BorderBrush="{StaticResource LuxuryNotchBorderBrush}"
                 BorderThickness="1.2,0,1.2,1.2"
-                CornerRadius="0,0,24,24"
                 MouseDown="Island_MouseDown">
+
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="0,0,24,24"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBezelMinimized}" Value="True">
+                            <Setter Property="CornerRadius" Value="0,0,10,10"/>
+                            <Setter Property="MinWidth" Value="64"/>
+                            <Setter Property="MinHeight" Value="8"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
             <Border.ContextMenu>
                 <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
                     <MenuItem Header="Perluas Panel" Command="{Binding SetModeCommand}" CommandParameter="Expanded" 
@@ -412,6 +425,7 @@
                     <MenuItem Header="Perkecil ke Notch" Command="{Binding SetModeCommand}" CommandParameter="Compact"
                               Foreground="#FFFFFF" Visibility="{Binding IsExpandedMode, Converter={StaticResource BoolToVis}}"/>
                     <MenuItem Header="{Binding PinMenuText}" Command="{Binding TogglePinCommand}" Foreground="#FFFFFF"/>
+                    <MenuItem Header="{Binding BezelMinimizeMenuText}" Command="{Binding ToggleBezelMinimizeCommand}" Foreground="#FFFFFF"/>
                     <MenuItem Header="Pengaturan" Command="{Binding OpenSettingsCommand}" Foreground="#FFFFFF"/>
                     <Separator Background="#282834"/>
                     <MenuItem Header="Tutup / Keluar Aplikasi" Command="{Binding ExitApplicationCommand}" Foreground="#FF6666"/>
@@ -421,7 +435,7 @@
             <Grid>
                 <!-- ================= MODE 1: COMPACT (DYNAMIC ISLAND NOTCH: 5 KOMPONEN HOVER) ================= -->
                 <!-- Saat idle: Hanya logo DRANOTCH yang muncul. Saat dihover: 5 ikon komponen muncul ke kiri (musik, radio), kanan (todo, browser), dan bawah (waktu sholat) -->
-                <Grid x:Name="CompactView" Visibility="{Binding IsCompactMode, Converter={StaticResource BoolToVis}}" 
+                <Grid x:Name="CompactView" Grid.Row="0" Visibility="{Binding ShowCompactView, Converter={StaticResource BoolToVis}}" 
                       Margin="14,4,14,6" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.RowDefinitions>
                         <!-- Baris 0: Logo DRANOTCH di tengah, Musik & Radio di kiri, To-Do & Browser di kanan -->
@@ -1788,7 +1802,8 @@
                 </Grid>
 
                 <!-- ================= FLOATING ISLAND PRAYER NOTIFICATION BANNER ================= -->
-                <Border Visibility="{Binding HasActivePrayerNotification, Converter={StaticResource BoolToVis}}"
+                <!-- ================= FLOATING ISLAND PRAYER NOTIFICATION BANNER ================= -->
+                <Border Grid.Row="0" Visibility="{Binding HasActivePrayerNotification, Converter={StaticResource BoolToVis}}"
                         Background="#0D0D11" BorderBrush="#343444" BorderThickness="1.5" CornerRadius="22"
                         Padding="12,6" Margin="4,2" VerticalAlignment="Center">
                     <Grid>
@@ -1823,16 +1838,86 @@
             </Grid>
         </Border>
 
+        <!-- ================= TOMBOL PANAH ATAS/BAWAH MENEMPEL DI TENGAH GARIS BEZEL BAWAH ================= -->
+        <Button x:Name="BezelMinimizeToggleButton"
+                Grid.Column="1"
+                Command="{Binding ToggleBezelMinimizeCommand}"
+                ToolTip="{Binding BezelMinimizeButtonTooltip}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,-5.5"
+                 Panel.ZIndex="10"
+                Cursor="Hand">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="TogglePillBorder"
+                            Background="#0E0E15"
+                            BorderBrush="#3C3C52"
+                            BorderThickness="1.2"
+                            CornerRadius="6"
+                            Padding="10,1.5">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- Panah ke Atas (▲) saat Notch Terbuka / Idle (Klik untuk minimize ke bezel) -->
+                            <Path Data="M 1,5.2 L 5,1.2 L 9,5.2"
+                                  Stroke="{StaticResource MetallicSilverBrush}"
+                                  StrokeThickness="1.7"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}"/>
+                            <!-- Panah ke Bawah (▼) saat Notch Diminimize ke Bezel (Klik untuk membuka kembali notch) -->
+                            <Path Data="M 1,1.2 L 5,5.2 L 9,1.2"
+                                  Stroke="{StaticResource MetallicSilverBrush}"
+                                  StrokeThickness="1.7"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="TogglePillBorder" Property="Background" Value="#262638"/>
+                            <Setter TargetName="TogglePillBorder" Property="BorderBrush" Value="#80FFFFFF"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="TogglePillBorder" Property="Background" Value="#36364E"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
         <!-- Left Top Bezel Concave Ear (Mac-Style Larger Luxury Concave Fillet 28x28) -->
-        <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Top" Margin="0,0,-1.4,0" IsHitTestVisible="False">
+        <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Top" Margin="0,0,-1.4,0" IsHitTestVisible="False"
+              Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}">
             <Path Data="M 0,0 L 28,0 L 28,28 C 28,12.54 15.46,0 0,0 Z" Fill="#000000"/>
             <Path Data="M 28,28 C 28,12.54 15.46,0 0,0" Stroke="#242432" StrokeThickness="1.2"/>
         </Grid>
 
         <!-- Right Top Bezel Concave Ear (Mac-Style Larger Luxury Concave Fillet 28x28) -->
-        <Grid Grid.Column="2" Width="28" Height="28" VerticalAlignment="Top" Margin="-1.4,0,0,0" IsHitTestVisible="False">
+        <Grid Grid.Column="2" Width="28" Height="28" VerticalAlignment="Top" Margin="-1.4,0,0,0" IsHitTestVisible="False"
+              Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}">
             <Path Data="M 0,0 L 28,0 C 12.54,0 0,12.54 0,28 Z" Fill="#000000"/>
             <Path Data="M 28,0 C 12.54,0 0,12.54 0,28" Stroke="#242432" StrokeThickness="1.2"/>
+        </Grid>
+
+        <!-- Mini Left Top Bezel Concave Ear (Saat Diminimize ke Bezel 12x12) -->
+        <Grid Grid.Column="0" Width="12" Height="12" VerticalAlignment="Top" Margin="0,0,-1.2,0" IsHitTestVisible="False"
+              Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}">
+            <Path Data="M 0,0 L 12,0 L 12,12 C 12,5.37 6.63,0 0,0 Z" Fill="#000000"/>
+            <Path Data="M 12,12 C 12,5.37 6.63,0 0,0" Stroke="#242432" StrokeThickness="1.2"/>
+        </Grid>
+
+        <!-- Mini Right Top Bezel Concave Ear (Saat Diminimize ke Bezel 12x12) -->
+        <Grid Grid.Column="2" Width="12" Height="12" VerticalAlignment="Top" Margin="-1.2,0,0,0" IsHitTestVisible="False"
+              Visibility="{Binding IsBezelMinimized, Converter={StaticResource BoolToVis}}">
+            <Path Data="M 0,0 L 12,0 C 5.37,0 0,5.37 0,12 Z" Fill="#000000"/>
+            <Path Data="M 12,0 C 5.37,0 0,5.37 0,12" Stroke="#242432" StrokeThickness="1.2"/>
         </Grid>
     </Grid>
 </Window>

@@ -63,6 +63,8 @@ public partial class MainWindow : Window
         {
             if (ev.PropertyName == nameof(MainViewModel.CurrentMode) ||
                 ev.PropertyName == nameof(MainViewModel.IsCompactMode) ||
+                ev.PropertyName == nameof(MainViewModel.IsBezelMinimized) ||
+                ev.PropertyName == nameof(MainViewModel.ShowCompactView) ||
                 ev.PropertyName == nameof(MainViewModel.IsIdleMiniMode) ||
                 ev.PropertyName == nameof(MainViewModel.ShowIdleMiniView) ||
                 ev.PropertyName == nameof(MainViewModel.IsMusicWindowOpen) ||
