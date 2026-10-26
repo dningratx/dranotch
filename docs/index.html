@@ -329,22 +329,33 @@
 
     .screenshot-viewer {
       width: 100%;
-      background: #000;
-      border-radius: 12px;
+      background: radial-gradient(circle at 50% 50%, #13131c 0%, #08080c 100%);
+      border-radius: 14px;
       overflow: hidden;
-      border: 1px solid #1c1c28;
+      border: 1px solid #222230;
       display: flex;
       align-items: center;
       justify-content: center;
+      min-height: 360px;
+      padding: 24px 16px;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7);
     }
 
     .screenshot-viewer img {
-      width: 100%;
+      max-width: 100%;
+      max-height: 520px;
+      width: auto;
       height: auto;
       display: block;
       object-fit: contain;
       cursor: zoom-in;
-      transition: transform 0.2s;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 10px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .screenshot-viewer img:hover {
+      transform: scale(1.015);
     }
 
     /* Feature Grid */
@@ -564,22 +575,25 @@
           <div class="notch-capsule">
             <img src="assets/app.png" alt="Logo" />
             <span style="font-weight: 600; color: #fff;">DRANOTCH</span>
-            <div class="capsule-pill">🎵 Ada Selamanya • For Revenge</div>
-            <div class="capsule-pill capsule-extra">🕌 Dzuhur 11:52 (-18m)</div>
-            <div class="capsule-pill capsule-extra">✓ 3 Tugas Aktif</div>
+            <div class="capsule-pill">🌙 Maghrib 17:48 • 1j 12m lagi</div>
+            <div class="capsule-pill capsule-extra">🎵 Teh Hijau • Tulus</div>
+            <div class="capsule-pill capsule-extra">⏰ 1 Tugas Target</div>
           </div>
         </div>
 
         <!-- Mode Switcher Tabs -->
         <div class="preview-tabs">
-          <button class="preview-tab active" onclick="switchShot('assets/screenshot-expanded.png', this)">
-            🎛️ Expanded Panel
+          <button class="preview-tab active" onclick="switchShot('assets/screenshot-music.png', this)">
+            🎵 Pemutar Musik &amp; Karaoke
           </button>
           <button class="preview-tab" onclick="switchShot('assets/screenshot-compact.png', this)">
-            🖥️ Compact Notch
+            🖥️ Compact Notch &amp; Bezel
           </button>
-          <button class="preview-tab" onclick="switchShot('assets/screenshot-lyrics.png', this)">
-            🎤 Layar Lirik Karaoke
+          <button class="preview-tab" onclick="switchShot('assets/screenshot-todo.png', this)">
+            📋 To-Do List &amp; Target Waktu
+          </button>
+          <button class="preview-tab" onclick="switchShot('assets/screenshot-radio.png', this)">
+            📻 Radio Online
           </button>
           <button class="preview-tab" onclick="switchShot('assets/screenshot-browser.png', this)">
             🌐 Browser Mengambang
@@ -588,7 +602,7 @@
 
         <!-- Screenshot Display -->
         <div class="screenshot-viewer" onclick="openLightbox(document.getElementById('active-shot').src)">
-          <img id="active-shot" src="assets/screenshot-expanded.png" alt="Tampilan Antarmuka DRANOTCH" />
+          <img id="active-shot" src="assets/screenshot-music.png" alt="Tampilan Antarmuka DRANOTCH" />
         </div>
       </div>
     </section>
@@ -603,14 +617,14 @@
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">🎧</div>
-          <h3>Musik &amp; Radio Online</h3>
-          <p>Mendeteksi lagu otomatis dari Spotify, Apple Music, YouTube, serta dilengkapi 10+ saluran Radio Online Indonesia &amp; Dunia.</p>
+          <h3>Musik &amp; Karaoke Vocal Remover</h3>
+          <p>Mendeteksi lagu otomatis dari Spotify, Apple Music, YouTube dengan fitur Real-Time Karaoke Vocal Remover DSP, serta 10+ saluran Radio Online.</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">🎤</div>
           <h3>Lirik Karaoke Realtime</h3>
-          <p>Pencarian lirik tersinkronisasi otomatis (LRCLIB) dengan jendela panggung lirik mewah (*Luxury Glass*) yang bisa digeser bebas.</p>
+          <p>Pencarian lirik tersinkronisasi otomatis (LRCLIB) dengan jendela panggung lirik mewah (*Luxury Glass*) yang bisa digeser dan disesuaikan bebas.</p>
         </div>
 
         <div class="feature-card">
@@ -621,8 +635,8 @@
 
         <div class="feature-card">
           <div class="feature-icon">📋</div>
-          <h3>To-Do List &amp; G-Drive</h3>
-          <p>Daftar tugas dengan teks berjalan (live ticker), drag &amp; drop prioritas, dan auto-sync lintas komputer via Google Drive pribadi.</p>
+          <h3>To-Do List, Deadline &amp; G-Drive</h3>
+          <p>Target waktu selesai (deadline) dengan nada alarm notifikasi real-time, resize bebas jendela, ticker berjalan, dan auto-sync via Google Drive.</p>
         </div>
 
         <div class="feature-card">
