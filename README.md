@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🎵 DRANOTCH
 
@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.5)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.6)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -163,12 +163,26 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - **Buka Kembali Notch (`▼`)**: Klik tombol panah ke bawah (`▼`) pada garis bezel (atau melalui menu klik kanan bezel) kapan saja untuk membuka kembali ukuran notch ke tampilan normal.
   - **Desain Kapsul Bezel Bersih Tanpa Bayangan Blur (`v1.6.4`)**: Menghapus bayangan hitam blur (`DropShadowEffect`) dan artefak garis lancip *concave ear* di sisi kiri-kanan, sehingga saat diminimize maupun dibuka tampil sebagai kapsul tunggal yang tajam, bersih, dan menyatu rapi di tepi atas layar.
 
-### 📐 19. Resize Bebas Jendela To-Do List saat Mode Diperluas (*Expanded*) *(Baru di v1.6.5)*
+### 📐 19. Resize Bebas Jendela To-Do List saat Mode Diperluas (*Expanded*) *(v1.6.5)*
 - **Bebas Diperbesar / Diperkecil (*Free Resizing*)**: Saat jendela mengambang To-Do List berada dalam kondisi diperluas (*expanded*), jendela kini dapat diubah ukurannya secara bebas (lebar dan tinggi) sesuai preferensi dan kenyamanan membaca daftar tugas.
 - **Indikator Pegangan Sudut Mewah (*Luxury Metallic Resize Grip*)**: Dilengkapi indikator grip garis diagonal modern di pojok kanan-bawah dengan kursor SizeNWSE dan efek hover perak mengilap.
 - **Dukungan Resize dari Seluruh Tepi & Sudut**: Dilengkapi pegangan interaktif di tepi kanan, kiri, atas, bawah, serta sudut kiri-bawah dan sudut atas.
 - **Tata Letak Adaptif & Ingat Ukuran Otomatis**: Daftar tugas dan kotak teks input tugas otomatis membentang secara responsif mengisi ruang baru, dan ukuran jendela terakhir otomatis tersimpan serta dipulihkan saat dibuka kembali.
 - **Rapi saat Mode Compact**: Seluruh area resize otomatis dinonaktifkan saat jendela berada dalam mode *compact/ticker* mini agar tampilan kapsul tetap bersih dan ramping.
+
+### ⏰ 20. Target Waktu Selesai (Deadline) To-Do List & Nada Pengingat Real-Time *(Baru di v1.6.6)*
+- **Target Waktu Selesai pada Setiap Tugas**:
+  - Pengguna dapat menentukan target tanggal dan jam selesai pada saat menambah tugas baru maupun saat mengedit tugas (*inline edit*).
+  - Pilihan cepat preset (+1 Jam, +3 Jam, Hari ini 17:00, Malam 21:00, Besok 09:00, Besok 17:00) serta pemilih kustom tanggal (`DatePicker`) dan jam/menit (0-23 : 0-59).
+  - Dialog pengaturan target waktu mandiri, rapi, dan terisolasi antara jendela notch utama dan jendela To-Do List mengambang (*detached*).
+- **Indikator Status & Ikon Jam Presisi**:
+  - Dilengkapi ikon jam vektor tajam dan badge waktu dinamis yang berubah warna (kuning saat aktif mendekati batas waktu, merah saat terlewat/*overdue*, biru muda saat santai).
+- **Pengingat Nada & Notifikasi Real-Time**:
+  - Saat waktu deadline tercapai, aplikasi otomatis membunyikan alert bell melodik dua nada (`Ding-Dong`) dan menampilkan banner notifikasi pengingat tugas.
+
+### 🌐 21. Isolasi Audio Karaoke Browser & Teks Pembaruan Interaktif *(Baru di v1.6.6)*
+- **Isolasi DSP Karaoke untuk Browser Mengambang**: Suara video atau web pada Browser Mengambang (*Floating Browser*) tidak lagi ikut teredam atau masuk mode karaoke saat Karaoke Vocal Remover aktif di pemutar musik.
+- **Teks Pembaruan Versi Interaktif ("Click to Update {versi}")**: Saat ada rilis baru terdeteksi, label versi di pengaturan otomatis berubah menjadi link klik interaktif untuk mempermudah pembaruan langsung.
 
 ---
 
@@ -198,7 +212,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.5.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.6.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

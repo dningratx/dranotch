@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.Media;
@@ -1078,5 +1078,231 @@ public class TodoTests
         // Leaving mouse should cancel the expansion timer
         vm.OnMouseLeave();
         Assert.False(expandedImmediately);
+    }
+
+    [Fact]
+    public void TodoItem_DueDate_SerializationAndDeserialization()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"todo_due_{Guid.NewGuid()}.json");
+        try
+        {
+            var service = new TodoService(tempFile);
+            var expectedDue = new DateTime(2026, 10, 26, 17, 30, 0);
+            var items = new List<TodoItem>
+            {
+                new TodoItem
+                {
+                    Title = "Kerja: Kirim laporan keuangan",
+                    DueDate = expectedDue,
+                    IsDueNotified = false
+                }
+            };
+
+            service.SaveTodos(items);
+            var loaded = service.LoadTodos();
+
+            Assert.Single(loaded);
+            Assert.Equal("Kerja: Kirim laporan keuangan", loaded[0].Title);
+            Assert.True(loaded[0].DueDate.HasValue);
+            Assert.Equal((DateTime?)expectedDue, loaded[0].DueDate);
+            Assert.False(loaded[0].IsDueNotified);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public void TodoItemViewModel_DueDateProperties_FormatCorrectly()
+    {
+        var dueToday = DateTime.Today.AddHours(18).AddMinutes(15);
+        var item = new TodoItem
+        {
+            Title = "Belajar: Baca bab 3",
+            DueDate = dueToday
+        };
+
+        var vm = new TodoItemViewModel(item);
+        Assert.True(vm.HasDueDate);
+        Assert.Equal("Hari ini 18:15", vm.DueDateText);
+        Assert.False(vm.IsOverdue);
+
+        // Test overdue
+        var duePast = DateTime.Now.AddHours(-2);
+        vm.DueDate = duePast;
+        Assert.True(vm.IsOverdue);
+        Assert.Contains("#3A141A", vm.DueBadgeBackground);
+
+        // Once completed, it is no longer marked overdue
+        vm.IsCompleted = true;
+        Assert.False(vm.IsOverdue);
+    }
+
+    [Fact]
+    public void MainViewModel_AddTodo_WithDueDate_AndCheckDeadline()
+    {
+        Exception? caught = null;
+        var thread = new Thread(() =>
+        {
+            var tempFile = Path.Combine(Path.GetTempPath(), $"todo_vm_{Guid.NewGuid()}.json");
+            try
+            {
+                var settingsService = new FakeSettingsService();
+                var todoService = new TodoService(tempFile);
+                var vm = new MainViewModel(
+                    new FakeMediaSessionService(),
+                    new FakeLyricsService(),
+                    settingsService,
+                    todoService);
+
+                var dueTime = DateTime.Now.AddMinutes(-1); // already reached deadline
+                vm.NewTodoTitle = "Kirim dokumen proyek";
+                vm.NewTodoDueDate = dueTime;
+
+                Assert.True(vm.HasNewTodoDueDate);
+                vm.AddTodoCommand.Execute(null);
+
+                Assert.Single(vm.Todos);
+                Assert.Equal("Kirim dokumen proyek", vm.Todos[0].Title);
+                Assert.Equal(dueTime, vm.Todos[0].DueDate);
+                Assert.False(vm.HasNewTodoDueDate); // reset after add
+
+                string? trayNotifTitle = null;
+                string? trayNotifMsg = null;
+                vm.RequestShowTrayNotification += (t, m) =>
+                {
+                    trayNotifTitle = t;
+                    trayNotifMsg = m;
+                };
+
+                // Trigger deadline check
+                vm.CheckTodoDeadlines();
+
+                Assert.True(vm.Todos[0].IsDueNotified);
+                Assert.True(vm.HasActiveTodoNotification);
+                Assert.NotNull(vm.ActiveTodoNotification);
+                Assert.Equal("â° Batas Waktu To-Do!", vm.ActiveTodoNotification.Title);
+                Assert.Contains("Kirim dokumen proyek", vm.ActiveTodoNotification.Message);
+                Assert.NotNull(trayNotifTitle);
+
+                // Complete through notification action button
+                vm.CompleteTodoNotificationCommand.Execute(null);
+                Assert.True(vm.Todos[0].IsCompleted);
+                Assert.False(vm.HasActiveTodoNotification);
+            }
+            catch (Exception ex)
+            {
+                caught = ex;
+            }
+            finally
+            {
+                if (File.Exists(tempFile)) File.Delete(tempFile);
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        bool finished = thread.Join(10000);
+        Assert.True(finished);
+        Assert.Null(caught);
+    }
+
+    [Fact]
+    public void TodoItemViewModel_InlineEdit_CanModifyAndCancelDueDate()
+    {
+        var originalDue = new DateTime(2026, 10, 26, 17, 0, 0);
+        var item = new TodoItem
+        {
+            Title = "Kerja: Desain poster",
+            DueDate = originalDue
+        };
+
+        var vm = new TodoItemViewModel(item);
+        Assert.Equal(originalDue, vm.DueDate);
+
+        // Start edit
+        vm.StartEdit();
+        Assert.True(vm.IsEditing);
+        Assert.Equal(originalDue, vm.EditDueDate);
+        Assert.True(vm.HasEditDueDate);
+
+        // Change preset during edit
+        vm.SetEditDueDatePreset("tomorrow_09");
+        var tomorrow9 = new DateTime(DateTime.Today.AddDays(1).Year, DateTime.Today.AddDays(1).Month, DateTime.Today.AddDays(1).Day, 9, 0, 0);
+        Assert.Equal(tomorrow9, vm.EditDueDate);
+        // Original DueDate should still be untouched before save
+        Assert.Equal(originalDue, vm.DueDate);
+
+        // Cancel edit -> reverts EditDueDate
+        vm.CancelEdit();
+        Assert.False(vm.IsEditing);
+        Assert.Equal(originalDue, vm.DueDate);
+
+        // Start edit again and save
+        vm.StartEdit();
+        vm.EditText = "Kerja: Desain poster banner";
+        vm.SetEditDueDatePreset("today_21");
+        var today21 = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 21, 0, 0);
+        vm.SaveEdit();
+
+        Assert.False(vm.IsEditing);
+        Assert.Equal("Kerja: Desain poster banner", vm.Title);
+        Assert.Equal(today21, vm.DueDate);
+
+        // Clear due date in edit mode
+        vm.StartEdit();
+        vm.ClearEditDueDateCommand.Execute(null);
+        Assert.False(vm.HasEditDueDate);
+        Assert.Null(vm.EditDueDate);
+        vm.SaveEdit();
+
+        Assert.False(vm.HasDueDate);
+        Assert.Null(vm.DueDate);
+    }
+
+    [Fact]
+    public void TodoItemViewModel_InlineEdit_WindowIsolationAndCustomDeadline()
+    {
+        var item = new TodoItem
+        {
+            Title = "Kerja: Desain banner",
+            DueDate = null
+        };
+        var vm = new TodoItemViewModel(item);
+        vm.StartEdit();
+
+        Assert.False(vm.IsSettingEditDueDateInDetached);
+        Assert.False(vm.IsSettingEditDueDateInMain);
+        Assert.False(vm.IsSettingEditDueDate);
+
+        // Open in detached window only
+        vm.ToggleEditDueDateDetachedCommand.Execute(null);
+        Assert.True(vm.IsSettingEditDueDateInDetached);
+        Assert.False(vm.IsSettingEditDueDateInMain);
+        Assert.True(vm.IsSettingEditDueDate);
+
+        // Switch to main window -> detached closes, main opens
+        vm.ToggleEditDueDateMainCommand.Execute(null);
+        Assert.False(vm.IsSettingEditDueDateInDetached);
+        Assert.True(vm.IsSettingEditDueDateInMain);
+        Assert.True(vm.IsSettingEditDueDate);
+
+        // Test custom deadline setting
+        var targetDay = new DateTime(2026, 11, 15);
+        vm.EditCustomDeadlineDate = targetDay;
+        vm.EditCustomDeadlineHour = 14;
+        vm.EditCustomDeadlineMinute = 30;
+
+        vm.ApplyEditCustomDeadlineCommand.Execute(null);
+
+        Assert.False(vm.IsSettingEditDueDateInDetached);
+        Assert.False(vm.IsSettingEditDueDateInMain);
+        Assert.False(vm.IsSettingEditDueDate);
+        Assert.NotNull(vm.EditDueDate);
+        Assert.Equal(new DateTime(2026, 11, 15, 14, 30, 0), vm.EditDueDate.Value);
+
+        // Save edit
+        vm.SaveEdit();
+        Assert.Equal(new DateTime(2026, 11, 15, 14, 30, 0), vm.DueDate);
     }
 }

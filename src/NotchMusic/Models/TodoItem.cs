@@ -8,6 +8,8 @@ public class TodoItem
     public bool IsCompleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? CompletedAt { get; set; }
+    public DateTime? DueDate { get; set; }
+    public bool IsDueNotified { get; set; }
 
     public static (string category, string taskText) ParseCategory(string? rawTitle)
     {

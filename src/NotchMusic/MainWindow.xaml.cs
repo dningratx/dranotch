@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using NotchMusic.Helpers;
 using NotchMusic.Models;
@@ -448,14 +448,10 @@ public partial class MainWindow : Window
             {
                 await _ytMusicWindow.SetVocalRemoverAsync(enabled);
             }
-            if (_floatingBrowserWindow != null)
-            {
-                await _floatingBrowserWindow.SetVocalRemoverAsync(enabled);
-            }
 
             if (enabled)
             {
-                _viewModel.SessionStatus = (_ytMusicWindow != null || _floatingBrowserWindow != null)
+                _viewModel.SessionStatus = (_ytMusicWindow != null)
                     ? "🎤 Mode Karaoke (Penghilang Vokal) Aktif"
                     : "🎤 Karaoke Aktif (Putar lagu di ▶ YT Music untuk hapus vokal)";
             }

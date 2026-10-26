@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -113,6 +113,10 @@ public class CompactHoverIslandTests
         Assert.False(string.IsNullOrEmpty(vm.PrayerScheduleTooltip));
         Assert.StartsWith("v", vm.VersionButtonText);
         Assert.False(string.IsNullOrEmpty(vm.VersionButtonTooltip));
+
+        vm.HasAvailableUpdate = true;
+        vm.AvailableUpdateVersion = "v1.7.0";
+        Assert.Equal("Click to Update v1.7.0", vm.VersionButtonText);
     }
 
     [Fact]

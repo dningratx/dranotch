@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -79,9 +79,6 @@ public partial class FloatingBrowserWindow : Window
 
             webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             webView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = true;
-
-            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
-                WebAudioVocalRemoverScript.GetBootstrapScript(_viewModel?.IsVocalRemoverEnabled ?? false));
 
             // Pastikan iframe dan video player (seperti di LK21/YouTube) diizinkan fullscreen
             await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
@@ -440,18 +437,6 @@ public partial class FloatingBrowserWindow : Window
         Hide();
     }
 
-    public async Task SetVocalRemoverAsync(bool enabled)
-    {
-        try
-        {
-            if (webView?.CoreWebView2 != null)
-            {
-                await webView.CoreWebView2.ExecuteScriptAsync(
-                    WebAudioVocalRemoverScript.GetSetEnabledScript(enabled));
-            }
-        }
-        catch { }
-    }
 
     public void ForceClose()
     {

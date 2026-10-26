@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -39,6 +39,14 @@ public class MainViewModel : ViewModelBase
     private readonly ICollectionView _filteredTodos;
     private string _todoFilter = "All";
     private string _newTodoTitle = string.Empty;
+    private DateTime? _newTodoDueDate;
+    private bool _isSettingNewTodoDeadline;
+    private DateTime? _customDeadlineDate = DateTime.Today;
+    private int _customDeadlineHour = 17;
+    private int _customDeadlineMinute = 0;
+    private TodoNotificationEvent? _activeTodoNotification;
+    private DispatcherTimer? _todoNotificationDismissTimer;
+    private readonly DispatcherTimer _todoDeadlineTimer;
 
     // Radio Online Fields (Komponen ke-5)
     private readonly ICollectionView _filteredRadioStations;
@@ -952,6 +960,89 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _newTodoTitle, value);
     }
 
+    public DateTime? NewTodoDueDate
+    {
+        get => _newTodoDueDate;
+        set
+        {
+            if (SetProperty(ref _newTodoDueDate, value))
+            {
+                OnPropertyChanged(nameof(HasNewTodoDueDate));
+                OnPropertyChanged(nameof(NewTodoDueDateText));
+            }
+        }
+    }
+
+    public bool HasNewTodoDueDate => NewTodoDueDate.HasValue;
+
+    public string NewTodoDueDateText
+    {
+        get
+        {
+            if (!NewTodoDueDate.HasValue) return string.Empty;
+            var dt = NewTodoDueDate.Value;
+            var today = DateTime.Today;
+            if (dt.Date == today)
+                return $"Hari ini {dt:HH:mm}";
+            if (dt.Date == today.AddDays(1))
+                return $"Besok {dt:HH:mm}";
+            if (dt.Date == today.AddDays(-1))
+                return $"Kemarin {dt:HH:mm}";
+            if (dt.Year == today.Year)
+                return dt.ToString("d MMM HH:mm");
+            return dt.ToString("d MMM yyyy HH:mm");
+        }
+    }
+
+    public bool IsSettingNewTodoDeadline
+    {
+        get => _isSettingNewTodoDeadline;
+        set => SetProperty(ref _isSettingNewTodoDeadline, value);
+    }
+
+    public DateTime? CustomDeadlineDate
+    {
+        get => _customDeadlineDate;
+        set => SetProperty(ref _customDeadlineDate, value);
+    }
+
+    public int CustomDeadlineHour
+    {
+        get => _customDeadlineHour;
+        set => SetProperty(ref _customDeadlineHour, value);
+    }
+
+    public int CustomDeadlineMinute
+    {
+        get => _customDeadlineMinute;
+        set => SetProperty(ref _customDeadlineMinute, value);
+    }
+
+    public bool HasActiveTodoNotification => _activeTodoNotification != null;
+
+    public TodoNotificationEvent? ActiveTodoNotification
+    {
+        get => _activeTodoNotification;
+        private set
+        {
+            if (SetProperty(ref _activeTodoNotification, value))
+            {
+                OnPropertyChanged(nameof(HasActiveTodoNotification));
+                if (value != null)
+                {
+                    _todoNotificationDismissTimer?.Stop();
+                    _todoNotificationDismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
+                    _todoNotificationDismissTimer.Tick += (s, e) =>
+                    {
+                        _todoNotificationDismissTimer.Stop();
+                        ActiveTodoNotification = null;
+                    };
+                    _todoNotificationDismissTimer.Start();
+                }
+            }
+        }
+    }
+
     public int PendingTodosCount => Todos.Count(t => !t.IsCompleted);
     public int CompletedTodosCount => Todos.Count(t => t.IsCompleted);
     public int TotalTodosCount => Todos.Count;
@@ -986,7 +1077,7 @@ public class MainViewModel : ViewModelBase
     public string VersionButtonText => !string.IsNullOrWhiteSpace(_updateActionStatusText)
         ? _updateActionStatusText
         : (HasAvailableUpdate && !string.IsNullOrWhiteSpace(AvailableUpdateVersion)
-            ? $"Update {(AvailableUpdateVersion.StartsWith("v", StringComparison.OrdinalIgnoreCase) ? AvailableUpdateVersion : "v" + AvailableUpdateVersion)}"
+            ? $"Click to Update {(AvailableUpdateVersion.StartsWith("v", StringComparison.OrdinalIgnoreCase) ? AvailableUpdateVersion : "v" + AvailableUpdateVersion)}"
             : CurrentVersionText);
     public string VersionButtonTooltip => HasAvailableUpdate && !string.IsNullOrWhiteSpace(AvailableUpdateVersion)
         ? $"Pembaruan v{AvailableUpdateVersion} tersedia! (Saat ini: {CurrentVersionText}) — Klik untuk langsung download & install"
@@ -1096,6 +1187,12 @@ public class MainViewModel : ViewModelBase
     public ICommand SelectSearchResultCommand { get; }
     public ICommand SelectSessionCommand { get; }
     public ICommand AddTodoCommand { get; }
+    public ICommand ToggleSetDeadlineCommand { get; }
+    public ICommand SetDeadlinePresetCommand { get; }
+    public ICommand ApplyCustomDeadlineCommand { get; }
+    public ICommand ClearNewTodoDueDateCommand { get; }
+    public ICommand DismissTodoNotificationCommand { get; }
+    public ICommand CompleteTodoNotificationCommand { get; }
     public ICommand ClearCompletedTodosCommand { get; }
     public ICommand SetTodoFilterCommand { get; }
     public ICommand SetCategoryFilterCommand { get; }
@@ -1245,6 +1342,45 @@ public class MainViewModel : ViewModelBase
         }
 
         AddTodoCommand = new RelayCommand(AddTodo);
+        ToggleSetDeadlineCommand = new RelayCommand(() => IsSettingNewTodoDeadline = !IsSettingNewTodoDeadline);
+        SetDeadlinePresetCommand = new RelayCommand((p) =>
+        {
+            if (p is string presetStr)
+            {
+                SetDeadlinePreset(presetStr);
+            }
+        });
+        ApplyCustomDeadlineCommand = new RelayCommand(ApplyCustomDeadline);
+        ClearNewTodoDueDateCommand = new RelayCommand(() =>
+        {
+            NewTodoDueDate = null;
+            IsSettingNewTodoDeadline = false;
+        });
+        DismissTodoNotificationCommand = new RelayCommand(() =>
+        {
+            _todoNotificationDismissTimer?.Stop();
+            ActiveTodoNotification = null;
+        });
+        CompleteTodoNotificationCommand = new RelayCommand(() =>
+        {
+            if (ActiveTodoNotification != null)
+            {
+                var target = Todos.FirstOrDefault(t => t.Id == ActiveTodoNotification.TodoId);
+                if (target != null)
+                {
+                    target.IsCompleted = true;
+                }
+                _todoNotificationDismissTimer?.Stop();
+                ActiveTodoNotification = null;
+            }
+        });
+        _todoDeadlineTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _todoDeadlineTimer.Tick += (s, e) => CheckTodoDeadlines();
+        try
+        {
+            _todoDeadlineTimer.Start();
+        }
+        catch { }
         ClearCompletedTodosCommand = new RelayCommand(ClearCompletedTodos);
         SetTodoFilterCommand = new RelayCommand((f) =>
         {
@@ -2263,7 +2399,9 @@ public class MainViewModel : ViewModelBase
         {
             Title = titleToSave,
             Category = categoryToSave,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            DueDate = NewTodoDueDate,
+            IsDueNotified = false
         };
 
         var vm = new TodoItemViewModel(item);
@@ -2272,8 +2410,93 @@ public class MainViewModel : ViewModelBase
 
         Todos.Add(vm);
         NewTodoTitle = string.Empty;
+        NewTodoDueDate = null;
+        IsSettingNewTodoDeadline = false;
 
         UpdateTodoCountsAndPersist();
+    }
+
+    public void SetDeadlinePreset(string preset)
+    {
+        var now = DateTime.Now;
+        DateTime target;
+        switch (preset?.ToLowerInvariant())
+        {
+            case "plus_1h":
+                target = now.AddHours(1);
+                NewTodoDueDate = new DateTime(target.Year, target.Month, target.Day, target.Hour, (target.Minute / 5) * 5, 0);
+                break;
+            case "plus_3h":
+                target = now.AddHours(3);
+                NewTodoDueDate = new DateTime(target.Year, target.Month, target.Day, target.Hour, (target.Minute / 5) * 5, 0);
+                break;
+            case "today_17":
+                NewTodoDueDate = new DateTime(now.Year, now.Month, now.Day, 17, 0, 0);
+                break;
+            case "today_21":
+                NewTodoDueDate = new DateTime(now.Year, now.Month, now.Day, 21, 0, 0);
+                break;
+            case "tomorrow_09":
+                target = now.AddDays(1);
+                NewTodoDueDate = new DateTime(target.Year, target.Month, target.Day, 9, 0, 0);
+                break;
+            case "tomorrow_17":
+                target = now.AddDays(1);
+                NewTodoDueDate = new DateTime(target.Year, target.Month, target.Day, 17, 0, 0);
+                break;
+            default:
+                break;
+        }
+        IsSettingNewTodoDeadline = false;
+    }
+
+    public void ApplyCustomDeadline()
+    {
+        var baseDate = CustomDeadlineDate ?? DateTime.Today;
+        int hour = Math.Clamp(CustomDeadlineHour, 0, 23);
+        int minute = Math.Clamp(CustomDeadlineMinute, 0, 59);
+        NewTodoDueDate = new DateTime(baseDate.Year, baseDate.Month, baseDate.Day, hour, minute, 0);
+        IsSettingNewTodoDeadline = false;
+    }
+
+    public void CheckTodoDeadlines()
+    {
+        var now = DateTime.Now;
+        bool hasChanges = false;
+
+        foreach (var vm in Todos)
+        {
+            if (vm.HasDueDate)
+            {
+                vm.RefreshDueStatus();
+            }
+
+            if (!vm.IsCompleted && vm.DueDate.HasValue && !vm.IsDueNotified && now >= vm.DueDate.Value)
+            {
+                vm.IsDueNotified = true;
+                hasChanges = true;
+
+                // 1. Play alert chime sound
+                PrayerAudioHelper.PlayDeadlineAlert();
+
+                // 2. Windows tray notification balloon
+                RequestShowTrayNotification?.Invoke("â° Batas Waktu To-Do!", $"Tugas '{vm.TaskText}' telah mencapai batas waktu.");
+
+                // 3. Notch Floating Island Banner
+                ActiveTodoNotification = new TodoNotificationEvent
+                {
+                    TodoId = vm.Id,
+                    Title = "â° Batas Waktu To-Do!",
+                    Message = $"Tugas '{vm.TaskText}' telah mencapai batas waktu ({vm.DueDateText}).",
+                    Timestamp = now
+                };
+            }
+        }
+
+        if (hasChanges)
+        {
+            UpdateTodoCountsAndPersist();
+        }
     }
 
     private void DeleteTodo(TodoItemViewModel item)
