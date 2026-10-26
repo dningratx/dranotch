@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # 🎵 DRANOTCH
 
@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.4)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.5)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -155,13 +155,20 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Lirik Tetap Tampil saat Mode *Minimize* Pelepasan Pemutar Musik**:
   - Ketika jendela pelepasan Pemutar Musik (`MusicWindow`) diperkecil (*minimize* `▴`), tampilan ringkas tetap menampilkan **kotak lirik 3 baris** secara langsung di bawah baris kontrol utama (tanpa *progress bar* dan *offset* agar tetap ringkas di layar).
 
-### 🔼 18. Tombol Panah Bezel Atas/Bawah & Desain Kapsul Bezel Bersih Tanpa Bayangan Blur *(Baru di v1.6.4)*
+### 🔼 18. Tombol Panah Bezel Atas/Bawah & Desain Kapsul Bezel Bersih Tanpa Bayangan Blur *(v1.6.4)*
 - **Tombol Panah Atas/Bawah (`▲` / `▼`) Menempel di Tengah Garis Bezel Bawah**:
   - Menambahkan tombol panah ramping yang menempel persis di tengah garis tepi bawah bezel (`MainIslandBorder`) tanpa menambah tinggi ruang hitam di dalam notch.
   - **Minimize ke Bezel Atas (`▲`)**: Saat banyak jendela atau tab aplikasi lain sedang dibuka, klik tombol panah ke atas (`▲`) untuk melipat/mengecilkan notch *idle* menjadi strip bezel super tipis di tepi atas layar agar tidak menutupi *titlebar* atau *tab* jendela lain.
   - **Perlindungan Anti-Hover saat Diminimize**: Ketika dalam kondisi diminimize ke bezel atas, mengarahkan kursor ke tepi atas layar tidak akan memunculkan komponen-komponen notch secara tidak sengaja.
   - **Buka Kembali Notch (`▼`)**: Klik tombol panah ke bawah (`▼`) pada garis bezel (atau melalui menu klik kanan bezel) kapan saja untuk membuka kembali ukuran notch ke tampilan normal.
   - **Desain Kapsul Bezel Bersih Tanpa Bayangan Blur (`v1.6.4`)**: Menghapus bayangan hitam blur (`DropShadowEffect`) dan artefak garis lancip *concave ear* di sisi kiri-kanan, sehingga saat diminimize maupun dibuka tampil sebagai kapsul tunggal yang tajam, bersih, dan menyatu rapi di tepi atas layar.
+
+### 📐 19. Resize Bebas Jendela To-Do List saat Mode Diperluas (*Expanded*) *(Baru di v1.6.5)*
+- **Bebas Diperbesar / Diperkecil (*Free Resizing*)**: Saat jendela mengambang To-Do List berada dalam kondisi diperluas (*expanded*), jendela kini dapat diubah ukurannya secara bebas (lebar dan tinggi) sesuai preferensi dan kenyamanan membaca daftar tugas.
+- **Indikator Pegangan Sudut Mewah (*Luxury Metallic Resize Grip*)**: Dilengkapi indikator grip garis diagonal modern di pojok kanan-bawah dengan kursor SizeNWSE dan efek hover perak mengilap.
+- **Dukungan Resize dari Seluruh Tepi & Sudut**: Dilengkapi pegangan interaktif di tepi kanan, kiri, atas, bawah, serta sudut kiri-bawah dan sudut atas.
+- **Tata Letak Adaptif & Ingat Ukuran Otomatis**: Daftar tugas dan kotak teks input tugas otomatis membentang secara responsif mengisi ruang baru, dan ukuran jendela terakhir otomatis tersimpan serta dipulihkan saat dibuka kembali.
+- **Rapi saat Mode Compact**: Seluruh area resize otomatis dinonaktifkan saat jendela berada dalam mode *compact/ticker* mini agar tampilan kapsul tetap bersih dan ramping.
 
 ---
 
@@ -191,7 +198,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.4.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.5.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

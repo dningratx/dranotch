@@ -248,8 +248,6 @@
                     <StackPanel>
                         <TextBlock Text="Tampilan &amp; Perilaku" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
                         <CheckBox Content="Jalankan otomatis saat login Windows" IsChecked="{Binding StartWithWindows}"/>
-                        <CheckBox Content="Always On Top (Selalu di atas jendela lain)" IsChecked="{Binding AlwaysOnTop}"/>
-                        <CheckBox Content="Perluas panel otomatis saat mouse diarahkan (Hover)" IsChecked="{Binding ExpandOnHover}"/>
                     </StackPanel>
                 </Border>
 

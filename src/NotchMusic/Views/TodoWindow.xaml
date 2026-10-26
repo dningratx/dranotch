@@ -1,9 +1,9 @@
-<Window x:Class="NotchMusic.Views.TodoWindow"
+﻿<Window x:Class="NotchMusic.Views.TodoWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
         Title="DRANOTCH - To-Do List"
-        Width="430" Height="520" MinWidth="400" MinHeight="360"
+        Width="430" Height="520" MinWidth="360" MinHeight="320"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"
@@ -12,6 +12,30 @@
     <Window.Resources>
         <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+
+        <!-- Resize Thumb Templates -->
+        <ControlTemplate x:Key="TransparentThumbTemplate" TargetType="Thumb">
+            <Border Background="Transparent"/>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="ResizeGripThumbTemplate" TargetType="Thumb">
+            <Grid Background="Transparent" Width="22" Height="22" ToolTip="Tarik untuk mengubah ukuran (Resize)">
+                <Path x:Name="GripLines"
+                      HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                      Margin="0,0,6,6"
+                      Data="M 12,2 L 2,12 M 12,6 L 6,12 M 12,10 L 10,12"
+                      Stroke="#555566" StrokeThickness="1.5"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="GripLines" Property="Stroke" Value="#D4D9E6"/>
+                </Trigger>
+                <Trigger Property="IsDragging" Value="True">
+                    <Setter TargetName="GripLines" Property="Stroke" Value="#FFFFFF"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
 
         <LinearGradientBrush x:Key="MetallicSilverBrush" StartPoint="0,0" EndPoint="1,1">
             <GradientStop Color="#FFFFFF" Offset="0.0"/>
@@ -711,5 +735,38 @@
             </Grid>
         </Grid>
     </Border>
+
+    <!-- Resizing Overlay (Hanya aktif & tampil saat kondisi EXPANDED) -->
+    <Grid Visibility="{Binding IsTodoWindowExpanded, Converter={StaticResource BoolToVis}}" IsHitTestVisible="True">
+        <!-- Sisi / Tepi Jendela -->
+        <Thumb x:Name="ResizeLeft" Width="6" HorizontalAlignment="Left" Cursor="SizeWE"
+               DragDelta="ResizeLeft_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+        <Thumb x:Name="ResizeRight" Width="6" HorizontalAlignment="Right" Cursor="SizeWE"
+               DragDelta="ResizeRight_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+        <Thumb x:Name="ResizeTop" Height="6" VerticalAlignment="Top" Cursor="SizeNS"
+               DragDelta="ResizeTop_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+        <Thumb x:Name="ResizeBottom" Height="6" VerticalAlignment="Bottom" Cursor="SizeNS"
+               DragDelta="ResizeBottom_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+
+        <!-- Sudut Jendela -->
+        <Thumb x:Name="ResizeTopLeft" Width="14" Height="14" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="SizeNWSE"
+               DragDelta="ResizeTopLeft_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+        <Thumb x:Name="ResizeTopRight" Width="14" Height="14" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="SizeNESW"
+               DragDelta="ResizeTopRight_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+        <Thumb x:Name="ResizeBottomLeft" Width="14" Height="14" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="SizeNESW"
+               DragDelta="ResizeBottomLeft_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource TransparentThumbTemplate}"/>
+
+        <!-- Indikator Grip Sudut Kanan-Bawah (Resize Grip) -->
+        <Thumb x:Name="ResizeBottomRight" Width="22" Height="22" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="SizeNWSE"
+               DragDelta="ResizeBottomRight_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+               Template="{StaticResource ResizeGripThumbTemplate}"/>
+    </Grid>
 </Grid>
 </Window>

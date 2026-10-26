@@ -1,4 +1,6 @@
+﻿using System;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using NotchMusic.Helpers;
 using NotchMusic.Services.Settings;
@@ -76,12 +78,12 @@ public partial class TodoWindow : Window
         }
         else
         {
-            MinWidth = 400;
-            MinHeight = 360;
+            MinWidth = 360;
+            MinHeight = 320;
 
             var s = _settingsService.CurrentSettings;
-            Width = s.TodoWindowWidth >= 400 ? s.TodoWindowWidth : 430;
-            Height = s.TodoWindowHeight >= 400 ? s.TodoWindowHeight : 520;
+            Width = s.TodoWindowWidth >= 360 ? s.TodoWindowWidth : 430;
+            Height = s.TodoWindowHeight >= 320 ? s.TodoWindowHeight : 520;
         }
 
         Dispatcher.InvokeAsync(() => WindowHelper.EnsureInVisibleScreen(this));
@@ -103,7 +105,6 @@ public partial class TodoWindow : Window
         {
             _settingsService.CurrentSettings.TodoWindowWidth = ActualWidth;
             _settingsService.CurrentSettings.TodoWindowHeight = ActualHeight;
-            _settingsService.Save();
         }
     }
 
@@ -117,6 +118,144 @@ public partial class TodoWindow : Window
             _settingsService.Save();
         }
     }
+
+    #region Window Resizing
+
+    private void ResizeThumb_DragCompleted(object sender, DragCompletedEventArgs e)
+    {
+        if (!_viewModel.IsTodoWindowCompact && WindowState == WindowState.Normal && ActualWidth >= MinWidth && ActualHeight >= MinHeight)
+        {
+            _settingsService.CurrentSettings.TodoWindowWidth = ActualWidth;
+            _settingsService.CurrentSettings.TodoWindowHeight = ActualHeight;
+            _settingsService.CurrentSettings.TodoWindowLeft = Left;
+            _settingsService.CurrentSettings.TodoWindowTop = Top;
+            _settingsService.Save();
+        }
+    }
+
+    private void ResizeRight_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double current = double.IsNaN(Width) ? ActualWidth : Width;
+        double newWidth = current + e.HorizontalChange;
+        if (newWidth >= MinWidth)
+        {
+            Width = newWidth;
+        }
+    }
+
+    private void ResizeBottom_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double current = double.IsNaN(Height) ? ActualHeight : Height;
+        double newHeight = current + e.VerticalChange;
+        if (newHeight >= MinHeight)
+        {
+            Height = newHeight;
+        }
+    }
+
+    private void ResizeBottomRight_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double currentW = double.IsNaN(Width) ? ActualWidth : Width;
+        double currentH = double.IsNaN(Height) ? ActualHeight : Height;
+        double newWidth = currentW + e.HorizontalChange;
+        double newHeight = currentH + e.VerticalChange;
+
+        if (newWidth >= MinWidth)
+        {
+            Width = newWidth;
+        }
+        if (newHeight >= MinHeight)
+        {
+            Height = newHeight;
+        }
+    }
+
+    private void ResizeLeft_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double current = double.IsNaN(Width) ? ActualWidth : Width;
+        double newWidth = current - e.HorizontalChange;
+        if (newWidth >= MinWidth)
+        {
+            Left += e.HorizontalChange;
+            Width = newWidth;
+        }
+    }
+
+    private void ResizeBottomLeft_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double currentW = double.IsNaN(Width) ? ActualWidth : Width;
+        double currentH = double.IsNaN(Height) ? ActualHeight : Height;
+        double newWidth = currentW - e.HorizontalChange;
+        double newHeight = currentH + e.VerticalChange;
+
+        if (newWidth >= MinWidth)
+        {
+            Left += e.HorizontalChange;
+            Width = newWidth;
+        }
+        if (newHeight >= MinHeight)
+        {
+            Height = newHeight;
+        }
+    }
+
+    private void ResizeTop_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double current = double.IsNaN(Height) ? ActualHeight : Height;
+        double newHeight = current - e.VerticalChange;
+        if (newHeight >= MinHeight)
+        {
+            Top += e.VerticalChange;
+            Height = newHeight;
+        }
+    }
+
+    private void ResizeTopLeft_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double currentW = double.IsNaN(Width) ? ActualWidth : Width;
+        double currentH = double.IsNaN(Height) ? ActualHeight : Height;
+        double newWidth = currentW - e.HorizontalChange;
+        double newHeight = currentH - e.VerticalChange;
+
+        if (newWidth >= MinWidth)
+        {
+            Left += e.HorizontalChange;
+            Width = newWidth;
+        }
+        if (newHeight >= MinHeight)
+        {
+            Top += e.VerticalChange;
+            Height = newHeight;
+        }
+    }
+
+    private void ResizeTopRight_DragDelta(object sender, DragDeltaEventArgs e)
+    {
+        if (_viewModel.IsTodoWindowCompact) return;
+        double currentW = double.IsNaN(Width) ? ActualWidth : Width;
+        double currentH = double.IsNaN(Height) ? ActualHeight : Height;
+        double newWidth = currentW + e.HorizontalChange;
+        double newHeight = currentH - e.VerticalChange;
+
+        if (newWidth >= MinWidth)
+        {
+            Width = newWidth;
+        }
+        if (newHeight >= MinHeight)
+        {
+            Top += e.VerticalChange;
+            Height = newHeight;
+        }
+    }
+
+    #endregion
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
