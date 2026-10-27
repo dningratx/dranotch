@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Text.Json;
 using Google.Apis.Auth.OAuth2;
@@ -33,7 +33,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 
     private readonly ISettingsService _settingsService;
     private readonly string _authDataStorePath;
-    private readonly object _syncLock = new();
+    private readonly SemaphoreSlim _syncLock = new(1, 1);
 
     private bool _isSyncing;
     private string _syncStatus = "Belum terhubung";
@@ -306,25 +306,30 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
         return result.Files?.FirstOrDefault();
     }
 
+    private async Task<List<TodoItem>?> DownloadTodosInternalAsync(DriveService service, CancellationToken ct)
+    {
+        var folderId = await GetOrCreateFolderAsync(service, ct);
+        var file = await FindTodoFileAsync(service, folderId, ct);
+        if (file == null) return null;
+
+        using var stream = new MemoryStream();
+        await service.Files.Get(file.Id).DownloadAsync(stream, ct);
+        stream.Position = 0;
+
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        var json = await reader.ReadToEndAsync(ct);
+        _lastKnownRemoteModifiedTime = file.ModifiedTimeDateTimeOffset;
+        return JsonSerializer.Deserialize<List<TodoItem>>(json);
+    }
+
     public async Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default)
     {
+        await _syncLock.WaitAsync(ct);
         try
         {
             var service = await CreateDriveServiceAsync(ct);
             if (service == null) return null;
-
-            var folderId = await GetOrCreateFolderAsync(service, ct);
-            var file = await FindTodoFileAsync(service, folderId, ct);
-            if (file == null) return null;
-
-            using var stream = new MemoryStream();
-            await service.Files.Get(file.Id).DownloadAsync(stream, ct);
-            stream.Position = 0;
-
-            using var reader = new StreamReader(stream, Encoding.UTF8);
-            var json = await reader.ReadToEndAsync(ct);
-            _lastKnownRemoteModifiedTime = file.ModifiedTimeDateTimeOffset;
-            return JsonSerializer.Deserialize<List<TodoItem>>(json);
+            return await DownloadTodosInternalAsync(service, ct);
         }
         catch (Exception ex)
         {
@@ -332,16 +337,17 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
             StatusChanged?.Invoke();
             return null;
         }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default)
     {
         if (!IsConnected) return null;
 
-        lock (_syncLock)
-        {
-            if (_isSyncing) return null;
-        }
+        if (!await _syncLock.WaitAsync(0, ct)) return null;
 
         try
         {
@@ -360,13 +366,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
             }
 
             // File di Google Drive telah berubah oleh perangkat lain! Unduh otomatis
-            using var stream = new MemoryStream();
-            await service.Files.Get(file.Id).DownloadAsync(stream, ct);
-            stream.Position = 0;
-
-            using var reader = new StreamReader(stream, Encoding.UTF8);
-            var json = await reader.ReadToEndAsync(ct);
-            var remoteList = JsonSerializer.Deserialize<List<TodoItem>>(json);
+            var remoteList = await DownloadTodosInternalAsync(service, ct);
 
             _lastKnownRemoteModifiedTime = remoteModTime;
             _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
@@ -387,10 +387,55 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
             System.Diagnostics.Debug.WriteLine($"CheckForRemoteChanges error: {ex.Message}");
             return null;
         }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    private async Task<bool> UploadTodosInternalAsync(DriveService service, IEnumerable<TodoItem> todos, CancellationToken ct)
+    {
+        var folderId = await GetOrCreateFolderAsync(service, ct);
+        var existingFile = await FindTodoFileAsync(service, folderId, ct);
+
+        var json = JsonSerializer.Serialize(todos, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = Encoding.UTF8.GetBytes(json);
+        using var stream = new MemoryStream(bytes);
+
+        if (existingFile != null)
+        {
+            var updateReq = service.Files.Update(new Google.Apis.Drive.v3.Data.File(), existingFile.Id, stream, "application/json");
+            updateReq.Fields = "id, modifiedTime";
+            var progress = await updateReq.UploadAsync(ct);
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                throw progress.Exception ?? new Exception("Gagal mengunggah ke Google Drive.");
+            }
+            _lastKnownRemoteModifiedTime = updateReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            var metadata = new Google.Apis.Drive.v3.Data.File
+            {
+                Name = FileName,
+                Parents = new List<string> { folderId }
+            };
+            var createReq = service.Files.Create(metadata, stream, "application/json");
+            createReq.Fields = "id, modifiedTime";
+            var progress = await createReq.UploadAsync(ct);
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                throw progress.Exception ?? new Exception("Gagal membuat file di Google Drive.");
+            }
+            _lastKnownRemoteModifiedTime = createReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+        }
+
+        return true;
     }
 
     public async Task<bool> UploadTodosAsync(IEnumerable<TodoItem> todos, CancellationToken ct = default)
     {
+        await _syncLock.WaitAsync(ct);
         try
         {
             IsSyncing = true;
@@ -404,40 +449,16 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
                 return false;
             }
 
-            var folderId = await GetOrCreateFolderAsync(service, ct);
-            var existingFile = await FindTodoFileAsync(service, folderId, ct);
-
-            var json = JsonSerializer.Serialize(todos, new JsonSerializerOptions { WriteIndented = true });
-            var bytes = Encoding.UTF8.GetBytes(json);
-            using var stream = new MemoryStream(bytes);
-
-            if (existingFile != null)
+            bool success = await UploadTodosInternalAsync(service, todos, ct);
+            if (success)
             {
-                var updateReq = service.Files.Update(new Google.Apis.Drive.v3.Data.File(), existingFile.Id, stream, "application/json");
-                updateReq.Fields = "id, modifiedTime";
-                await updateReq.UploadAsync(ct);
-                _lastKnownRemoteModifiedTime = updateReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+                _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
+                _settingsService.Save();
+                _syncStatus = $"Tersinkron ({DateTime.Now:HH:mm})";
             }
-            else
-            {
-                var metadata = new Google.Apis.Drive.v3.Data.File
-                {
-                    Name = FileName,
-                    Parents = new List<string> { folderId }
-                };
-                var createReq = service.Files.Create(metadata, stream, "application/json");
-                createReq.Fields = "id, modifiedTime";
-                await createReq.UploadAsync(ct);
-                _lastKnownRemoteModifiedTime = createReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
-            }
-
-            _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
-            _settingsService.Save();
-
-            _syncStatus = $"Tersinkron ({DateTime.Now:HH:mm})";
             IsSyncing = false;
             StatusChanged?.Invoke();
-            return true;
+            return success;
         }
         catch (Exception ex)
         {
@@ -446,63 +467,81 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
             StatusChanged?.Invoke();
             return false;
         }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
-    public async Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, CancellationToken ct = default)
+    public async Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, IEnumerable<string>? deletedIds = null, CancellationToken ct = default)
     {
         if (!IsConnected) return null;
 
-        lock (_syncLock)
-        {
-            if (_isSyncing) return null;
-            _isSyncing = true;
-        }
-
+        await _syncLock.WaitAsync(ct);
         try
         {
+            IsSyncing = true;
             _syncStatus = "Menyinkronkan dengan Google Drive...";
             StatusChanged?.Invoke();
 
-            var remoteTodos = await DownloadTodosAsync(ct);
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null)
+            {
+                IsSyncing = false;
+                return null;
+            }
+
+            var remoteTodos = await DownloadTodosInternalAsync(service, ct);
 
             // Merge local and remote
-            var merged = MergeTodos(localTodos, remoteTodos ?? new List<TodoItem>());
+            var merged = MergeTodos(localTodos, remoteTodos ?? new List<TodoItem>(), deletedIds);
 
-            await UploadTodosAsync(merged, ct);
+            await UploadTodosInternalAsync(service, merged, ct);
 
             _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
             _settingsService.Save();
 
             _syncStatus = $"Sinkronisasi berhasil ({DateTime.Now:HH:mm})";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+
             TodosSynced?.Invoke(merged);
             return merged;
         }
         catch (Exception ex)
         {
             _syncStatus = $"Gagal sinkronisasi: {ex.Message}";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
             return null;
         }
         finally
         {
-            lock (_syncLock)
-            {
-                _isSyncing = false;
-            }
-            StatusChanged?.Invoke();
+            _syncLock.Release();
         }
     }
 
-    public static List<TodoItem> MergeTodos(IEnumerable<TodoItem> local, IEnumerable<TodoItem> remote)
+    public static List<TodoItem> MergeTodos(IEnumerable<TodoItem> local, IEnumerable<TodoItem> remote, IEnumerable<string>? deletedIds = null)
     {
+        var deletedSet = deletedIds != null ? new HashSet<string>(deletedIds) : new HashSet<string>();
         var dict = new Dictionary<string, TodoItem>();
 
         foreach (var item in remote)
         {
+            if (deletedSet.Contains(item.Id))
+            {
+                continue;
+            }
             dict[item.Id] = item;
         }
 
         foreach (var localItem in local)
         {
+            if (deletedSet.Contains(localItem.Id))
+            {
+                continue;
+            }
+
             if (dict.TryGetValue(localItem.Id, out var remoteItem))
             {
                 // Prefer the completed state or later completed timestamp

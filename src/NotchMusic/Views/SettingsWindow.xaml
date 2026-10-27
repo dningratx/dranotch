@@ -1,4 +1,4 @@
-<Window x:Class="NotchMusic.Views.SettingsWindow"
+﻿<Window x:Class="NotchMusic.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
@@ -501,15 +501,7 @@
                                     <CheckBox Content="Tampilkan Waktu Sholat di samping logo DRANOTCH saat idle" 
                                               IsChecked="{Binding ShowPrayerInCompactNotch}" Margin="0,4"/>
 
-                                    <!-- Opsi Pisahkan Waktu Sholat -->
-                                    <Border Margin="0,6,0,0" Padding="10,8" Background="#181820" CornerRadius="6">
-                                        <StackPanel>
-                                            <CheckBox Content="Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"
-                                                      IsChecked="{Binding IsPrayerDetached}" Margin="0"/>
-                                            <TextBlock Text="Waktu Sholat akan muncul sebagai widget melayang tersendiri yang dapat dipindahkan ke mana saja."
-                                                       FontSize="11" Foreground="#888899" TextWrapping="Wrap" Margin="22,3,0,0"/>
-                                        </StackPanel>
-                                    </Border>
+
                                 </StackPanel>
                             </Border>
 

@@ -270,6 +270,65 @@ public class TodoTests
     }
 
     [Fact]
+    public void GoogleDriveSyncService_MergeTodos_RespectsDeletedIds_DoesNotRestoreDeletedItem()
+    {
+        var local = new List<TodoItem>
+        {
+            new TodoItem { Id = "2", Title = "Task 2", IsCompleted = false }
+        };
+
+        var remote = new List<TodoItem>
+        {
+            new TodoItem { Id = "1", Title = "Task 1 (Deleted)", IsCompleted = false },
+            new TodoItem { Id = "2", Title = "Task 2", IsCompleted = false },
+            new TodoItem { Id = "3", Title = "Task 3 (New from remote)", IsCompleted = false }
+        };
+
+        var deletedIds = new[] { "1" };
+
+        var merged = GoogleDriveSyncService.MergeTodos(local, remote, deletedIds);
+
+        Assert.Equal(2, merged.Count);
+        Assert.DoesNotContain(merged, m => m.Id == "1");
+        Assert.Contains(merged, m => m.Id == "2");
+        Assert.Contains(merged, m => m.Id == "3");
+    }
+
+    [Fact]
+    public void TodoService_DeletedIds_PersistsAndClears()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"dranotch_test_{Guid.NewGuid():N}.json");
+        var tempDeleted = Path.ChangeExtension(tempFile, ".deleted.json");
+        try
+        {
+            var service = new TodoService(tempFile);
+            Assert.Empty(service.GetDeletedIds());
+
+            service.MarkDeleted("item-1");
+            service.MarkDeleted(new[] { "item-2", "item-3" });
+
+            var deleted = service.GetDeletedIds();
+            Assert.Equal(3, deleted.Count);
+            Assert.Contains("item-1", deleted);
+            Assert.Contains("item-2", deleted);
+            Assert.Contains("item-3", deleted);
+
+            var service2 = new TodoService(tempFile);
+            var reloaded = service2.GetDeletedIds();
+            Assert.Equal(3, reloaded.Count);
+
+            service2.ClearDeletedIds(new[] { "item-2" });
+            Assert.Equal(2, service2.GetDeletedIds().Count);
+            Assert.DoesNotContain("item-2", service2.GetDeletedIds());
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+            if (File.Exists(tempDeleted)) File.Delete(tempDeleted);
+        }
+    }
+
+    [Fact]
     public void GoogleDriveSyncService_ImportCredentials_ParsesValidJson()
     {
         var tempFile = Path.Combine(Path.GetTempPath(), $"credentials_test_{Guid.NewGuid():N}.json");
@@ -355,7 +414,7 @@ public class TodoTests
         }
         public Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default) => Task.FromResult<List<TodoItem>?>(new List<TodoItem>());
         public Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default) => Task.FromResult<List<TodoItem>?>(null);
-        public Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, CancellationToken ct = default)
+        public Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, IEnumerable<string>? deletedIds = null, CancellationToken ct = default)
         {
             var list = localTodos.ToList();
             list.Add(new TodoItem { Title = "Cloud Synced Task", IsCompleted = false });
@@ -1032,10 +1091,12 @@ public class TodoTests
                 int afterEdit = syncService.UploadCallCount;
 
                 // 3. DELETE
+                var deletedId = addedItem.Id;
                 addedItem.DeleteCommand.Execute(null);
 
                 Thread.Sleep(850);
                 Assert.True(syncService.UploadCallCount > afterEdit, "Upload should be called on Delete");
+                Assert.Contains(deletedId, todoService.GetDeletedIds());
             }
             catch (Exception ex)
             {

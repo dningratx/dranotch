@@ -1320,12 +1320,25 @@ public class MainViewModel : ViewModelBase
 
         _googleDriveSyncService.StatusChanged += () =>
         {
-            OnPropertyChanged(nameof(IsGoogleDriveConnected));
-            OnPropertyChanged(nameof(IsGoogleDriveSyncing));
-            OnPropertyChanged(nameof(GoogleDriveUserEmail));
-            OnPropertyChanged(nameof(GoogleDriveSyncStatus));
-            OnPropertyChanged(nameof(GoogleDriveStatusButtonText));
-            OnPropertyChanged(nameof(GoogleDriveSyncTooltip));
+            void Notify()
+            {
+                OnPropertyChanged(nameof(IsGoogleDriveConnected));
+                OnPropertyChanged(nameof(IsGoogleDriveSyncing));
+                OnPropertyChanged(nameof(GoogleDriveUserEmail));
+                OnPropertyChanged(nameof(GoogleDriveSyncStatus));
+                OnPropertyChanged(nameof(GoogleDriveStatusButtonText));
+                OnPropertyChanged(nameof(GoogleDriveSyncTooltip));
+            }
+
+            if (System.Windows.Application.Current?.Dispatcher != null &&
+                !System.Windows.Application.Current.Dispatcher.CheckAccess())
+            {
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(Notify);
+            }
+            else
+            {
+                Notify();
+            }
         };
         _googleDriveSyncService.TodosSynced += OnTodosSyncedFromCloud;
 
@@ -2504,6 +2517,7 @@ public class MainViewModel : ViewModelBase
         item.OnChanged -= OnTodoItemChanged;
         item.OnDeleteRequested -= DeleteTodo;
         Todos.Remove(item);
+        _todoService.MarkDeleted(item.Id);
         UpdateTodoCountsAndPersist();
     }
 
@@ -2512,12 +2526,14 @@ public class MainViewModel : ViewModelBase
         var completed = Todos.Where(t => t.IsCompleted).ToList();
         if (completed.Count == 0) return;
 
+        var ids = completed.Select(t => t.Id).ToList();
         foreach (var item in completed)
         {
             item.OnChanged -= OnTodoItemChanged;
             item.OnDeleteRequested -= DeleteTodo;
             Todos.Remove(item);
         }
+        _todoService.MarkDeleted(ids);
         UpdateTodoCountsAndPersist();
     }
 
@@ -2541,21 +2557,41 @@ public class MainViewModel : ViewModelBase
         ScheduleAutoSync();
     }
 
-    private System.Threading.Timer? _autoSyncDebounceTimer;
     private readonly object _autoSyncLock = new();
+    private bool _isAutoSyncRunning = false;
+    private bool _hasPendingAutoSync = false;
 
     private void ScheduleAutoSync()
     {
         if (!_googleDriveSyncService.IsConnected || !Settings.GoogleDriveAutoSync) return;
 
-        // Snapshot daftar todo pada UI thread untuk memastikan thread safety
-        var snapshot = Todos.Select(t => t.ToModel()).ToList();
-
         lock (_autoSyncLock)
         {
-            _autoSyncDebounceTimer?.Dispose();
-            _autoSyncDebounceTimer = new System.Threading.Timer(async _ =>
+            if (_isAutoSyncRunning)
             {
+                _hasPendingAutoSync = true;
+                return;
+            }
+            _isAutoSyncRunning = true;
+            _hasPendingAutoSync = false;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            while (true)
+            {
+                List<TodoItem> snapshot;
+                if (System.Windows.Application.Current?.Dispatcher != null &&
+                    !System.Windows.Application.Current.Dispatcher.CheckAccess())
+                {
+                    snapshot = await System.Windows.Application.Current.Dispatcher.InvokeAsync(
+                        () => Todos.Select(t => t.ToModel()).ToList());
+                }
+                else
+                {
+                    snapshot = Todos.Select(t => t.ToModel()).ToList();
+                }
+
                 try
                 {
                     if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync)
@@ -2567,8 +2603,19 @@ public class MainViewModel : ViewModelBase
                 {
                     System.Diagnostics.Debug.WriteLine($"AutoSync error: {ex.Message}");
                 }
-            }, null, TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
-        }
+
+                lock (_autoSyncLock)
+                {
+                    if (_hasPendingAutoSync)
+                    {
+                        _hasPendingAutoSync = false;
+                        continue;
+                    }
+                    _isAutoSyncRunning = false;
+                    break;
+                }
+            }
+        });
     }
 
     public async Task HandleGoogleDriveClickAsync()
@@ -2612,7 +2659,8 @@ public class MainViewModel : ViewModelBase
     {
         if (!_googleDriveSyncService.IsConnected) return;
 
-        var merged = await _googleDriveSyncService.SyncAsync(Todos.Select(t => t.ToModel()));
+        var deletedIds = _todoService.GetDeletedIds();
+        var merged = await _googleDriveSyncService.SyncAsync(Todos.Select(t => t.ToModel()), deletedIds);
         if (merged != null)
         {
             OnTodosSyncedFromCloud(merged);
@@ -2631,6 +2679,7 @@ public class MainViewModel : ViewModelBase
                 {
                     existing.Title = item.Title;
                     existing.IsCompleted = item.IsCompleted;
+                    existing.DueDate = item.DueDate;
                 }
                 else
                 {

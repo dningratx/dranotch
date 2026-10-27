@@ -814,7 +814,8 @@ public class SettingsViewModel : ViewModelBase
             StatusMessage = "Menyinkronkan dengan Google Drive...";
             var todoService = new TodoService(_settingsService);
             var todos = todoService.LoadTodos();
-            var merged = await _syncService.SyncAsync(todos);
+            var deletedIds = todoService.GetDeletedIds();
+            var merged = await _syncService.SyncAsync(todos, deletedIds);
             if (merged != null)
             {
                 todoService.SaveTodos(merged);

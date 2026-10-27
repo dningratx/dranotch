@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.6)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.7)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -170,7 +170,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Tata Letak Adaptif & Ingat Ukuran Otomatis**: Daftar tugas dan kotak teks input tugas otomatis membentang secara responsif mengisi ruang baru, dan ukuran jendela terakhir otomatis tersimpan serta dipulihkan saat dibuka kembali.
 - **Rapi saat Mode Compact**: Seluruh area resize otomatis dinonaktifkan saat jendela berada dalam mode *compact/ticker* mini agar tampilan kapsul tetap bersih dan ramping.
 
-### ⏰ 20. Target Waktu Selesai (Deadline) To-Do List & Nada Pengingat Real-Time *(Baru di v1.6.6)*
+### ⏰ 20. Target Waktu Selesai (Deadline) To-Do List & Nada Pengingat Real-Time *(v1.6.6)*
 - **Target Waktu Selesai pada Setiap Tugas**:
   - Pengguna dapat menentukan target tanggal dan jam selesai pada saat menambah tugas baru maupun saat mengedit tugas (*inline edit*).
   - Pilihan cepat preset (+1 Jam, +3 Jam, Hari ini 17:00, Malam 21:00, Besok 09:00, Besok 17:00) serta pemilih kustom tanggal (`DatePicker`) dan jam/menit (0-23 : 0-59).
@@ -180,9 +180,15 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Pengingat Nada & Notifikasi Real-Time**:
   - Saat waktu deadline tercapai, aplikasi otomatis membunyikan alert bell melodik dua nada (`Ding-Dong`) dan menampilkan banner notifikasi pengingat tugas.
 
-### 🌐 21. Isolasi Audio Karaoke Browser & Teks Pembaruan Interaktif *(Baru di v1.6.6)*
+### 🌐 21. Isolasi Audio Karaoke Browser & Teks Pembaruan Interaktif *(v1.6.6)*
 - **Isolasi DSP Karaoke untuk Browser Mengambang**: Suara video atau web pada Browser Mengambang (*Floating Browser*) tidak lagi ikut teredam atau masuk mode karaoke saat Karaoke Vocal Remover aktif di pemutar musik.
 - **Teks Pembaruan Versi Interaktif ("Click to Update {versi}")**: Saat ada rilis baru terdeteksi, label versi di pengaturan otomatis berubah menjadi link klik interaktif untuk mempermudah pembaruan langsung.
+
+### ⚡ 22. Sinkronisasi Instan Google Drive To-Do List & Pembersihan Pengaturan *(Baru di v1.6.7)*
+- **Sinkronisasi Instan Tanpa Tunda (0ms Delay)**: Setiap tindakan pada To-Do list—menghapus tugas, menambah tugas baru, mencentang/membatalkan centang selesai, mengedit tugas (*inline edit*), mengubah target tenggat waktu, membersihkan tugas selesai, maupun menyusun ulang urutan tugas (*drag & drop*)—langsung disinkronkan ke Google Drive secara instan tanpa jeda *debounce*.
+- **Pelacakan ID yang Dihapus (*Tombstone Tracking*)**: Menambahkan sistem pelacakan ID tugas yang dihapus (`deleted_todos.json`), menjamin tugas yang telah dihapus di lokal tidak akan pernah muncul kembali (*resurrect*) saat sinkronisasi dua arah atau auto-sync cloud berjalan.
+- **Pembersihan Antarmuka Pengaturan Waktu Sholat**: Menghapus opsi *"Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"* dari jendela Pengaturan untuk pengalaman pengguna yang lebih bersih, fokus, dan ringkas.
+- **Pembaruan Status UI Google Drive Responsif**: Indikator status sinkronisasi kini otomatis di-*dispatch* langsung ke UI thread, sehingga indikator tombol Drive (`Menyinkronkan...` -> `Drive` / `Tersinkron`) langsung terupdate tanpa *lag*.
 
 ---
 
@@ -212,7 +218,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.6.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.7.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

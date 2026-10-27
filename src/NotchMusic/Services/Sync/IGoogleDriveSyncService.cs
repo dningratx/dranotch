@@ -16,7 +16,7 @@ public interface IGoogleDriveSyncService
 
     Task<bool> AuthenticateAsync(CancellationToken ct = default);
     Task DisconnectAsync();
-    Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, CancellationToken ct = default);
+    Task<List<TodoItem>?> SyncAsync(IEnumerable<TodoItem> localTodos, IEnumerable<string>? deletedIds = null, CancellationToken ct = default);
     Task<bool> UploadTodosAsync(IEnumerable<TodoItem> todos, CancellationToken ct = default);
     Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default);
     Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default);
