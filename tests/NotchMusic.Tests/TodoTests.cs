@@ -1366,4 +1366,103 @@ public class TodoTests
         vm.SaveEdit();
         Assert.Equal(new DateTime(2026, 11, 15, 14, 30, 0), vm.DueDate);
     }
+
+    [Fact]
+    public void TodoItemViewModel_CategoryGroup_ReturnsCategoryOrTanpaKategori()
+    {
+        var item1 = new TodoItem { Title = "Tugas biasa" };
+        var vm1 = new TodoItemViewModel(item1);
+        Assert.Equal("Tanpa Kategori", vm1.CategoryGroup);
+
+        var item2 = new TodoItem { Title = "Kerja: Desain UI" };
+        var vm2 = new TodoItemViewModel(item2);
+        Assert.Equal("Kerja", vm2.CategoryGroup);
+
+        bool categoryGroupNotified = false;
+        vm1.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(TodoItemViewModel.CategoryGroup))
+                categoryGroupNotified = true;
+        };
+
+        vm1.Category = "Pribadi";
+        Assert.True(categoryGroupNotified);
+        Assert.Equal("Pribadi", vm1.CategoryGroup);
+    }
+
+    [Fact]
+    public void TodoItemViewModel_RemainingTimeText_CalculatesCorrectly()
+    {
+        var now = DateTime.Now;
+        var item = new TodoItem
+        {
+            Title = "Testing Deadline",
+            DueDate = now.AddDays(2).AddHours(3).AddMinutes(1)
+        };
+        var vm = new TodoItemViewModel(item);
+
+        // Upcoming > 1 day
+        Assert.StartsWith("Sisa 2 hr", vm.RemainingTimeText);
+        Assert.Contains(vm.DueDateText, vm.DueDateBadgeText);
+        Assert.Contains("Sisa 2 hr", vm.DueDateBadgeText);
+
+        // Upcoming < 1 day
+        vm.DueDate = now.AddHours(3).AddMinutes(15);
+        Assert.StartsWith("Sisa 3 jam", vm.RemainingTimeText);
+
+        // Upcoming < 1 hour
+        vm.DueDate = now.AddMinutes(45);
+        Assert.StartsWith("Sisa 4", vm.RemainingTimeText);
+
+        // Overdue
+        vm.DueDate = now.AddHours(-2).AddMinutes(-5);
+        Assert.StartsWith("Terlewat 2 jam", vm.RemainingTimeText);
+        Assert.Contains("Terlewat 2 jam", vm.DueDateBadgeText);
+
+        // Completed
+        vm.IsCompleted = true;
+        Assert.Equal("Selesai", vm.RemainingTimeText);
+        Assert.Contains("(Selesai)", vm.DueDateBadgeText);
+
+        // Null deadline
+        vm.DueDate = null;
+        Assert.Equal(string.Empty, vm.RemainingTimeText);
+        Assert.Equal(string.Empty, vm.DueDateBadgeText);
+    }
+
+    [Fact]
+    public void MainViewModel_MoveTodo_CrossCategory_InheritsTargetCategory()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"todo_group_test_{Guid.NewGuid():N}.json");
+        try
+        {
+            var todoService = new TodoService(tempFile);
+            var settingsService = new FakeSettingsService();
+            var mainVm = new MainViewModel(
+                new FakeMediaSessionService(),
+                new FakeLyricsService(),
+                settingsService,
+                todoService,
+                new GoogleDriveSyncService(settingsService));
+
+            var item1 = new TodoItemViewModel(new TodoItem { Title = "Beli kopi", Category = "" });
+            var item2 = new TodoItemViewModel(new TodoItem { Title = "Review PR", Category = "Kerja" });
+
+            mainVm.Todos.Add(item1);
+            mainVm.Todos.Add(item2);
+
+            Assert.Equal("Tanpa Kategori", item1.CategoryGroup);
+            Assert.Equal("Kerja", item2.CategoryGroup);
+
+            // Move item1 (no category) to item2 (Kerja)
+            mainVm.MoveTodo(item1, item2);
+
+            Assert.Equal("Kerja", item1.Category);
+            Assert.Equal("Kerja", item1.CategoryGroup);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
 }

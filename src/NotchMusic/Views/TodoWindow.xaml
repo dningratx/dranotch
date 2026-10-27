@@ -776,6 +776,60 @@
                         <!-- List Item -->
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False">
                             <ItemsControl ItemsSource="{Binding FilteredTodos}">
+                                <ItemsControl.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.ContainerStyle>
+                                            <Style TargetType="{x:Type GroupItem}">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                            <StackPanel Margin="0,3,0,6">
+                                                                <!-- Header Kategori Cabang -->
+                                                                <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                                                <!-- Batang Pohon / Garis Cabang Vertikal -->
+                                                                <Border Margin="10,2,0,0" BorderBrush="#2C2C3A" BorderThickness="1.5,0,0,0" Padding="8,0,0,0">
+                                                                    <ItemsPresenter/>
+                                                                </Border>
+                                                            </StackPanel>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </GroupStyle.ContainerStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="0,4,0,3" Padding="2,1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <!-- Ikon Folder Kategori -->
+                                                        <Border Grid.Column="0" Background="#181822" BorderBrush="#303040" BorderThickness="1" CornerRadius="4"
+                                                                Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="📁" FontSize="9.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+
+                                                        <!-- Nama Kategori -->
+                                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#D2D6E4" FontSize="11" FontWeight="Bold"
+                                                                   VerticalAlignment="Center"/>
+
+                                                        <!-- Badge Jumlah Tugas -->
+                                                        <Border Grid.Column="2" Background="#1D1D28" CornerRadius="8" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding ItemCount, StringFormat='{}{0}'}" Foreground="#7E859E" FontSize="9" FontWeight="SemiBold"/>
+                                                        </Border>
+
+                                                        <!-- Garis Cabang Horizontal -->
+                                                        <Border Grid.Column="3" Height="1" Background="#22222E" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                    </GroupStyle>
+                                </ItemsControl.GroupStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="#141418" CornerRadius="8" Padding="7,6" Margin="0,2,0,2"
@@ -791,44 +845,45 @@
                                             </Border.Style>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
+                                                    <!-- Garis Penghubung Cabang ├──• -->
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <!-- Drag Handle Grip -->
                                                     <ColumnDefinition Width="Auto"/>
                                                     <!-- Checkbox -->
                                                     <ColumnDefinition Width="Auto"/>
-                                                    <!-- Judul Tugas & Kategori Tag -->
+                                                    <!-- Judul Tugas & Target Waktu -->
                                                     <ColumnDefinition Width="*"/>
-                                                    <!-- Tombol Hapus -->
+                                                    <!-- Tombol Aksi (Edit & Hapus) -->
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
+                                                <!-- Penghubung Cabang Horisontal (Branch Arm) -->
+                                                <Grid Grid.Column="0" Width="10" Height="18" VerticalAlignment="Center" Margin="-6,0,3,0">
+                                                    <Rectangle Height="1.5" Width="6" Fill="#36364A" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                                    <Ellipse Width="3.5" Height="3.5" Fill="#5A5A72" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                </Grid>
+
                                                 <!-- Drag Grip Handle ⋮⋮ -->
-                                                <Border Grid.Column="0" Width="14" Height="20" Background="Transparent" Cursor="SizeAll"
+                                                <Border Grid.Column="1" Width="14" Height="20" Background="Transparent" Cursor="SizeAll"
                                                         VerticalAlignment="Center" Margin="0,0,4,0" ToolTip="Tahan dan geser naik/turun untuk ubah urutan">
                                                     <TextBlock Text="⋮⋮" Foreground="#555566" FontSize="11" FontWeight="Bold"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
 
                                                 <!-- Checkbox -->
-                                                <CheckBox Grid.Column="1" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
+                                                <CheckBox Grid.Column="2" IsChecked="{Binding IsCompleted, Mode=TwoWay}"
                                                           Style="{StaticResource TodoCheckBoxStyle}"
                                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
 
-                                                <!-- Judul Tugas & Kategori Tag (Mode Tampilan) -->
-                                                <DockPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,6,0" Cursor="Hand"
+                                                <!-- Judul Tugas & Target Waktu (Mode Tampilan) -->
+                                                <DockPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,6,0" Cursor="Hand"
                                                            ToolTip="Klik dua kali atau klik ikon pensil untuk mengedit tugas"
                                                            Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
                                                     <DockPanel.InputBindings>
                                                         <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding StartEditCommand}"/>
                                                     </DockPanel.InputBindings>
 
-                                                    <!-- Tag / Kategori Badge -->
-                                                    <Border DockPanel.Dock="Left" Visibility="{Binding HasCategory, Converter={StaticResource BoolToVis}}"
-                                                            Background="#1E1E24" BorderBrush="#363640" BorderThickness="1"
-                                                            CornerRadius="4" Padding="5,1" Margin="0,0,6,0" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Category}" Foreground="#DDDDDD" FontSize="9.5" FontWeight="Bold"/>
-                                                    </Border>
-
-                                                    <!-- Target Waktu Badge -->
+                                                    <!-- Target Waktu Badge dengan Remaining Time & Day -->
                                                     <Border DockPanel.Dock="Right" Visibility="{Binding HasDueDate, Converter={StaticResource BoolToVis}}"
                                                             Background="{Binding DueBadgeBackground}" BorderBrush="{Binding DueBadgeBorder}" BorderThickness="1"
                                                             CornerRadius="4" Padding="5,1" Margin="6,0,2,0" VerticalAlignment="Center"
@@ -848,7 +903,7 @@
                                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                             <Path Data="M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 12,20 C 7.59,20 4,16.41 4,12 C 4,7.59 7.59,4 12,4 C 16.41,4 20,7.59 20,12 C 20,16.41 16.41,20 12,20 Z M 11.25,6.5 L 11.25,12.5 L 15.5,15 L 16.25,13.75 L 12.75,11.75 L 12.75,6.5 Z"
                                                                   Width="9.5" Height="9.5" Stretch="Uniform" Fill="{Binding DueBadgeForeground}" Margin="0,0,3,0" VerticalAlignment="Center"/>
-                                                            <TextBlock Text="{Binding DueDateText}" Foreground="{Binding DueBadgeForeground}" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding DueDateBadgeText}" Foreground="{Binding DueBadgeForeground}" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                         </StackPanel>
                                                     </Border>
 
@@ -870,7 +925,7 @@
                                                 </DockPanel>
 
                                                 <!-- Mode Edit Inline (Input Teks + Pilihan Target Waktu) -->
-                                                <Grid Grid.Column="2" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                <Grid Grid.Column="3" Margin="0,0,6,0" VerticalAlignment="Center"
                                                       Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
@@ -1021,7 +1076,7 @@
                                                 </Grid>
 
                                                 <!-- Tombol Aksi saat Normal (Edit ✎ & Hapus ×) -->
-                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center"
                                                             Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
                                                     <Button Command="{Binding StartEditCommand}"
                                                             Style="{StaticResource TodoDeleteButtonStyle}"
@@ -1036,7 +1091,7 @@
                                                 </StackPanel>
 
                                                 <!-- Tombol Aksi saat Mode Edit (Simpan ✓ & Batal ✕) -->
-                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"
+                                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center"
                                                             Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
                                                     <Button Command="{Binding SaveEditCommand}"
                                                             Style="{StaticResource TodoDeleteButtonStyle}"

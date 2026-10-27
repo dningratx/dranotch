@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.7)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.8)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -184,11 +184,17 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Isolasi DSP Karaoke untuk Browser Mengambang**: Suara video atau web pada Browser Mengambang (*Floating Browser*) tidak lagi ikut teredam atau masuk mode karaoke saat Karaoke Vocal Remover aktif di pemutar musik.
 - **Teks Pembaruan Versi Interaktif ("Click to Update {versi}")**: Saat ada rilis baru terdeteksi, label versi di pengaturan otomatis berubah menjadi link klik interaktif untuk mempermudah pembaruan langsung.
 
-### ⚡ 22. Sinkronisasi Instan Google Drive To-Do List & Pembersihan Pengaturan *(Baru di v1.6.7)*
+### ⚡ 22. Sinkronisasi Instan Google Drive To-Do List & Pembersihan Pengaturan *(v1.6.7)*
 - **Sinkronisasi Instan Tanpa Tunda (0ms Delay)**: Setiap tindakan pada To-Do list—menghapus tugas, menambah tugas baru, mencentang/membatalkan centang selesai, mengedit tugas (*inline edit*), mengubah target tenggat waktu, membersihkan tugas selesai, maupun menyusun ulang urutan tugas (*drag & drop*)—langsung disinkronkan ke Google Drive secara instan tanpa jeda *debounce*.
 - **Pelacakan ID yang Dihapus (*Tombstone Tracking*)**: Menambahkan sistem pelacakan ID tugas yang dihapus (`deleted_todos.json`), menjamin tugas yang telah dihapus di lokal tidak akan pernah muncul kembali (*resurrect*) saat sinkronisasi dua arah atau auto-sync cloud berjalan.
 - **Pembersihan Antarmuka Pengaturan Waktu Sholat**: Menghapus opsi *"Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"* dari jendela Pengaturan untuk pengalaman pengguna yang lebih bersih, fokus, dan ringkas.
 - **Pembaruan Status UI Google Drive Responsif**: Indikator status sinkronisasi kini otomatis di-*dispatch* langsung ke UI thread, sehingga indikator tombol Drive (`Menyinkronkan...` -> `Drive` / `Tersinkron`) langsung terupdate tanpa *lag*.
+
+### 🌳 23. Struktur Cabang To-Do Kategori & Hitung Mundur Sisa Waktu *(Baru di v1.6.8)*
+- **Hierarki Cabang Visual Kategori (*Tree/Branch Structure*)**: Item to-do otomatis dikelompokkan rapi di bawah kategori tugasnya dengan header folder (`📁`), nama kategori tebal, badge jumlah item, dan garis penghubung cabang visual (`├──•`) yang elegan.
+- **Tampilan Bersih Bebas Tag Berulang**: Menghilangkan badge kategori berulang di dalam setiap baris tugas karena tugas sudah tertata di bawah cabang kategorinya masing-masing.
+- **Drag-and-Drop Lintas Kategori**: Memindahkan tugas dari satu kategori ke kategori lain kini semudah menyeret item ke kelompok kategori tujuan, kategori tugas akan otomatis diperbarui.
+- **Hitung Mundur Sisa Waktu & Hari Real-Time (*Remaining Time & Days*)**: Setiap tugas dengan target waktu kini menampilkan sisa hari, jam, dan menit secara langsung (contoh: `Besok 17:00 • Sisa 1 hr 4 jam`, `Hari ini 17:00 • Sisa 3 jam 20 mnt`, `Sisa 45 mnt`, atau `⚠️ Terlewat 2 jam`), diperbarui otomatis setiap 2 detik.
 
 ---
 
@@ -218,7 +224,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.7.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.8.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -1344,6 +1344,7 @@ public class MainViewModel : ViewModelBase
 
         _filteredTodos = CollectionViewSource.GetDefaultView(Todos);
         _filteredTodos.Filter = FilterTodoItem;
+        _filteredTodos.GroupDescriptions.Add(new PropertyGroupDescription(nameof(TodoItemViewModel.CategoryGroup)));
 
         var loadedTodos = _todoService.LoadTodos();
         foreach (var item in loadedTodos)
@@ -2743,6 +2744,11 @@ public class MainViewModel : ViewModelBase
     public void MoveTodo(TodoItemViewModel source, TodoItemViewModel target)
     {
         if (source == target) return;
+
+        if (!string.Equals(source.CategoryGroup, target.CategoryGroup, StringComparison.OrdinalIgnoreCase))
+        {
+            source.Category = target.Category;
+        }
 
         int oldIndex = Todos.IndexOf(source);
         int newIndex = Todos.IndexOf(target);

@@ -142,6 +142,7 @@ public class TodoItemViewModel : ViewModelBase
                 _category = cat;
                 _taskText = !string.IsNullOrEmpty(cat) ? text : value;
                 OnPropertyChanged(nameof(Category));
+                OnPropertyChanged(nameof(CategoryGroup));
                 OnPropertyChanged(nameof(TaskText));
                 OnPropertyChanged(nameof(HasCategory));
                 OnChanged?.Invoke();
@@ -158,11 +159,14 @@ public class TodoItemViewModel : ViewModelBase
             {
                 _title = HasCategory ? $"{_category}: {_taskText}" : _taskText;
                 OnPropertyChanged(nameof(Title));
+                OnPropertyChanged(nameof(CategoryGroup));
                 OnPropertyChanged(nameof(HasCategory));
                 OnChanged?.Invoke();
             }
         }
     }
+
+    public string CategoryGroup => string.IsNullOrWhiteSpace(_category) ? "Tanpa Kategori" : _category.Trim();
 
     public string TaskText
     {
@@ -244,14 +248,83 @@ public class TodoItemViewModel : ViewModelBase
         }
     }
 
+    public string RemainingTimeText
+    {
+        get
+        {
+            if (!DueDate.HasValue) return string.Empty;
+            if (IsCompleted) return "Selesai";
+
+            var now = DateTime.Now;
+            var due = DueDate.Value;
+
+            if (due < now)
+            {
+                var diff = now - due;
+                if (diff.TotalDays >= 1)
+                {
+                    var days = (int)diff.TotalDays;
+                    var hours = diff.Hours;
+                    return hours > 0 ? $"Terlewat {days} hr {hours} jam" : $"Terlewat {days} hr";
+                }
+                if (diff.TotalHours >= 1)
+                {
+                    var hours = (int)diff.TotalHours;
+                    var mins = diff.Minutes;
+                    return mins > 0 ? $"Terlewat {hours} jam {mins} mnt" : $"Terlewat {hours} jam";
+                }
+                if (diff.TotalMinutes >= 1)
+                {
+                    var mins = (int)diff.TotalMinutes;
+                    return $"Terlewat {mins} mnt";
+                }
+                return "Baru saja terlewat";
+            }
+            else
+            {
+                var diff = due - now;
+                if (diff.TotalDays >= 1)
+                {
+                    var days = (int)diff.TotalDays;
+                    var hours = diff.Hours;
+                    return hours > 0 ? $"Sisa {days} hr {hours} jam" : $"Sisa {days} hr";
+                }
+                if (diff.TotalHours >= 1)
+                {
+                    var hours = (int)diff.TotalHours;
+                    var mins = diff.Minutes;
+                    return mins > 0 ? $"Sisa {hours} jam {mins} mnt" : $"Sisa {hours} jam";
+                }
+                if (diff.TotalMinutes >= 1)
+                {
+                    var mins = (int)diff.TotalMinutes;
+                    return $"Sisa {mins} mnt";
+                }
+                return "Sisa < 1 mnt";
+            }
+        }
+    }
+
+    public string DueDateBadgeText
+    {
+        get
+        {
+            if (!DueDate.HasValue) return string.Empty;
+            if (IsCompleted) return $"{DueDateText} (Selesai)";
+            var remaining = RemainingTimeText;
+            if (string.IsNullOrEmpty(remaining)) return DueDateText;
+            return $"{DueDateText} • {remaining}";
+        }
+    }
+
     public string DueDateFullTooltip
     {
         get
         {
             if (!DueDate.HasValue) return string.Empty;
             var dt = DueDate.Value;
-            var status = IsCompleted ? " (Selesai)" : (IsOverdue ? " (Terlewat!)" : "");
-            return $"Batas Waktu: {dt:dddd, d MMMM yyyy HH:mm}{status}";
+            var remaining = !string.IsNullOrEmpty(RemainingTimeText) ? $"\nStatus: {RemainingTimeText}" : "";
+            return $"Batas Waktu: {dt:dddd, d MMMM yyyy HH:mm}{remaining}";
         }
     }
 
@@ -292,6 +365,8 @@ public class TodoItemViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsOverdue));
         OnPropertyChanged(nameof(DueDateText));
+        OnPropertyChanged(nameof(RemainingTimeText));
+        OnPropertyChanged(nameof(DueDateBadgeText));
         OnPropertyChanged(nameof(DueDateFullTooltip));
         OnPropertyChanged(nameof(DueBadgeBackground));
         OnPropertyChanged(nameof(DueBadgeBorder));
