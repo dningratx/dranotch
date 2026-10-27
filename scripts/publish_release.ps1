@@ -41,6 +41,34 @@ public class CredHelper {
         return null;
     }
 }
+
+public class JsonHelper {
+    public static string Escape(string s) {
+        if (s == null) return "null";
+        var sb = new StringBuilder();
+        sb.Append('"');
+        foreach (char c in s) {
+            switch (c) {
+                case '\\': sb.Append("\\\\"); break;
+                case '"': sb.Append("\\\""); break;
+                case '\b': sb.Append("\\b"); break;
+                case '\f': sb.Append("\\f"); break;
+                case '\n': sb.Append("\\n"); break;
+                case '\r': sb.Append("\\r"); break;
+                case '\t': sb.Append("\\t"); break;
+                default:
+                    if (c < ' ') {
+                        sb.AppendFormat("\\u{0:X4}", (int)c);
+                    } else {
+                        sb.Append(c);
+                    }
+                    break;
+            }
+        }
+        sb.Append('"');
+        return sb.ToString();
+    }
+}
 '@
 
 Add-Type -TypeDefinition $source -ErrorAction SilentlyContinue
@@ -82,23 +110,36 @@ Write-Host "Checking if release for $tag exists..." -ForegroundColor Cyan
 $release = $null
 try {
     $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$tag" -Headers $headers -Method Get
-    Write-Host "Existing release found with ID $($release.id)" -ForegroundColor Yellow
+    Write-Host "Existing release found with ID $($release.id), updating title and body with UTF-8..." -ForegroundColor Yellow
+    
+    $jsonStr = '{"name":' + [JsonHelper]::Escape($title) + ',"body":' + [JsonHelper]::Escape($notes) + '}'
+    $jsonBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonStr)
+
+    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/$($release.id)" `
+        -Headers $headers `
+        -Method Patch `
+        -ContentType "application/json; charset=utf-8" `
+        -Body $jsonBytes
+    Write-Host "Updated release title and body successfully!" -ForegroundColor Green
 } catch {
     Write-Host "Creating new release for $tag..." -ForegroundColor Cyan
-    $body = @{
-        tag_name         = $tag
-        name             = $title
-        body             = $notes
-        draft            = $false
-        prerelease       = $false
-        generate_release_notes = $false
-    } | ConvertTo-Json -Depth 4
+    $jsonStr = '{"tag_name":' + [JsonHelper]::Escape($tag) + ',"name":' + [JsonHelper]::Escape($title) + ',"body":' + [JsonHelper]::Escape($notes) + ',"draft":false,"prerelease":false}'
+    $jsonBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonStr)
 
-    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases" -Headers $headers -Method Post -Body $body
+    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases" `
+        -Headers $headers `
+        -Method Post `
+        -ContentType "application/json; charset=utf-8" `
+        -Body $jsonBytes
     Write-Host "Created release with ID $($release.id)" -ForegroundColor Green
 }
 
 $releaseId = $release.id
+$existingAssets = $release.assets
+$existingAssetNames = @()
+if ($existingAssets) {
+    $existingAssetNames = $existingAssets | ForEach-Object { $_.name }
+}
 
 $assets = @(
     @{
@@ -124,6 +165,11 @@ foreach ($asset in $assets) {
         continue
     }
 
+    if ($existingAssetNames -contains $asset.Name) {
+        Write-Host "Asset $($asset.Name) already uploaded, skipping." -ForegroundColor Yellow
+        continue
+    }
+
     Write-Host "Uploading $($asset.Name)..." -ForegroundColor Cyan
     $uploadUri = "https://uploads.github.com/repos/$repo/releases/$releaseId/assets?name=$($asset.Name)"
     $uploadHeaders = @{
@@ -137,4 +183,4 @@ foreach ($asset in $assets) {
     Write-Host "Uploaded $($asset.Name) successfully!" -ForegroundColor Green
 }
 
-Write-Host "=== Release published successfully: $($release.html_url) ===" -ForegroundColor Green
+Write-Host ("=== Release published successfully: " + $release.html_url + " ===") -ForegroundColor Green
