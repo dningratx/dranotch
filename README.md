@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.9)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.7.0)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -25,7 +25,7 @@ Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **li
 ### 🎧 1. Dynamic Notch & Smart Media Player
 - **Island Mode Pintar**: Notch melayang di tepi atas layar yang otomatis melebar saat didekati (*Expand on Hover*) dan mengecil saat idle (*Compact Mode*).
 - **Integrasi Windows Media Session**: Mendeteksi otomatis lagu yang sedang diputar dari **Spotify**, **YouTube**, **Apple Music**, browser (Chrome/Edge/Firefox), atau pemutar lokal.
-- **Built-in YouTube Music**: Dilengkapi pemutar bawaan berbasis WebView2 dengan penyimpanan sesi akun Google permanen.
+- **Built-in YouTube Music**: Dilengkapi pemutar bawaan berbasis WebView2 dengan penyimpanan sesi akun Google permanen, dukungan bebas ubah ukuran (*free resizing*), pilihan ukuran cepat preset (Mini PiP, Ringkas, Sedang, Standar, HD), zoom factor, dan mode pin mengambang (*Always On Top*).
 
 ### 🎤 2. Lirik Real-Time & Mode Karaoke
 - **Auto-Search LRCLIB**: Pencarian otomatis lirik tersinkronisasi (*timed lyrics*) langsung saat lagu berganti.
@@ -38,6 +38,7 @@ Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **li
 - **Docking Mudah**: Kembalikan To-Do list menempel ke musik kapan saja dengan tombol **`⇲ Pasang ke Musik`**.
 - **Ticker Berjalan (*Live Ticker*)**: Pantau tugas aktif langsung dari mode compact tanpa membuka jendela besar.
 - **Kategori & Tag**: Kelompokkan tugas dengan tag (misal: `#KERJA`, `#KULIAH`, `#PRIBADI`).
+- **Geser & Pindah Kategori *(Baru di v1.7.0)***: Atur urutan kategori ke atas atau ke bawah secara fleksibel menggunakan tombol panah (`▲`/`▼`) maupun seret & lepas (*drag and drop* `⋮⋮`). Seluruh daftar tugas di dalam kategori (*anak-anaknya*) otomatis ikut berpindah secara utuh dengan urutan yang tetap terjaga.
 - **Filter Cepat**: Tab filter instan (*Semua*, *Aktif*, *Selesai*) dan pembersihan tugas selesai sekali klik.
 - **Google Drive Cloud Sync**: Sinkronisasi daftar tugas ke cloud akun Google Drive pribadi Anda secara aman. *(Panduan setup OAuth pribadi: [docs/GOOGLE_DRIVE_SETUP.md](docs/GOOGLE_DRIVE_SETUP.md))*
 
@@ -230,7 +231,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.9.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.7.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 
