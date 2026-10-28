@@ -1196,6 +1196,8 @@ public class MainViewModel : ViewModelBase
     public ICommand ClearCompletedTodosCommand { get; }
     public ICommand SetTodoFilterCommand { get; }
     public ICommand SetCategoryFilterCommand { get; }
+    public ICommand MoveCategoryUpCommand { get; }
+    public ICommand MoveCategoryDownCommand { get; }
     public ICommand NextTickerCommand { get; }
     public ICommand PreviousTickerCommand { get; }
     public ICommand CompleteCurrentTickerCommand { get; }
@@ -1415,6 +1417,9 @@ public class MainViewModel : ViewModelBase
                 }
             }
         });
+
+                MoveCategoryUpCommand = new RelayCommand(p => MoveCategoryUp(p));
+        MoveCategoryDownCommand = new RelayCommand(p => MoveCategoryDown(p));
 
         UpdateAvailableCategories();
 
@@ -2758,6 +2763,102 @@ public class MainViewModel : ViewModelBase
             Todos.Move(oldIndex, newIndex);
             UpdateTodoCountsAndPersist();
         }
+    }
+
+    public void MoveCategoryUp(object? param)
+    {
+        string? categoryName = param as string ?? (param as System.Windows.Data.CollectionViewGroup)?.Name?.ToString() ?? param?.ToString();
+        if (string.IsNullOrWhiteSpace(categoryName)) return;
+
+        var order = GetCategoryOrder();
+        int index = order.FindIndex(c => string.Equals(c, categoryName, StringComparison.OrdinalIgnoreCase));
+        if (index <= 0) return;
+
+        string prevCategory = order[index - 1];
+        order[index - 1] = order[index];
+        order[index] = prevCategory;
+
+        ReorderTodosByCategories(order);
+    }
+
+    public void MoveCategoryDown(object? param)
+    {
+        string? categoryName = param as string ?? (param as System.Windows.Data.CollectionViewGroup)?.Name?.ToString() ?? param?.ToString();
+        if (string.IsNullOrWhiteSpace(categoryName)) return;
+
+        var order = GetCategoryOrder();
+        int index = order.FindIndex(c => string.Equals(c, categoryName, StringComparison.OrdinalIgnoreCase));
+        if (index < 0 || index >= order.Count - 1) return;
+
+        string nextCategory = order[index + 1];
+        order[index + 1] = order[index];
+        order[index] = nextCategory;
+
+        ReorderTodosByCategories(order);
+    }
+
+    public void MoveCategory(string sourceCategory, string targetCategory)
+    {
+        if (string.IsNullOrWhiteSpace(sourceCategory) || string.IsNullOrWhiteSpace(targetCategory)) return;
+        if (string.Equals(sourceCategory, targetCategory, StringComparison.OrdinalIgnoreCase)) return;
+
+        var order = GetCategoryOrder();
+        int sourceIndex = order.FindIndex(c => string.Equals(c, sourceCategory, StringComparison.OrdinalIgnoreCase));
+        int targetIndex = order.FindIndex(c => string.Equals(c, targetCategory, StringComparison.OrdinalIgnoreCase));
+
+        if (sourceIndex < 0 || targetIndex < 0) return;
+
+        order.RemoveAt(sourceIndex);
+        order.Insert(targetIndex, sourceCategory);
+
+        ReorderTodosByCategories(order);
+    }
+
+    public List<string> GetCategoryOrder()
+    {
+        var order = new List<string>();
+        foreach (var item in Todos)
+        {
+            string group = item.CategoryGroup;
+            if (!order.Any(c => string.Equals(c, group, StringComparison.OrdinalIgnoreCase)))
+            {
+                order.Add(group);
+            }
+        }
+        return order;
+    }
+
+    public void ReorderTodosByCategories(List<string> categoryOrder)
+    {
+        var reordered = new List<TodoItemViewModel>();
+
+        foreach (var cat in categoryOrder)
+        {
+            var itemsInCat = Todos
+                .Where(t => string.Equals(t.CategoryGroup, cat, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            reordered.AddRange(itemsInCat);
+        }
+
+        foreach (var item in Todos)
+        {
+            if (!reordered.Contains(item))
+            {
+                reordered.Add(item);
+            }
+        }
+
+        for (int targetIdx = 0; targetIdx < reordered.Count; targetIdx++)
+        {
+            var targetItem = reordered[targetIdx];
+            int currentIdx = Todos.IndexOf(targetItem);
+            if (currentIdx >= 0 && currentIdx != targetIdx)
+            {
+                Todos.Move(currentIdx, targetIdx);
+            }
+        }
+
+        UpdateTodoCountsAndPersist();
     }
 
     private void CompleteCurrentTicker()

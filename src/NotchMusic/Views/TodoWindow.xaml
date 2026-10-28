@@ -326,6 +326,43 @@
                 </Setter.Value>
             </Setter>
         </Style>
+            <!-- Tombol Panah Pindah Kategori Up / Down -->
+        <Style x:Key="CategoryOrderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#181824"/>
+            <Setter Property="Foreground" Value="#7E859E"/>
+            <Setter Property="FontSize" Value="8"/>
+            <Setter Property="FontFamily" Value="Segoe UI Symbol, Segoe UI"/>
+            <Setter Property="BorderBrush" Value="#2E2E3E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="BtnBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#2E2E44"/>
+                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#555577"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#3F3F5A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
     <Grid Margin="12">
@@ -797,37 +834,66 @@
                                             </Style>
                                         </GroupStyle.ContainerStyle>
                                         <GroupStyle.HeaderTemplate>
-                                            <DataTemplate>
-                                                <Border Margin="0,4,0,3" Padding="2,1">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
+                                                    <DataTemplate>
+                                                        <Border Margin="0,4,0,3" Padding="2,1"
+                                                                Background="Transparent"
+                                                                helpers:TodoCategoryDragDropBehavior.IsEnabled="True">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <!-- Drag Handle Grip -->
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <!-- Ikon Folder Kategori -->
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <!-- Nama Kategori -->
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <!-- Badge Jumlah Tugas -->
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <!-- Garis Cabang Horizontal -->
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <!-- Tombol Pindah Kategori Naik / Turun -->
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                                        <!-- Ikon Folder Kategori -->
-                                                        <Border Grid.Column="0" Background="#181822" BorderBrush="#303040" BorderThickness="1" CornerRadius="4"
-                                                                Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center">
-                                                            <TextBlock Text="📁" FontSize="9.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                <!-- Drag Handle Grip untuk Kategori -->
+                                                                <Border Grid.Column="0" Background="Transparent" Width="14" Height="18" Margin="0,0,2,0"
+                                                                        Cursor="SizeAll" ToolTip="Tahan dan geser (drag &amp; drop) untuk memindahkan urutan kategori beserta seluruh tugasnya">
+                                                                    <TextBlock Text="⋮⋮" Foreground="#4E556E" FontSize="11" FontWeight="Bold"
+                                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+
+                                                                <!-- Ikon Folder Kategori -->
+                                                                <Border Grid.Column="1" Background="#181822" BorderBrush="#303040" BorderThickness="1" CornerRadius="4"
+                                                                        Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                                    <TextBlock Text="📁" FontSize="9.5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+
+                                                                <!-- Nama Kategori -->
+                                                                <TextBlock Grid.Column="2" Text="{Binding Name}" Foreground="#D2D6E4" FontSize="11" FontWeight="Bold"
+                                                                           VerticalAlignment="Center"/>
+
+                                                                <!-- Badge Jumlah Tugas -->
+                                                                <Border Grid.Column="3" Background="#1D1D28" CornerRadius="8" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding ItemCount, StringFormat='{}{0}'}" Foreground="#7E859E" FontSize="9" FontWeight="SemiBold"/>
+                                                                </Border>
+
+                                                                <!-- Garis Cabang Horizontal -->
+                                                                <Border Grid.Column="4" Height="1" Background="#22222E" Margin="8,0,8,0" VerticalAlignment="Center"/>
+
+                                                                <!-- Tombol Pindah Kategori Naik / Turun -->
+                                                                <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center">
+                                                                    <Button Style="{StaticResource CategoryOrderButtonStyle}"
+                                                                            Command="{Binding DataContext.MoveCategoryUpCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                            CommandParameter="{Binding Name}"
+                                                                            Content="&#x25B4;" ToolTip="Geser kategori ke atas (anak tugas ikut)"/>
+                                                                    <Button Style="{StaticResource CategoryOrderButtonStyle}"
+                                                                            Command="{Binding DataContext.MoveCategoryDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                            CommandParameter="{Binding Name}"
+                                                                            Content="&#x25BE;" ToolTip="Geser kategori ke bawah (anak tugas ikut)" Margin="3,0,0,0"/>
+                                                                </StackPanel>
+                                                            </Grid>
                                                         </Border>
-
-                                                        <!-- Nama Kategori -->
-                                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="#D2D6E4" FontSize="11" FontWeight="Bold"
-                                                                   VerticalAlignment="Center"/>
-
-                                                        <!-- Badge Jumlah Tugas -->
-                                                        <Border Grid.Column="2" Background="#1D1D28" CornerRadius="8" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding ItemCount, StringFormat='{}{0}'}" Foreground="#7E859E" FontSize="9" FontWeight="SemiBold"/>
-                                                        </Border>
-
-                                                        <!-- Garis Cabang Horizontal -->
-                                                        <Border Grid.Column="3" Height="1" Background="#22222E" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </GroupStyle.HeaderTemplate>
+                                                    </DataTemplate>
+                                                </GroupStyle.HeaderTemplate>
                                     </GroupStyle>
                                 </ItemsControl.GroupStyle>
                                 <ItemsControl.ItemTemplate>

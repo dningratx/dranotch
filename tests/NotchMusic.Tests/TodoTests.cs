@@ -1465,4 +1465,68 @@ public class TodoTests
             if (File.Exists(tempFile)) File.Delete(tempFile);
         }
     }
+    [Fact]
+    public void MainViewModel_MoveCategoryUp_And_Down_MovesAllChildrenWithCategory()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"cat_move_test_{Guid.NewGuid():N}.json");
+        try
+        {
+            var todoService = new TodoService(tempFile);
+            var settingsService = new FakeSettingsService();
+            var mainVm = new MainViewModel(
+                new FakeMediaSessionService(),
+                new FakeLyricsService(),
+                settingsService,
+                todoService,
+                new GoogleDriveSyncService(settingsService));
+
+            // Setup categories: Kerja (2 items), Pribadi (2 items), Belanja (1 item)
+            var k1 = new TodoItemViewModel(new TodoItem { Title = "Review PR", Category = "Kerja" });
+            var k2 = new TodoItemViewModel(new TodoItem { Title = "Deploy prod", Category = "Kerja" });
+            var p1 = new TodoItemViewModel(new TodoItem { Title = "Olahraga", Category = "Pribadi" });
+            var p2 = new TodoItemViewModel(new TodoItem { Title = "Baca buku", Category = "Pribadi" });
+            var b1 = new TodoItemViewModel(new TodoItem { Title = "Beli susu", Category = "Belanja" });
+
+            mainVm.Todos.Add(k1);
+            mainVm.Todos.Add(k2);
+            mainVm.Todos.Add(p1);
+            mainVm.Todos.Add(p2);
+            mainVm.Todos.Add(b1);
+
+            var initialOrder = mainVm.GetCategoryOrder();
+            Assert.Equal(new[] { "Kerja", "Pribadi", "Belanja" }, initialOrder);
+
+            // Move "Pribadi" UP -> should become: Pribadi, Kerja, Belanja
+            mainVm.MoveCategoryUpCommand.Execute("Pribadi");
+
+            var orderAfterUp = mainVm.GetCategoryOrder();
+            Assert.Equal(new[] { "Pribadi", "Kerja", "Belanja" }, orderAfterUp);
+
+            // Children of Pribadi (p1, p2) must be first, followed by Kerja (k1, k2), then Belanja (b1)
+            Assert.Equal(new[] { p1, p2, k1, k2, b1 }, mainVm.Todos.ToArray());
+
+            // Move "Pribadi" DOWN -> should swap back: Kerja, Pribadi, Belanja
+            mainVm.MoveCategoryDownCommand.Execute("Pribadi");
+
+            var orderAfterDown = mainVm.GetCategoryOrder();
+            Assert.Equal(new[] { "Kerja", "Pribadi", "Belanja" }, orderAfterDown);
+            Assert.Equal(new[] { k1, k2, p1, p2, b1 }, mainVm.Todos.ToArray());
+
+            // Move "Belanja" to top via Drag & Drop MoveCategory("Belanja", "Kerja")
+            mainVm.MoveCategory("Belanja", "Kerja");
+            var orderAfterDrag = mainVm.GetCategoryOrder();
+            Assert.Equal(new[] { "Belanja", "Kerja", "Pribadi" }, orderAfterDrag);
+            Assert.Equal(new[] { b1, k1, k2, p1, p2 }, mainVm.Todos.ToArray());
+
+            // Moving the top category UP or bottom category DOWN is a safe no-op
+            mainVm.MoveCategoryUpCommand.Execute("Belanja");
+            Assert.Equal(new[] { "Belanja", "Kerja", "Pribadi" }, mainVm.GetCategoryOrder());
+            mainVm.MoveCategoryDownCommand.Execute("Pribadi");
+            Assert.Equal(new[] { "Belanja", "Kerja", "Pribadi" }, mainVm.GetCategoryOrder());
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
 }
