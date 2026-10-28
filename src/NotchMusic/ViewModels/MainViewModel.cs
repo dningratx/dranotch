@@ -2494,13 +2494,13 @@ public class MainViewModel : ViewModelBase
                 PrayerAudioHelper.PlayDeadlineAlert();
 
                 // 2. Windows tray notification balloon
-                RequestShowTrayNotification?.Invoke("â° Batas Waktu To-Do!", $"Tugas '{vm.TaskText}' telah mencapai batas waktu.");
+                RequestShowTrayNotification?.Invoke("⏰ Batas Waktu To-Do!", $"Tugas '{vm.TaskText}' telah mencapai batas waktu.");
 
                 // 3. Notch Floating Island Banner
                 ActiveTodoNotification = new TodoNotificationEvent
                 {
                     TodoId = vm.Id,
-                    Title = "â° Batas Waktu To-Do!",
+                    Title = "⏰ Batas Waktu To-Do!",
                     Message = $"Tugas '{vm.TaskText}' telah mencapai batas waktu ({vm.DueDateText}).",
                     Timestamp = now
                 };

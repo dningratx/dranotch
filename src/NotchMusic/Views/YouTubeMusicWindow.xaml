@@ -155,9 +155,9 @@
                         <Rectangle Width="1" Height="14" Fill="#28283C" Margin="3,0" VerticalAlignment="Center"/>
 
                         <!-- Window Caption Buttons -->
-                        <Button Style="{StaticResource WindowCaptionButtonStyle}" Content="🗕" ToolTip="Minimize" Click="MinimizeButton_Click"/>
-                        <Button x:Name="MaximizeButton" Style="{StaticResource WindowCaptionButtonStyle}" Content="🗖" ToolTip="Maximize / Restore" Click="MaximizeButton_Click"/>
-                        <Button Style="{StaticResource CloseWindowButtonStyle}" Content="✕" ToolTip="Tutup ke latar belakang (Lagu tetap jalan)" Click="CloseButton_Click"/>
+                        <Button Style="{StaticResource WindowCaptionButtonStyle}" Content="&#x1F5D5;" ToolTip="Minimize" Click="MinimizeButton_Click"/>
+                        <Button x:Name="MaximizeButton" Style="{StaticResource WindowCaptionButtonStyle}" Content="&#x1F5D6;" ToolTip="Maximize / Restore" Click="MaximizeButton_Click"/>
+                        <Button Style="{StaticResource CloseWindowButtonStyle}" Content="&#x2715;" ToolTip="Tutup ke latar belakang (Lagu tetap jalan)" Click="CloseButton_Click"/>
                     </StackPanel>
                 </Grid>
             </Border>

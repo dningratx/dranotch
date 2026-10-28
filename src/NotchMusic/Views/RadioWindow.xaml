@@ -184,8 +184,8 @@
                             </Grid>
                         </Button>
                         <Button Style="{StaticResource SmallPillButton}" Command="{Binding NextRadioStationCommand}" Content="⏭" ToolTip="Stasiun Berikutnya" Padding="7,4"/>
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandRadioWindowCommand}" Content="▾" ToolTip="Perluas Radio Online"/>
-                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="✕" ToolTip="Sembunyikan Jendela Radio"/>
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandRadioWindowCommand}" Content="&#x25BE;" ToolTip="Perluas Radio Online"/>
+                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="&#x2715;" ToolTip="Sembunyikan Jendela Radio"/>
                     </StackPanel>
                 </Grid>
 
@@ -260,9 +260,9 @@
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding ToggleAddCustomRadioCommand}"
                                     Content="+ URL" ToolTip="Tambah URL Stream Radio Custom" Margin="0,0,3,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizeRadioWindowCommand}"
-                                    Content="▴" ToolTip="Perkecil ke Mini Player" Margin="0,0,3,0"/>
+                                    Content="&#x25B4;" ToolTip="Perkecil ke Mini Player" Margin="0,0,3,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click"
-                                    Content="✕" ToolTip="Sembunyikan Jendela Radio (Siaran tetap berjalan di latar belakang)"/>
+                                    Content="&#x2715;" ToolTip="Sembunyikan Jendela Radio (Siaran tetap berjalan di latar belakang)"/>
                         </StackPanel>
                     </Grid>
 

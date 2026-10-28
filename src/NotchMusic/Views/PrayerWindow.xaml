@@ -106,11 +106,11 @@
 
                     <!-- Actions (Expand, Pasang ke Notch, Close) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandPrayerWindowCommand}" Content="▾" ToolTip="Perluas Jadwal"/>
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandPrayerWindowCommand}" Content="&#x25BE;" ToolTip="Perluas Jadwal"/>
                         <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachPrayerCommand}" ToolTip="Pasang kembali ke notch utama" Margin="2,0,0,0">
-                            <TextBlock Text="⇲" FontSize="11"/>
+                            <TextBlock Text="&#x21F2;" FontSize="11"/>
                         </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="✕" ToolTip="Tutup Waktu Sholat" Margin="2,0,0,0"/>
+                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="&#x2715;" ToolTip="Tutup Waktu Sholat" Margin="2,0,0,0"/>
                     </StackPanel>
                 </Grid>
 
@@ -149,15 +149,15 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
                             <!-- Tombol Pasang Kembali ke Notch Utama -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachPrayerCommand}"
-                                    Content="⇲" ToolTip="Pasang kembali Waktu Sholat ke notch utama" Margin="0,0,4,0"/>
+                                    Content="&#x21F2;" ToolTip="Pasang kembali Waktu Sholat ke notch utama" Margin="0,0,4,0"/>
 
                             <!-- Tombol Tutup ke Compact (Minimize) -->
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding MinimizePrayerWindowCommand}"
-                                    Content="▴" ToolTip="Tutup ke Compact" Margin="0,0,4,0"/>
+                                    Content="&#x25B4;" ToolTip="Tutup ke Compact" Margin="0,0,4,0"/>
 
                             <!-- Tombol Tutup / Sembunyikan -->
                             <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click"
-                                    Content="✕" ToolTip="Tutup jendela Waktu Sholat"/>
+                                    Content="&#x2715;" ToolTip="Tutup jendela Waktu Sholat"/>
                         </StackPanel>
                     </Grid>
 

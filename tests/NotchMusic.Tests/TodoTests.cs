@@ -1243,7 +1243,7 @@ public class TodoTests
                 Assert.True(vm.Todos[0].IsDueNotified);
                 Assert.True(vm.HasActiveTodoNotification);
                 Assert.NotNull(vm.ActiveTodoNotification);
-                Assert.Equal("â° Batas Waktu To-Do!", vm.ActiveTodoNotification.Title);
+                Assert.Equal("⏰ Batas Waktu To-Do!", vm.ActiveTodoNotification.Title);
                 Assert.Contains("Kirim dokumen proyek", vm.ActiveTodoNotification.Message);
                 Assert.NotNull(trayNotifTitle);
 
