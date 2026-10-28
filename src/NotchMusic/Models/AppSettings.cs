@@ -93,4 +93,11 @@ public class AppSettings
     public double MusicWindowLeft { get; set; } = -1;
     public double MusicWindowTop { get; set; } = -1;
     public bool IsMusicWindowCompact { get; set; } = false;
+
+    // YouTube Music Window (Browser YouTube Music di Music Player)
+    public double YouTubeMusicLeft { get; set; } = -1;
+    public double YouTubeMusicTop { get; set; } = -1;
+    public double YouTubeMusicWidth { get; set; } = 1080;
+    public double YouTubeMusicHeight { get; set; } = 720;
+    public bool YouTubeMusicAlwaysOnTop { get; set; } = false;
 }

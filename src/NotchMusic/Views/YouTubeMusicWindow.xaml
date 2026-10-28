@@ -3,12 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="YouTube Music - DRANOTCH Player"
-        Width="1080" Height="720" MinWidth="480" MinHeight="360"
+        Width="1080" Height="720" MinWidth="360" MinHeight="240"
         WindowStartupLocation="Manual"
         Background="#0E0E12" Foreground="#EEEEEE">
 
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="42" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+        <WindowChrome x:Name="WindowChromeElement" CaptionHeight="38" CornerRadius="8" GlassFrameThickness="0" ResizeBorderThickness="8" UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
@@ -16,23 +16,23 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#CCCCCC"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Padding" Value="7,4"/>
             <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#252533"/>
+                                <Setter Property="Background" Value="#252538"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#353548"/>
+                                <Setter Property="Background" Value="#35354E"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Foreground" Value="#555566"/>
@@ -47,9 +47,9 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#AAAAAA"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Width" Value="42"/>
-            <Setter Property="Height" Value="42"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="11.5"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -59,7 +59,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#262636"/>
+                                <Setter Property="Background" Value="#26263A"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -87,85 +87,115 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="42"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <!-- Outer border: 5px padding ensures the 8px WindowChrome resize borders are ALWAYS active and never blocked by WebView2 -->
+    <Border x:Name="RootBorder" Background="#0E0E12" BorderBrush="#252535" BorderThickness="1.5" CornerRadius="8" Padding="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Row 0: Custom Header / Title Bar -->
+                <RowDefinition Height="38"/>
+                <!-- Row 1: Info / Tip Banner -->
+                <RowDefinition Height="Auto"/>
+                <!-- Row 2: WebView2 Content -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!-- Custom Dark Title Bar -->
-        <Border Grid.Row="0" Background="#14141B" BorderBrush="#252535" BorderThickness="0,0,0,1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <!-- ================= ROW 0: CUSTOM TITLE BAR ================= -->
+            <Border x:Name="TitleBarBorder" Grid.Row="0" Background="#14141B" BorderBrush="#252535" BorderThickness="0,0,0,1" CornerRadius="6,6,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseDown">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Left: App Branding & Navigation -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
-                    <!-- YouTube Music Icon badge -->
-                    <Border Width="24" Height="24" CornerRadius="12" Background="#FF0033" Margin="0,0,8,0">
-                        <TextBlock Text="▶" Foreground="#FFFFFF" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/>
-                    </Border>
-                    <TextBlock Text="YouTube Music" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <Border Background="#1E1E24" BorderBrush="#2E2E36" BorderThickness="1" CornerRadius="4" Padding="5,2" Margin="0,0,12,0" VerticalAlignment="Center">
-                        <TextBlock Text="DRANOTCH Player" Foreground="#CCCCCC" FontSize="10" FontWeight="SemiBold"/>
-                    </Border>
+                    <!-- Left: Drag Grip Handle, Branding & Nav Controls -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                        <!-- Dedicated Drag Grip with SizeAll cursor -->
+                        <Border Background="#20202E" CornerRadius="4" Padding="5,2" Margin="0,0,7,0" Cursor="SizeAll" ToolTip="Tahan dan geser untuk memindahkan jendela">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⋮⋮" Foreground="#FF4D6D" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="Geser" Foreground="#AAAAAA" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Nav Controls -->
-                    <StackPanel Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
-                        <Button x:Name="BackButton" Style="{StaticResource NavButtonStyle}" Content="◀" ToolTip="Kembali" Click="BackButton_Click"/>
-                        <Button x:Name="ForwardButton" Style="{StaticResource NavButtonStyle}" Content="▶" ToolTip="Maju" Click="ForwardButton_Click"/>
-                        <Button Style="{StaticResource NavButtonStyle}" Content="⟳" ToolTip="Muat Ulang (Refresh)" Click="ReloadButton_Click"/>
-                        <Button Style="{StaticResource NavButtonStyle}" Content="&#x1F3E0;" ToolTip="Beranda YouTube Music" Click="HomeButton_Click"/>
-                        <Button x:Name="VocalRemoverButton" Style="{StaticResource NavButtonStyle}" Content="&#x1F3A4; Karaoke (Hapus Vokal)" ToolTip="Aktifkan/Nonaktifkan Penghilang Vokal (Mode Karaoke)" Click="VocalRemoverButton_Click" Margin="8,0,0,0"/>
+                        <!-- YouTube Music Icon badge -->
+                        <Border Width="22" Height="22" CornerRadius="11" Background="#FF0033" Margin="0,0,7,0">
+                            <TextBlock Text="▶" Foreground="#FFFFFF" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/>
+                        </Border>
+                        <TextBlock Text="YouTube Music" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                        <!-- Nav Controls -->
+                        <StackPanel Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                            <Button x:Name="BackButton" Style="{StaticResource NavButtonStyle}" Content="◀" ToolTip="Kembali" Click="BackButton_Click"/>
+                            <Button x:Name="ForwardButton" Style="{StaticResource NavButtonStyle}" Content="▶" ToolTip="Maju" Click="ForwardButton_Click"/>
+                            <Button Style="{StaticResource NavButtonStyle}" Content="⟳" ToolTip="Muat Ulang (Refresh)" Click="ReloadButton_Click"/>
+                            <Button Style="{StaticResource NavButtonStyle}" Content="&#x1F3E0;" ToolTip="Beranda YouTube Music" Click="HomeButton_Click"/>
+                            <Button x:Name="VocalRemoverButton" Style="{StaticResource NavButtonStyle}" Content="&#x1F3A4; Karaoke" ToolTip="Aktifkan/Nonaktifkan Penghilang Vokal (Mode Karaoke)" Click="VocalRemoverButton_Click" Margin="4,0,0,0"/>
+                        </StackPanel>
                     </StackPanel>
+
+                    <!-- Center: Drag Space & Status (Clicking here also drags the window) -->
+                    <Grid Grid.Column="1" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseDown">
+                        <TextBlock x:Name="StatusText" Text="Tersambung ke DRANOTCH" Foreground="#77778C" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="320"/>
+                    </Grid>
+
+                    <!-- Right: Window Actions & Caption Controls -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <!-- Mode Mengambang (Pin / Always On Top) -->
+                        <Button x:Name="PinButton" Style="{StaticResource NavButtonStyle}" ToolTip="Mode Mengambang (Selalu di Atas Jendela Lain)" Click="PinButton_Click" Padding="6,3" Margin="0,0,2,0">
+                            <TextBlock Text="📌" FontSize="11" VerticalAlignment="Center"/>
+                        </Button>
+
+                        <!-- Pilihan Ukuran Cepat Preset -->
+                        <Button x:Name="PresetSizeButton" Style="{StaticResource NavButtonStyle}" ToolTip="Ubah Ukuran Jendela (Mini PiP, Ringkas, Sedang, Standar, HD)" Click="PresetSizeButton_Click" Padding="6,3" Margin="0,0,2,0">
+                            <TextBlock Text="📐" FontSize="11" VerticalAlignment="Center"/>
+                        </Button>
+
+                        <Rectangle Width="1" Height="14" Fill="#28283C" Margin="3,0" VerticalAlignment="Center"/>
+
+                        <!-- Window Caption Buttons -->
+                        <Button Style="{StaticResource WindowCaptionButtonStyle}" Content="🗕" ToolTip="Minimize" Click="MinimizeButton_Click"/>
+                        <Button x:Name="MaximizeButton" Style="{StaticResource WindowCaptionButtonStyle}" Content="🗖" ToolTip="Maximize / Restore" Click="MaximizeButton_Click"/>
+                        <Button Style="{StaticResource CloseWindowButtonStyle}" Content="✕" ToolTip="Tutup ke latar belakang (Lagu tetap jalan)" Click="CloseButton_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ================= ROW 1: TIP NOTICE BANNER ================= -->
+            <Border Grid.Row="1" Background="#141418" BorderBrush="#24242A" BorderThickness="0,0,0,1" Padding="12,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="💡 Info:" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11" Margin="0,0,6,0"/>
+                        <TextBlock Text="Login tersimpan otomatis. Jendela ini dapat diubah ukurannya secara bebas (drag tepi/sudut) atau gunakan ikon 📐 untuk pilihan ukuran cepat." 
+                                   Foreground="#CCCCCC" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Sembunyikan Pesan" Click="DismissTip_Click" Background="Transparent" Foreground="#8888AA" BorderThickness="0" FontSize="11" Cursor="Hand" Margin="8,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- ================= ROW 2: MAIN CONTENT (WEBVIEW2) ================= -->
+            <Grid Grid.Row="2" Background="#0A0A0F">
+                <!-- Loading Indicator before WebView2 is ready -->
+                <StackPanel x:Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
+                    <TextBlock Text="Memuat YouTube Music..." Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <ProgressBar IsIndeterminate="True" Width="180" Height="3.5" Foreground="#FF0033" Background="#22222E" BorderThickness="0"/>
                 </StackPanel>
 
-                <!-- Center: Drag Area & URL / Status indicator -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock x:Name="StatusText" Text="Tersambung ke DRANOTCH" Foreground="#77778C" FontSize="11" VerticalAlignment="Center"/>
-                </StackPanel>
+                <wv2:WebView2 x:Name="webView"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              Visibility="Hidden"/>
 
-                <!-- Right: Window Caption Controls -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Button Style="{StaticResource WindowCaptionButtonStyle}" Content="🗕" ToolTip="Minimize" Click="MinimizeButton_Click"/>
-                    <Button x:Name="MaximizeButton" Style="{StaticResource WindowCaptionButtonStyle}" Content="🗖" ToolTip="Maximize" Click="MaximizeButton_Click"/>
-                    <Button Style="{StaticResource CloseWindowButtonStyle}" Content="✕" ToolTip="Tutup ke latar belakang (Lagu tetap jalan)" Click="CloseButton_Click"/>
-                </StackPanel>
+                <!-- Bottom-Right Subtle Resize Grip Indicator -->
+                <TextBlock Text="⋰" Foreground="#44445A" FontSize="13" FontWeight="Bold"
+                           HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                           Margin="0,0,3,1" IsHitTestVisible="False"/>
             </Grid>
-        </Border>
-
-        <!-- Tip Notice Banner -->
-        <Border Grid.Row="1" Background="#141418" BorderBrush="#24242A" BorderThickness="0,0,0,1" Padding="12,6">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="💡 Info:" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11" Margin="0,0,6,0"/>
-                    <TextBlock Text="Silakan login ke akun Google / YouTube Music Anda. Sesi login akan tersimpan otomatis. Saat lagu diputar, lirik dan kontrol akan sinkron ke DRANOTCH." 
-                               Foreground="#CCCCCC" FontSize="11" TextTrimming="CharacterEllipsis"/>
-                </StackPanel>
-                <Button Grid.Column="1" Content="Sembunyikan Pesan" Click="DismissTip_Click" Background="Transparent" Foreground="#8888AA" BorderThickness="0" FontSize="11" Cursor="Hand" Margin="8,0,0,0"/>
-            </Grid>
-        </Border>
-
-        <!-- Main Content Area: WebView2 -->
-        <Grid Grid.Row="2">
-            <!-- Loading Indicator before WebView2 is ready -->
-            <StackPanel x:Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
-                <TextBlock Text="Memuat YouTube Music..." Foreground="#FFFFFF" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                <ProgressBar IsIndeterminate="True" Width="180" Height="4" Foreground="#FFFFFF" Background="#22222E" BorderThickness="0"/>
-            </StackPanel>
-
-            <wv2:WebView2 x:Name="webView"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Stretch"
-                          Visibility="Hidden"/>
         </Grid>
-    </Grid>
+    </Border>
 </Window>

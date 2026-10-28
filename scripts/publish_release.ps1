@@ -95,9 +95,9 @@ if ([string]::IsNullOrWhiteSpace($token)) {
 }
 
 $repo = "dningratx/dranotch"
-$tag = "v1.6.8"
-$title = 'DRANOTCH v1.6.8 - To-Do Category Tree Branch & Remaining Countdown'
-$notesPath = Join-Path $PSScriptRoot "..\dist\release_notes_v1.6.8.md"
+$tag = "v1.6.9"
+$title = 'DRANOTCH v1.6.9 - Free Resizing YouTube Music Browser, Quick Presets & Pin Mode'
+$notesPath = Join-Path $PSScriptRoot "..\dist\release_notes_v1.6.9.md"
 $notes = [System.IO.File]::ReadAllText($notesPath, [System.Text.Encoding]::UTF8)
 
 $headers = @{
@@ -143,8 +143,8 @@ if ($existingAssets) {
 
 $assets = @(
     @{
-        Path = (Join-Path $PSScriptRoot "..\dist\Installer\DRANOTCH-Setup-1.6.8.exe")
-        Name = "DRANOTCH-Setup-1.6.8.exe"
+        Path = (Join-Path $PSScriptRoot "..\dist\Installer\DRANOTCH-Setup-1.6.9.exe")
+        Name = "DRANOTCH-Setup-1.6.9.exe"
         ContentType = "application/octet-stream"
     },
     @{

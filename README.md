@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.6.8)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.6.9)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -190,11 +190,17 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Pembersihan Antarmuka Pengaturan Waktu Sholat**: Menghapus opsi *"Pisahkan Waktu Sholat ke jendela terpisah (tidak menempel dengan musik)"* dari jendela Pengaturan untuk pengalaman pengguna yang lebih bersih, fokus, dan ringkas.
 - **Pembaruan Status UI Google Drive Responsif**: Indikator status sinkronisasi kini otomatis di-*dispatch* langsung ke UI thread, sehingga indikator tombol Drive (`Menyinkronkan...` -> `Drive` / `Tersinkron`) langsung terupdate tanpa *lag*.
 
-### 🌳 23. Struktur Cabang To-Do Kategori & Hitung Mundur Sisa Waktu *(Baru di v1.6.8)*
+### 🌳 23. Struktur Cabang To-Do Kategori & Hitung Mundur Sisa Waktu *(v1.6.8)*
 - **Hierarki Cabang Visual Kategori (*Tree/Branch Structure*)**: Item to-do otomatis dikelompokkan rapi di bawah kategori tugasnya dengan header folder (`📁`), nama kategori tebal, badge jumlah item, dan garis penghubung cabang visual (`├──•`) yang elegan.
 - **Tampilan Bersih Bebas Tag Berulang**: Menghilangkan badge kategori berulang di dalam setiap baris tugas karena tugas sudah tertata di bawah cabang kategorinya masing-masing.
 - **Drag-and-Drop Lintas Kategori**: Memindahkan tugas dari satu kategori ke kategori lain kini semudah menyeret item ke kelompok kategori tujuan, kategori tugas akan otomatis diperbarui.
 - **Hitung Mundur Sisa Waktu & Hari Real-Time (*Remaining Time & Days*)**: Setiap tugas dengan target waktu kini menampilkan sisa hari, jam, dan menit secara langsung (contoh: `Besok 17:00 • Sisa 1 hr 4 jam`, `Hari ini 17:00 • Sisa 3 jam 20 mnt`, `Sisa 45 mnt`, atau `⚠️ Terlewat 2 jam`), diperbarui otomatis setiap 2 detik.
+
+### 🎵 24. Ukuran Bebas Browser YouTube Music, Preset Cepat & Mode Mengambang Pin *(Baru di v1.6.9)*
+- **Bebas Diperbesar / Diperkecil (*Free Resizing*)**: Jendela pemutar bawaan YouTube Music (`YouTubeMusicWindow`) kini dapat diubah ukurannya secara bebas dari seluruh tepi dan sudut jendela (*WindowChrome 8px*) dengan batas minimal hingga `360 × 240` untuk mode mini player yang sangat ringkas.
+- **Pilihan Ukuran Cepat Preset (`📐`)**: Tombol preset ukuran instan di title bar menyediakan pilihan rasio sekali klik: Mini PiP (400×260), Ringkas (640×420), Sedang (840×560), Standar (1080×720), Layar Lebar HD (1280×800), serta kontrol perbesar/perkecil (+15% / -15%) dan skala zoom konten (75% - 125%).
+- **Mode Mengambang Pin (`📌 Always On Top`)**: Sematkan jendela YouTube Music agar selalu berada di atas aplikasi lain saat memutar musik sambil bekerja, mengetik, atau coding.
+- **Penyimpanan Dimensi Otomatis**: Ukuran dan posisi jendela terakhir otomatis tersimpan di pengaturan dan tidak akan ter-reset saat jendela dibuka ulang melalui pemutar musik atau menu tray.
 
 ---
 
@@ -224,7 +230,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.8.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.6.9.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

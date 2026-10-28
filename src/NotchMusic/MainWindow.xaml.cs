@@ -472,54 +472,68 @@ public partial class MainWindow : Window
 
             if (_ytMusicWindow == null)
             {
-                _ytMusicWindow = new YouTubeMusicWindow(_viewModel);
+                _ytMusicWindow = new YouTubeMusicWindow(_viewModel, _settingsService);
                 _ytMusicWindow.Closed += (s, e) => _ytMusicWindow = null;
+
+                var saved = _settingsService.CurrentSettings;
+                if (saved.YouTubeMusicLeft > 0 && saved.YouTubeMusicTop >= 0 &&
+                    saved.YouTubeMusicWidth >= _ytMusicWindow.MinWidth &&
+                    saved.YouTubeMusicHeight >= _ytMusicWindow.MinHeight)
+                {
+                    _ytMusicWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                    _ytMusicWindow.Left = saved.YouTubeMusicLeft;
+                    _ytMusicWindow.Top = saved.YouTubeMusicTop;
+                    _ytMusicWindow.Width = saved.YouTubeMusicWidth;
+                    _ytMusicWindow.Height = saved.YouTubeMusicHeight;
+                }
+                else
+                {
+                    // Dapatkan area monitor tempat Dranotch berada
+                    var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+                    var workingArea = screen.WorkingArea;
+
+                    var source = PresentationSource.FromVisual(this);
+                    double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                    double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+                    double areaLeft = workingArea.Left / dpiX;
+                    double areaTop = workingArea.Top / dpiY;
+                    double areaWidth = workingArea.Width / dpiX;
+                    double areaHeight = workingArea.Height / dpiY;
+
+                    // Ukuran ideal tidak melebihi batas layar Windows
+                    double horizontalMargin = 20;
+                    double verticalMargin = 16;
+                    double targetWidth = Math.Min(1080, areaWidth - (horizontalMargin * 2));
+                    if (targetWidth < _ytMusicWindow.MinWidth)
+                    {
+                        targetWidth = Math.Min(_ytMusicWindow.MinWidth, areaWidth - 10);
+                    }
+
+                    // Terbuka di bawah dranotch dan tengah horizontalnya
+                    double notchHeight = 64;
+                    double notchBottom = Top + notchHeight;
+                    if (notchBottom < areaTop) notchBottom = areaTop;
+
+                    double targetTop = notchBottom + 8;
+                    double availableHeight = (areaTop + areaHeight) - targetTop - verticalMargin;
+                    double targetHeight = Math.Min(720, availableHeight);
+
+                    if (targetHeight < _ytMusicWindow.MinHeight)
+                    {
+                        targetHeight = Math.Min(_ytMusicWindow.MinHeight, areaHeight - 30);
+                        targetTop = Math.Max(areaTop + 4, (areaTop + areaHeight) - targetHeight - verticalMargin);
+                    }
+
+                    double targetLeft = areaLeft + (areaWidth - targetWidth) / 2.0;
+
+                    _ytMusicWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                    _ytMusicWindow.Left = targetLeft;
+                    _ytMusicWindow.Top = targetTop;
+                    _ytMusicWindow.Width = targetWidth;
+                    _ytMusicWindow.Height = targetHeight;
+                }
             }
-
-            // Dapatkan area monitor tempat Dranotch berada
-            var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
-            var workingArea = screen.WorkingArea;
-
-            var source = PresentationSource.FromVisual(this);
-            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
-            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
-
-            double areaLeft = workingArea.Left / dpiX;
-            double areaTop = workingArea.Top / dpiY;
-            double areaWidth = workingArea.Width / dpiX;
-            double areaHeight = workingArea.Height / dpiY;
-
-            // Ukuran ideal tidak melebihi batas layar Windows
-            double horizontalMargin = 20;
-            double verticalMargin = 16;
-            double targetWidth = Math.Min(1080, areaWidth - (horizontalMargin * 2));
-            if (targetWidth < _ytMusicWindow.MinWidth)
-            {
-                targetWidth = Math.Min(_ytMusicWindow.MinWidth, areaWidth - 10);
-            }
-
-            // Terbuka di bawah dranotch dan tengah horizontalnya
-            double notchHeight = 64;
-            double notchBottom = Top + notchHeight;
-            if (notchBottom < areaTop) notchBottom = areaTop;
-
-            double targetTop = notchBottom + 8;
-            double availableHeight = (areaTop + areaHeight) - targetTop - verticalMargin;
-            double targetHeight = Math.Min(720, availableHeight);
-
-            if (targetHeight < _ytMusicWindow.MinHeight)
-            {
-                targetHeight = Math.Min(_ytMusicWindow.MinHeight, areaHeight - 30);
-                targetTop = Math.Max(areaTop + 4, (areaTop + areaHeight) - targetHeight - verticalMargin);
-            }
-
-            double targetLeft = areaLeft + (areaWidth - targetWidth) / 2.0;
-
-            _ytMusicWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            _ytMusicWindow.Left = targetLeft;
-            _ytMusicWindow.Top = targetTop;
-            _ytMusicWindow.Width = targetWidth;
-            _ytMusicWindow.Height = targetHeight;
 
             if (_ytMusicWindow.WindowState == WindowState.Minimized)
             {
