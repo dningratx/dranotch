@@ -1174,8 +1174,20 @@ public class MainViewModel : ViewModelBase
     {
         get
         {
-            var opt = AvailableAdhanSounds.FirstOrDefault(s => string.Equals(s.Id, SelectedAdhanSound, StringComparison.OrdinalIgnoreCase));
-            string name = opt?.Name ?? "Adzan Mekkah (Masjidil Haram)";
+            string name;
+            if (string.Equals(SelectedAdhanSound, "custom", StringComparison.OrdinalIgnoreCase))
+            {
+                string customName = !string.IsNullOrWhiteSpace(Settings.CustomAdhanSoundPath)
+                    ? System.IO.Path.GetFileName(Settings.CustomAdhanSoundPath)
+                    : "File Audio Kustom";
+                name = $"Kustom: {customName}";
+            }
+            else
+            {
+                var opt = AvailableAdhanSounds.FirstOrDefault(s => string.Equals(s.Id, SelectedAdhanSound, StringComparison.OrdinalIgnoreCase));
+                name = opt?.Name ?? "Adzan Mekkah (Masjidil Haram)";
+            }
+
             if (Settings.AdhanCustomDurationEnabled)
             {
                 name += $" (⏱ {Settings.AdhanStartMinutes:D2}:{Settings.AdhanStartSeconds:D2} - {Settings.AdhanEndMinutes:D2}:{Settings.AdhanEndSeconds:D2})";
@@ -1195,6 +1207,7 @@ public class MainViewModel : ViewModelBase
                 _isAdhanPlaying = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(AdhanPlayButtonIcon));
+                OnPropertyChanged(nameof(AdhanPlayButtonTooltip));
                 OnPropertyChanged(nameof(AdhanPlayPauseButtonIcon));
             }
         }
@@ -1214,6 +1227,7 @@ public class MainViewModel : ViewModelBase
     }
 
     public string AdhanPlayButtonIcon => IsAdhanPlaying ? "⏹" : "▶";
+    public string AdhanPlayButtonTooltip => IsAdhanPlaying ? "Berhenti putar suara" : "Tes putar suara adzan";
     public string AdhanPlayPauseButtonIcon => (!IsAdhanPlaying || IsAdhanPaused) ? "▶" : "⏸";
 
     private double _adhanCurrentSec;
@@ -1263,6 +1277,7 @@ public class MainViewModel : ViewModelBase
                 : _adhanTotalSec;
             return target > 0 ? Math.Clamp((_adhanCurrentSec / target) * 100.0, 0, 100) : 0;
         }
+        set { /* Read-only calculated property; setter provided to prevent WPF TwoWay binding crash */ }
     }
     public bool HasActivePrayerNotification => EnablePrayerTimes && _activePrayerNotification != null;
     public PrayerNotificationEvent? ActivePrayerNotification
@@ -1937,8 +1952,18 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         OnPropertyChanged(nameof(IsRadioActiveOrOpen));
         OnPropertyChanged(nameof(RadioStatusSummary));
         OnPropertyChanged(nameof(RadioButtonActionText));
+        RefreshAdhanSettings();
         _prayerReminderService.RefreshSchedule();
         RequestComponentLayoutChanged?.Invoke();
+    }
+
+    public void RefreshAdhanSettings()
+    {
+        OnPropertyChanged(nameof(SelectedAdhanSound));
+        OnPropertyChanged(nameof(SelectedAdhanSoundName));
+        OnPropertyChanged(nameof(AdhanPlayButtonIcon));
+        OnPropertyChanged(nameof(AdhanPlayButtonTooltip));
+        OnPropertyChanged(nameof(AdhanPlayPauseButtonIcon));
     }
 
     private void OnRadioStateChanged()

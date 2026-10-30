@@ -1,3 +1,9 @@
+param(
+    [string]$Version = "1.8.1",
+    [string]$Title = "DRANOTCH v1.8.1 - Perbaikan Binding Suara Azan, Sinkronisasi Real-Time dan Desain Ikon Tombol Tes",
+    [string]$NotesFile = "release_notes_v1.8.1.md"
+)
+
 $ErrorActionPreference = "Stop"
 
 $source = @'
@@ -95,9 +101,10 @@ if ([string]::IsNullOrWhiteSpace($token)) {
 }
 
 $repo = "dningratx/dranotch"
-$tag = "v1.8.0"
-$title = 'DRANOTCH v1.8.0 - Suara Azan Terbaik Dunia, Durasi Kustom & Timeline Scrubber, Expand/Collapse To-Do & Phone Size YT Music'
-$notesPath = Join-Path $PSScriptRoot "..\dist\release_notes_v1.8.0.md"
+$verClean = $Version.TrimStart('v')
+$tag = "v$verClean"
+$title = if ($Title) { $Title } else { "DRANOTCH $tag" }
+$notesPath = Join-Path $PSScriptRoot "..\dist\$NotesFile"
 $notes = [System.IO.File]::ReadAllText($notesPath, [System.Text.Encoding]::UTF8)
 
 $headers = @{
@@ -143,8 +150,8 @@ if ($existingAssets) {
 
 $assets = @(
     @{
-        Path = (Join-Path $PSScriptRoot "..\dist\Installer\DRANOTCH-Setup-1.8.0.exe")
-        Name = "DRANOTCH-Setup-1.8.0.exe"
+        Path = (Join-Path $PSScriptRoot "..\dist\Installer\DRANOTCH-Setup-$verClean.exe")
+        Name = "DRANOTCH-Setup-$verClean.exe"
         ContentType = "application/octet-stream"
     },
     @{
