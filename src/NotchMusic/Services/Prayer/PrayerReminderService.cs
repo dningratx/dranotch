@@ -126,7 +126,7 @@ public class PrayerReminderService : IPrayerReminderService
 
                     if (settings.PrayerSoundAlert)
                     {
-                        PrayerAudioHelper.PlayChime();
+                        PrayerAudioHelper.PlayPrayerNotification(settings, evt);
                     }
 
                     ReminderTriggered?.Invoke(evt);
@@ -155,7 +155,7 @@ public class PrayerReminderService : IPrayerReminderService
 
                     if (settings.PrayerSoundAlert)
                     {
-                        PrayerAudioHelper.PlayChime();
+                        PrayerAudioHelper.PlayPrayerNotification(settings, evt);
                     }
 
                     ReminderTriggered?.Invoke(evt);
@@ -185,7 +185,7 @@ public class PrayerReminderService : IPrayerReminderService
 
                     if (settings.PrayerSoundAlert)
                     {
-                        PrayerAudioHelper.PlayChime();
+                        PrayerAudioHelper.PlayPrayerNotification(settings, evt);
                     }
 
                     ReminderTriggered?.Invoke(evt);

@@ -1153,6 +1153,117 @@ public class MainViewModel : ViewModelBase
         ? $"Jadwal Sholat ({CurrentPrayerSchedule.CityName}): {CurrentPrayerSchedule.CountdownSummary}\nKlik untuk melihat jadwal lengkap hari ini"
         : "Waktu Sholat";
 
+    public IReadOnlyList<AdhanSoundOption> AvailableAdhanSounds => PrayerAudioHelper.AvailableSounds;
+
+    public string SelectedAdhanSound
+    {
+        get => Settings.SelectedAdhanSound;
+        set
+        {
+            if (Settings.SelectedAdhanSound != value)
+            {
+                Settings.SelectedAdhanSound = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedAdhanSoundName));
+            }
+        }
+    }
+
+    public string SelectedAdhanSoundName
+    {
+        get
+        {
+            var opt = AvailableAdhanSounds.FirstOrDefault(s => string.Equals(s.Id, SelectedAdhanSound, StringComparison.OrdinalIgnoreCase));
+            string name = opt?.Name ?? "Adzan Mekkah (Masjidil Haram)";
+            if (Settings.AdhanCustomDurationEnabled)
+            {
+                name += $" (⏱ {Settings.AdhanStartMinutes:D2}:{Settings.AdhanStartSeconds:D2} - {Settings.AdhanEndMinutes:D2}:{Settings.AdhanEndSeconds:D2})";
+            }
+            return name;
+        }
+    }
+
+    private bool _isAdhanPlaying;
+    public bool IsAdhanPlaying
+    {
+        get => _isAdhanPlaying;
+        set
+        {
+            if (_isAdhanPlaying != value)
+            {
+                _isAdhanPlaying = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(AdhanPlayButtonIcon));
+                OnPropertyChanged(nameof(AdhanPlayPauseButtonIcon));
+            }
+        }
+    }
+
+    private bool _isAdhanPaused;
+    public bool IsAdhanPaused
+    {
+        get => _isAdhanPaused;
+        set
+        {
+            if (SetProperty(ref _isAdhanPaused, value))
+            {
+                OnPropertyChanged(nameof(AdhanPlayPauseButtonIcon));
+            }
+        }
+    }
+
+    public string AdhanPlayButtonIcon => IsAdhanPlaying ? "⏹" : "▶";
+    public string AdhanPlayPauseButtonIcon => (!IsAdhanPlaying || IsAdhanPaused) ? "▶" : "⏸";
+
+    private double _adhanCurrentSec;
+    private double _adhanTotalSec;
+
+    public double AdhanCurrentPositionSeconds
+    {
+        get => _adhanCurrentSec;
+        set
+        {
+            if (Math.Abs(_adhanCurrentSec - value) > 0.5)
+            {
+                _adhanCurrentSec = value;
+                PrayerAudioHelper.SeekTo(value);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(AdhanProgressText));
+                OnPropertyChanged(nameof(AdhanProgressPercent));
+            }
+        }
+    }
+
+    public double AdhanTotalDurationSeconds => _adhanTotalSec > 0 ? _adhanTotalSec : 180;
+    public string AdhanCurrentPositionText => TimeSpan.FromSeconds(Math.Max(0, _adhanCurrentSec)).ToString(@"mm\:ss");
+    public string AdhanTotalDurationText => TimeSpan.FromSeconds(Math.Max(0, _adhanTotalSec)).ToString(@"mm\:ss");
+
+    public string AdhanProgressText
+    {
+        get
+        {
+            string cur = TimeSpan.FromSeconds(Math.Max(0, _adhanCurrentSec)).ToString(@"mm\:ss");
+            if (Settings.AdhanCustomDurationEnabled && Settings.GetAdhanEndTotalSeconds() > 0)
+            {
+                string end = $"{Settings.AdhanEndMinutes:D2}:{Settings.AdhanEndSeconds:D2}";
+                return $"{cur} / {end}";
+            }
+            string tot = TimeSpan.FromSeconds(Math.Max(0, _adhanTotalSec)).ToString(@"mm\:ss");
+            return $"{cur} / {tot}";
+        }
+    }
+
+    public double AdhanProgressPercent
+    {
+        get
+        {
+            double target = (Settings.AdhanCustomDurationEnabled && Settings.GetAdhanEndTotalSeconds() > 0)
+                ? Settings.GetAdhanEndTotalSeconds()
+                : _adhanTotalSec;
+            return target > 0 ? Math.Clamp((_adhanCurrentSec / target) * 100.0, 0, 100) : 0;
+        }
+    }
     public bool HasActivePrayerNotification => EnablePrayerTimes && _activePrayerNotification != null;
     public PrayerNotificationEvent? ActivePrayerNotification
     {
@@ -1198,6 +1309,9 @@ public class MainViewModel : ViewModelBase
     public ICommand SetCategoryFilterCommand { get; }
     public ICommand MoveCategoryUpCommand { get; }
     public ICommand MoveCategoryDownCommand { get; }
+    public ICommand ExpandAllCategoriesCommand { get; }
+    public ICommand CollapseAllCategoriesCommand { get; }
+    public ICommand ToggleCategoryCollapseCommand { get; }
     public ICommand NextTickerCommand { get; }
     public ICommand PreviousTickerCommand { get; }
     public ICommand CompleteCurrentTickerCommand { get; }
@@ -1212,7 +1326,10 @@ public class MainViewModel : ViewModelBase
     public ICommand ClosePrayerCommand { get; }
     public ICommand MinimizePrayerWindowCommand { get; }
     public ICommand ExpandPrayerWindowCommand { get; }
-    public ICommand TogglePrayerPanelCommand { get; }
+public ICommand TogglePrayerPanelCommand { get; }
+    public ICommand PlayAdhanPreviewCommand { get; }
+    public ICommand StopAdhanPreviewCommand { get; }
+    public ICommand ToggleAdhanPlayPauseCommand { get; }
     public ICommand OpenPrayerScheduleCommand { get; }
     public ICommand DismissPrayerNotificationCommand { get; }
     public ICommand ToggleComponentsMenuCommand { get; }
@@ -1418,8 +1535,11 @@ public class MainViewModel : ViewModelBase
             }
         });
 
-                MoveCategoryUpCommand = new RelayCommand(p => MoveCategoryUp(p));
+        MoveCategoryUpCommand = new RelayCommand(p => MoveCategoryUp(p));
         MoveCategoryDownCommand = new RelayCommand(p => MoveCategoryDown(p));
+        ExpandAllCategoriesCommand = new RelayCommand(ExpandAllCategories);
+        CollapseAllCategoriesCommand = new RelayCommand(CollapseAllCategories);
+        ToggleCategoryCollapseCommand = new RelayCommand(p => ToggleCategoryCollapse(p));
 
         UpdateAvailableCategories();
 
@@ -1541,7 +1661,75 @@ public class MainViewModel : ViewModelBase
             IsComponentsMenuOpen = false;
         });
         MinimizePrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = true);
-        ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false);
+ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false);
+
+        PlayAdhanPreviewCommand = new RelayCommand(() =>
+        {
+            if (IsAdhanPlaying)
+            {
+                PrayerAudioHelper.StopAudio();
+                IsAdhanPlaying = false;
+            }
+            else
+            {
+                IsAdhanPlaying = true;
+                double startSec = Settings.GetAdhanStartTotalSeconds();
+                double endSec = Settings.GetAdhanEndTotalSeconds();
+                PrayerAudioHelper.PlayPreview(SelectedAdhanSound, Settings.CustomAdhanSoundPath, Settings.AdhanVolume, startSec, endSec, () =>
+                {
+                    IsAdhanPlaying = false;
+                });
+            }
+        });
+
+        StopAdhanPreviewCommand = new RelayCommand(() =>
+        {
+            PrayerAudioHelper.StopAudio();
+            IsAdhanPlaying = false;
+        });
+
+        ToggleAdhanPlayPauseCommand = new RelayCommand(() =>
+        {
+            if (PrayerAudioHelper.IsPlaying && !PrayerAudioHelper.IsPaused)
+            {
+                PrayerAudioHelper.PauseAudio();
+            }
+            else if (PrayerAudioHelper.IsPlaying && PrayerAudioHelper.IsPaused)
+            {
+                PrayerAudioHelper.ResumeAudio();
+            }
+            else
+            {
+                IsAdhanPlaying = true;
+                double startSec = Settings.GetAdhanStartTotalSeconds();
+                double endSec = Settings.GetAdhanEndTotalSeconds();
+                PrayerAudioHelper.PlayPreview(SelectedAdhanSound, Settings.CustomAdhanSoundPath, Settings.AdhanVolume, startSec, endSec, () =>
+                {
+                    IsAdhanPlaying = false;
+                });
+            }
+        });
+
+        PrayerAudioHelper.PlaybackProgressChanged += (current, total) =>
+        {
+            _adhanCurrentSec = current;
+            _adhanTotalSec = total;
+            OnPropertyChanged(nameof(AdhanCurrentPositionSeconds));
+            OnPropertyChanged(nameof(AdhanProgressText));
+            OnPropertyChanged(nameof(AdhanProgressPercent));
+            OnPropertyChanged(nameof(AdhanCurrentPositionText));
+            OnPropertyChanged(nameof(AdhanTotalDurationText));
+        };
+
+        PrayerAudioHelper.PlaybackStateChanged += () =>
+        {
+            _isAdhanPlaying = PrayerAudioHelper.IsPlaying;
+            _isAdhanPaused = PrayerAudioHelper.IsPaused;
+            OnPropertyChanged(nameof(IsAdhanPlaying));
+            OnPropertyChanged(nameof(IsAdhanPaused));
+            OnPropertyChanged(nameof(AdhanPlayButtonIcon));
+            OnPropertyChanged(nameof(AdhanPlayPauseButtonIcon));
+        };
 
         ToggleComponentsMenuCommand = new RelayCommand(() => IsComponentsMenuOpen = !IsComponentsMenuOpen);
         RestoreAllComponentsCommand = new RelayCommand(() =>
@@ -2779,6 +2967,27 @@ public class MainViewModel : ViewModelBase
         order[index] = prevCategory;
 
         ReorderTodosByCategories(order);
+    }
+
+public void ExpandAllCategories()
+    {
+        TodoCategoryExpansionHelper.ExpandAll();
+        _filteredTodos?.Refresh();
+    }
+
+    public void CollapseAllCategories()
+    {
+        var cats = AvailableCategories.Where(c => !string.Equals(c, "All", StringComparison.OrdinalIgnoreCase));
+        TodoCategoryExpansionHelper.CollapseAll(cats);
+        _filteredTodos?.Refresh();
+    }
+
+    public void ToggleCategoryCollapse(object? param)
+    {
+        string? categoryName = param as string ?? (param as System.Windows.Data.CollectionViewGroup)?.Name?.ToString() ?? param?.ToString();
+        if (string.IsNullOrWhiteSpace(categoryName)) return;
+        TodoCategoryExpansionHelper.Toggle(categoryName);
+        _filteredTodos?.Refresh();
     }
 
     public void MoveCategoryDown(object? param)

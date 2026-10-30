@@ -68,6 +68,30 @@ public class AppSettings
     public bool PrayerAutoPauseMusic { get; set; } = true;
     public bool ShowPrayerInCompactNotch { get; set; } = true;
 
+    // Pilihan Suara Adzan & Notifikasi
+    public string SelectedAdhanSound { get; set; } = "makkah"; // "makkah", "madinah", "alaqsa", "alafasy", "abdulbasit", "mansoor", "refaat", "turkey", "fajr", "chime", "custom"
+    public string CustomAdhanSoundPath { get; set; } = string.Empty;
+    public double AdhanVolume { get; set; } = 0.85;
+
+    // Pengaturan Durasi Adzan Pendek / Potong Durasi (Menit & Detik Mulai s/d Selesai)
+    public bool AdhanCustomDurationEnabled { get; set; } = false;
+    public int AdhanStartMinutes { get; set; } = 0;
+    public int AdhanStartSeconds { get; set; } = 0;
+    public int AdhanEndMinutes { get; set; } = 1;
+    public int AdhanEndSeconds { get; set; } = 0;
+
+    public double GetAdhanStartTotalSeconds()
+    {
+        if (!AdhanCustomDurationEnabled) return 0;
+        return Math.Max(0, AdhanStartMinutes) * 60 + Math.Clamp(AdhanStartSeconds, 0, 59);
+    }
+
+    public double GetAdhanEndTotalSeconds()
+    {
+        if (!AdhanCustomDurationEnabled) return 0;
+        return Math.Max(0, AdhanEndMinutes) * 60 + Math.Clamp(AdhanEndSeconds, 0, 59);
+    }
+
     // Browser Mengambang (Floating Browser & Video Player)
     public bool IsBrowserWindowOpen { get; set; } = false;
     public double BrowserLeft { get; set; } = -1;
@@ -94,10 +118,10 @@ public class AppSettings
     public double MusicWindowTop { get; set; } = -1;
     public bool IsMusicWindowCompact { get; set; } = false;
 
-    // YouTube Music Window (Browser YouTube Music di Music Player)
+    // YouTube Music Window (Browser YouTube Music di Music Player - Default Seukuran Handphone)
     public double YouTubeMusicLeft { get; set; } = -1;
     public double YouTubeMusicTop { get; set; } = -1;
-    public double YouTubeMusicWidth { get; set; } = 1080;
-    public double YouTubeMusicHeight { get; set; } = 720;
+    public double YouTubeMusicWidth { get; set; } = 380;
+    public double YouTubeMusicHeight { get; set; } = 740;
     public bool YouTubeMusicAlwaysOnTop { get; set; } = false;
 }

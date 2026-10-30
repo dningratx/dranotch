@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="YouTube Music - DRANOTCH Player"
-        Width="1080" Height="720" MinWidth="360" MinHeight="240"
+        Width="380" Height="740" MinWidth="340" MinHeight="420"
         WindowStartupLocation="Manual"
         Background="#0E0E12" Foreground="#EEEEEE">
 
@@ -131,7 +131,6 @@
                             <Button x:Name="ForwardButton" Style="{StaticResource NavButtonStyle}" Content="▶" ToolTip="Maju" Click="ForwardButton_Click"/>
                             <Button Style="{StaticResource NavButtonStyle}" Content="⟳" ToolTip="Muat Ulang (Refresh)" Click="ReloadButton_Click"/>
                             <Button Style="{StaticResource NavButtonStyle}" Content="&#x1F3E0;" ToolTip="Beranda YouTube Music" Click="HomeButton_Click"/>
-                            <Button x:Name="VocalRemoverButton" Style="{StaticResource NavButtonStyle}" Content="&#x1F3A4; Karaoke" ToolTip="Aktifkan/Nonaktifkan Penghilang Vokal (Mode Karaoke)" Click="VocalRemoverButton_Click" Margin="4,0,0,0"/>
                         </StackPanel>
                     </StackPanel>
 

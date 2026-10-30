@@ -42,6 +42,13 @@ public partial class YouTubeMusicWindow : Window
         {
             var s = _settingsService.CurrentSettings;
             Topmost = s.YouTubeMusicAlwaysOnTop;
+            // Jika masih memakai ukuran lama bawaan (1080x720), ubah ke default seukuran handphone (380x740)
+            if (s.YouTubeMusicWidth == 1080 && s.YouTubeMusicHeight == 720)
+            {
+                s.YouTubeMusicWidth = 380;
+                s.YouTubeMusicHeight = 740;
+                _settingsService.Save();
+            }
             if (s.YouTubeMusicWidth >= MinWidth && s.YouTubeMusicHeight >= MinHeight)
             {
                 Width = s.YouTubeMusicWidth;
@@ -53,8 +60,12 @@ public partial class YouTubeMusicWindow : Window
                 Top = s.YouTubeMusicTop;
             }
         }
+        else
+        {
+            Width = 380;
+            Height = 740;
+        }
 
-        UpdateVocalRemoverButtonVisuals();
         UpdatePinVisuals();
         Loaded += YouTubeMusicWindow_Loaded;
     }
@@ -105,9 +116,7 @@ public partial class YouTubeMusicWindow : Window
                 {
                     LoadingPanel.Visibility = Visibility.Collapsed;
                     webView.Visibility = Visibility.Visible;
-                    StatusText.Text = _isVocalRemoverEnabled
-                        ? "🎤 Mode Karaoke (Penghilang Vokal) Aktif"
-                        : "Tersambung ke DRANOTCH";
+                    StatusText.Text = "Tersambung ke DRANOTCH";
                     BackButton.IsEnabled = webView.CanGoBack;
                     ForwardButton.IsEnabled = webView.CanGoForward;
                 });
@@ -131,14 +140,6 @@ public partial class YouTubeMusicWindow : Window
     public async Task SetVocalRemoverAsync(bool enabled)
     {
         _isVocalRemoverEnabled = enabled;
-        Dispatcher.Invoke(() =>
-        {
-            UpdateVocalRemoverButtonVisuals();
-            StatusText.Text = _isVocalRemoverEnabled
-                ? "🎤 Mode Karaoke (Penghilang Vokal) Aktif"
-                : "Tersambung ke DRANOTCH";
-        });
-
         await ApplyVocalRemoverToWebViewAsync();
     }
 
@@ -153,35 +154,6 @@ public partial class YouTubeMusicWindow : Window
             }
         }
         catch { }
-    }
-
-    private void UpdateVocalRemoverButtonVisuals()
-    {
-        if (VocalRemoverButton == null) return;
-        if (_isVocalRemoverEnabled)
-        {
-            VocalRemoverButton.Content = "🎤 Karaoke: ON";
-            VocalRemoverButton.Background = new SolidColorBrush(Color.FromRgb(42, 24, 62));
-            VocalRemoverButton.Foreground = new SolidColorBrush(Color.FromRgb(233, 213, 255));
-        }
-        else
-        {
-            VocalRemoverButton.Content = "🎤 Karaoke";
-            VocalRemoverButton.Background = System.Windows.Media.Brushes.Transparent;
-            VocalRemoverButton.Foreground = new SolidColorBrush(Color.FromRgb(204, 204, 204));
-        }
-    }
-
-    private async void VocalRemoverButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (_viewModel != null)
-        {
-            _viewModel.IsVocalRemoverEnabled = !_viewModel.IsVocalRemoverEnabled;
-        }
-        else
-        {
-            await SetVocalRemoverAsync(!_isVocalRemoverEnabled);
-        }
     }
 
     private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
@@ -243,10 +215,11 @@ public partial class YouTubeMusicWindow : Window
 
         var presets = new (string Label, double W, double H)[]
         {
+            ("📱 Handphone (380 × 740)", 380, 740),
             ("📱 Mini PiP (400 × 260)", 400, 260),
-            ("📻 Ringkas (640 × 420)", 640, 420),
-            ("💻 Sedang (840 × 560)", 840, 560),
-            ("🖥️ Standar (1080 × 720)", 1080, 720),
+            ("📻 Ringkas (480 × 640)", 480, 640),
+            ("💻 Sedang (640 × 720)", 640, 720),
+            ("🖥️ Standar Layar Lebar (1080 × 720)", 1080, 720),
             ("🎬 Layar Lebar HD (1280 × 800)", 1280, 800)
         };
 
