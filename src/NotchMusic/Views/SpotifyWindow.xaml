@@ -1,0 +1,187 @@
+<Window x:Class="NotchMusic.Views.SpotifyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="Spotify - DRANOTCH Player"
+        Width="380" Height="740" MinWidth="340" MinHeight="420"
+        WindowStartupLocation="Manual"
+        Background="#0B0E0C" Foreground="#EEEEEE">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome x:Name="WindowChromeElement" CaptionHeight="38" CornerRadius="8" GlassFrameThickness="0" ResizeBorderThickness="8" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <Geometry x:Key="SpotifyIconGeometry">M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 16.59,16.59 C 16.35,16.97 15.85,17.09 15.47,16.85 C 12.66,15.13 9.36,14.77 5.48,15.66 C 5.05,15.76 4.61,15.48 4.51,15.05 C 4.41,14.61 4.68,14.17 5.12,14.07 C 9.36,13.1 13.02,13.52 16.16,15.44 C 16.54,15.67 16.66,16.17 16.42,16.56 Z M 17.92,13.44 C 17.66,13.88 17.09,14.02 16.66,13.75 C 13.62,11.88 9.01,11.34 5.41,12.44 C 4.91,12.59 4.38,12.31 4.22,11.81 C 4.06,11.31 4.34,10.78 4.84,10.62 C 8.95,9.38 14.05,9.98 17.52,12.11 C 17.95,12.38 18.09,12.94 17.83,13.38 Z M 18.06,10.23 C 14.41,8.06 8.38,7.86 4.88,8.92 C 4.31,9.09 3.72,8.78 3.55,8.22 C 3.38,7.66 3.69,7.06 4.25,6.89 C 8.28,5.66 14.94,5.9 19.14,8.39 C 19.64,8.69 19.81,9.33 19.52,9.83 C 19.22,10.33 18.58,10.5 18.08,10.2 Z</Geometry>
+
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="7,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1C2E22"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#254230"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#556655"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WindowCaptionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="38"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1C2E22"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CloseWindowButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowCaptionButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E81123"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border x:Name="RootBorder" Background="#0B0E0C" BorderBrush="#1A2E20" BorderThickness="1.5" CornerRadius="8" Padding="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title Bar -->
+            <Border x:Name="TitleBarBorder" Grid.Row="0" Background="#101813" BorderBrush="#1A2E20" BorderThickness="0,0,0,1" CornerRadius="6,6,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseDown">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                        <Border Background="#16291C" CornerRadius="4" Padding="5,2" Margin="0,0,7,0" Cursor="SizeAll" ToolTip="Tahan dan geser untuk memindahkan jendela">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⋮⋮" Foreground="#1DB954" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="Geser" Foreground="#AAAAAA" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Width="22" Height="22" CornerRadius="11" Background="#1DB954" Margin="0,0,7,0">
+                            <Path Data="{StaticResource SpotifyIconGeometry}" Fill="#FFFFFF" Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="Spotify" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center" Margin="0,0,6,0"/>
+
+                        <StackPanel Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                            <Button x:Name="BackButton" Style="{StaticResource NavButtonStyle}" Content="◀" ToolTip="Kembali" Click="BackButton_Click"/>
+                            <Button x:Name="ForwardButton" Style="{StaticResource NavButtonStyle}" Content="▶" ToolTip="Maju" Click="ForwardButton_Click"/>
+                            <Button Style="{StaticResource NavButtonStyle}" Content="⟳" ToolTip="Muat Ulang (Refresh)" Click="ReloadButton_Click"/>
+                            <Button Style="{StaticResource NavButtonStyle}" Content="&#x1F3E0;" ToolTip="Beranda Spotify" Click="HomeButton_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid Grid.Column="1" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseDown">
+                        <TextBlock x:Name="StatusText" Text="Tersambung ke DRANOTCH" Foreground="#6C8A74" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="320"/>
+                    </Grid>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Button x:Name="PinButton" Style="{StaticResource NavButtonStyle}" ToolTip="Mode Mengambang (Selalu di Atas Jendela Lain)" Click="PinButton_Click" Padding="6,3" Margin="0,0,2,0">
+                            <TextBlock Text="📌" FontSize="11" VerticalAlignment="Center"/>
+                        </Button>
+
+                        <Button x:Name="PresetSizeButton" Style="{StaticResource NavButtonStyle}" ToolTip="Ubah Ukuran Jendela (Mini PiP, Ringkas, Sedang, Standar, HD)" Click="PresetSizeButton_Click" Padding="6,3" Margin="0,0,2,0">
+                            <TextBlock Text="📐" FontSize="11" VerticalAlignment="Center"/>
+                        </Button>
+
+                        <Rectangle Width="1" Height="14" Fill="#203828" Margin="3,0" VerticalAlignment="Center"/>
+
+                        <Button Style="{StaticResource WindowCaptionButtonStyle}" Content="&#x1F5D5;" ToolTip="Minimize" Click="MinimizeButton_Click"/>
+                        <Button x:Name="MaximizeButton" Style="{StaticResource WindowCaptionButtonStyle}" Content="&#x1F5D6;" ToolTip="Maximize / Restore" Click="MaximizeButton_Click"/>
+                        <Button Style="{StaticResource CloseWindowButtonStyle}" Content="&#x2715;" ToolTip="Tutup ke latar belakang (Lagu tetap jalan)" Click="CloseButton_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Tip Notice Banner -->
+            <Border Grid.Row="1" Background="#0E1611" BorderBrush="#1A2E20" BorderThickness="0,0,0,1" Padding="12,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="💡 Info:" Foreground="#1DB954" FontWeight="Bold" FontSize="11" Margin="0,0,6,0"/>
+                        <TextBlock Text="Login akun Spotify tersimpan otomatis. Jendela ini bebas diubah ukurannya atau gunakan 📐 untuk pilihan ukuran cepat." 
+                                   Foreground="#CCCCCC" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Sembunyikan Pesan" Click="DismissTip_Click" Background="Transparent" Foreground="#7A9982" BorderThickness="0" FontSize="11" Cursor="Hand" Margin="8,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- Main Content (WebView2) -->
+            <Grid Grid.Row="2" Background="#050806">
+                <StackPanel x:Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible">
+                    <TextBlock Text="Memuat Spotify..." Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <ProgressBar IsIndeterminate="True" Width="180" Height="3.5" Foreground="#1DB954" Background="#1A2E20" BorderThickness="0"/>
+                </StackPanel>
+
+                <wv2:WebView2 x:Name="webView"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              Visibility="Hidden"/>
+
+                <TextBlock Text="⋰" Foreground="#2A4834" FontSize="13" FontWeight="Bold"
+                           HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                           Margin="0,0,3,1" IsHitTestVisible="False"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

@@ -30,6 +30,9 @@ public interface IMediaSessionService : IDisposable
     Task PreviousAsync();
     Task NextAsync();
     Task SeekAsync(TimeSpan position);
+    Task PauseSessionByKeywordAsync(string keyword);
+    event EventHandler? PlaybackStartedOnSpotify;
+    event EventHandler? PlaybackStartedOnYouTubeMusic;
 }
 
 public class WindowsMediaSessionService : IMediaSessionService
@@ -46,6 +49,10 @@ public class WindowsMediaSessionService : IMediaSessionService
     public event EventHandler<TrackInfo?>? TrackChanged;
     public event EventHandler<TimeSpan>? TimelineUpdated;
     public event EventHandler<IReadOnlyList<MediaSessionInfo>>? SessionsChanged;
+    public event EventHandler? PlaybackStartedOnSpotify;
+#pragma warning disable CS0067
+    public event EventHandler? PlaybackStartedOnYouTubeMusic;
+#pragma warning restore CS0067
 
     public TrackInfo? CurrentTrack => _currentTrack;
     public IReadOnlyList<MediaSessionInfo> AvailableSessions
@@ -96,6 +103,12 @@ public class WindowsMediaSessionService : IMediaSessionService
     {
         lock (_lock)
         {
+            var current = sender.GetCurrentSession();
+            if (current != null)
+            {
+                CheckMutualPlaybackExclusion(current);
+            }
+
             // If user explicitly picked a session and it's active, keep it
             if (!string.IsNullOrEmpty(_selectedSessionId))
             {
@@ -107,7 +120,7 @@ public class WindowsMediaSessionService : IMediaSessionService
                 }
             }
 
-            BindToSession(sender.GetCurrentSession());
+            BindToSession(current);
         }
     }
 
@@ -185,13 +198,23 @@ public class WindowsMediaSessionService : IMediaSessionService
                 best = sessions.FirstOrDefault(s => s.SourceAppUserModelId == _selectedSessionId);
             }
 
-            // Priority 2: Built-in YouTube Music WebView2 Player or Browsers
+            // Priority 2: Any session actively PLAYING right now (e.g. Spotify or YouTube Music)
+            if (best == null)
+            {
+                best = sessions.FirstOrDefault(s =>
+                {
+                    try { return s.GetPlaybackInfo()?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing; }
+                    catch { return false; }
+                });
+            }
+
+            // Priority 3: Built-in YouTube Music WebView2 Player or Spotify or Browsers
             if (best == null)
             {
                 best = sessions.FirstOrDefault(s =>
                 {
                     var id = s.SourceAppUserModelId?.ToLowerInvariant() ?? "";
-                    return id.Contains("dranotch") || id.Contains("notchmusic") || id.Contains("msedgewebview2");
+                    return id.Contains("dranotch") || id.Contains("notchmusic") || id.Contains("msedgewebview2") || id.Contains("spotify");
                 });
             }
 
@@ -204,7 +227,7 @@ public class WindowsMediaSessionService : IMediaSessionService
                 });
             }
 
-            // Priority 3: Any active session
+            // Priority 4: Default current session
             best ??= _manager.GetCurrentSession() ?? sessions.FirstOrDefault();
 
             BindToSession(best);
@@ -268,7 +291,26 @@ public class WindowsMediaSessionService : IMediaSessionService
 
     private void Session_PlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender, PlaybackInfoChangedEventArgs args)
     {
+        CheckMutualPlaybackExclusion(sender);
         _ = RefreshSessionPropertiesAsync(sender);
+    }
+
+    private void CheckMutualPlaybackExclusion(GlobalSystemMediaTransportControlsSession? session)
+    {
+        if (session == null) return;
+        try
+        {
+            var playbackInfo = session.GetPlaybackInfo();
+            if (playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+            {
+                var appId = session.SourceAppUserModelId?.ToLowerInvariant() ?? "";
+                if (appId.Contains("spotify") && !appId.Contains("dranotch") && !appId.Contains("notchmusic"))
+                {
+                    PlaybackStartedOnSpotify?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        catch { }
     }
 
     private void Session_TimelinePropertiesChanged(GlobalSystemMediaTransportControlsSession sender, TimelinePropertiesChangedEventArgs args)
@@ -385,6 +427,28 @@ public class WindowsMediaSessionService : IMediaSessionService
             }
             catch { }
         }
+    }
+
+    public async Task PauseSessionByKeywordAsync(string keyword)
+    {
+        if (_manager == null || string.IsNullOrWhiteSpace(keyword)) return;
+        try
+        {
+            var sessions = _manager.GetSessions();
+            foreach (var s in sessions)
+            {
+                var id = s.SourceAppUserModelId?.ToLowerInvariant() ?? "";
+                if (id.Contains(keyword.ToLowerInvariant()))
+                {
+                    try
+                    {
+                        await s.TryPauseAsync();
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch { }
     }
 
     public async Task PreviousAsync()

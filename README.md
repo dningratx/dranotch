@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # 🎵 DRANOTCH
 
@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.8.1)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.8.2)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -245,7 +245,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 
@@ -295,7 +295,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 ## 💡 Teknologi yang Digunakan
 
 - **Framework**: [.NET 10](https://dotnet.microsoft.com/) & WPF (Windows Presentation Foundation)
-- **Web Runtime**: [Microsoft WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (untuk pemutar YouTube Music)
+- **Web Runtime**: [Microsoft WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (untuk pemutar YouTube Music & Spotify)
 - **Media API**: Windows System Media Transport Controls (`Windows.Media.Control`)
 - **Lirik API**: [LRCLIB API](https://lrclib.net/)
 - **Cloud Sync**: [Google Drive API v3](https://developers.google.com/drive)

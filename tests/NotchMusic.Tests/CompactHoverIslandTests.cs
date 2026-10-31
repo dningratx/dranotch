@@ -34,6 +34,9 @@ public class CompactHoverIslandTests
         public Task NextAsync() => Task.CompletedTask;
         public Task SeekAsync(TimeSpan position) => Task.CompletedTask;
         public void Dispose() { }
+        public event EventHandler? PlaybackStartedOnSpotify;
+        public event EventHandler? PlaybackStartedOnYouTubeMusic;
+        public Task PauseSessionByKeywordAsync(string keyword) => Task.CompletedTask;
         public void FireTrackChanged(TrackInfo? track) => TrackChanged?.Invoke(this, track);
     }
 
@@ -102,6 +105,7 @@ public class CompactHoverIslandTests
         vm.CurrentMode = PanelMode.Compact;
 
         Assert.NotNull(vm.OpenYouTubeMusicCommand);
+        Assert.NotNull(vm.OpenSpotifyCommand);
         Assert.NotNull(vm.OpenRadioCommand);
         Assert.NotNull(vm.OpenTodoCommand);
         Assert.NotNull(vm.OpenFloatingBrowserCommand);
@@ -117,6 +121,18 @@ public class CompactHoverIslandTests
         vm.HasAvailableUpdate = true;
         vm.AvailableUpdateVersion = "v1.7.0";
         Assert.Equal("Click to Update v1.7.0", vm.VersionButtonText);
+    }
+
+    [Fact]
+    public void OpenSpotifyCommand_TriggersRequestOpenSpotify()
+    {
+        var vm = new MainViewModel(new FakeMediaSessionService(), new FakeLyricsService(), new FakeSettingsService());
+        bool requested = false;
+        vm.RequestOpenSpotify += () => requested = true;
+
+        vm.OpenSpotifyCommand.Execute(null);
+
+        Assert.True(requested);
     }
 
     [Fact]

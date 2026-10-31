@@ -33,6 +33,8 @@
 
         <Geometry x:Key="LuxuryMusicNoteGeometry">M 12,3 V 13.55 C 11.41,13.21 10.73,13 10,13 C 7.79,13 6,14.79 6,17 C 6,19.21 7.79,21 10,21 C 12.21,21 14,19.21 14,17 V 7 H 18 V 3 H 12 Z</Geometry>
 
+        <Geometry x:Key="SpotifyIconGeometry">M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 16.59,16.59 C 16.35,16.97 15.85,17.09 15.47,16.85 C 12.66,15.13 9.36,14.77 5.48,15.66 C 5.05,15.76 4.61,15.48 4.51,15.05 C 4.41,14.61 4.68,14.17 5.12,14.07 C 9.36,13.1 13.02,13.52 16.16,15.44 C 16.54,15.67 16.66,16.17 16.42,16.56 Z M 17.92,13.44 C 17.66,13.88 17.09,14.02 16.66,13.75 C 13.62,11.88 9.01,11.34 5.41,12.44 C 4.91,12.59 4.38,12.31 4.22,11.81 C 4.06,11.31 4.34,10.78 4.84,10.62 C 8.95,9.38 14.05,9.98 17.52,12.11 C 17.95,12.38 18.09,12.94 17.83,13.38 Z M 18.06,10.23 C 14.41,8.06 8.38,7.86 4.88,8.92 C 4.31,9.09 3.72,8.78 3.55,8.22 C 3.38,7.66 3.69,7.06 4.25,6.89 C 8.28,5.66 14.94,5.9 19.14,8.39 C 19.64,8.69 19.81,9.33 19.52,9.83 C 19.22,10.33 18.58,10.5 18.08,10.2 Z</Geometry>
+
         <Style x:Key="ControlButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#F5F5FA"/>
@@ -275,13 +277,17 @@
                                              Visibility="{Binding IsVocalRemoverEnabled, Converter={StaticResource BoolToVis}}"/>
                                 </StackPanel>
                             </Button>
-
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
-                                    ToolTip="Buka Pemutar YouTube Music untuk ganti lagu" Padding="8,4" Margin="0,0,4,0">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="&#x25B6;" Foreground="#FF4D6D" FontSize="9.5" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                    <TextBlock Text="YT Music" FontSize="11" Foreground="#EDEDF5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                </StackPanel>
+                                    ToolTip="Buka Pemutar YouTube Music" Width="26" Height="26" Padding="0" Margin="0,0,4,0">
+                                <Grid Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Ellipse Fill="#FF0033" Width="14" Height="14"/>
+                                    <Path Data="M 0,0 L 5.5,3.5 L 0,7 Z" Fill="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1,0,0,0"/>
+                                </Grid>
+                            </Button>
+
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSpotifyCommand}"
+                                    ToolTip="Buka Pemutar Spotify" Width="26" Height="26" Padding="0" Margin="0,0,4,0">
+                                <Path Data="{StaticResource SpotifyIconGeometry}" Fill="#1DB954" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             </Button>
 
                             <!-- Tombol Minimize ke Compact -->
@@ -303,11 +309,17 @@
                                         Visibility="{Binding HasTrack, Converter={StaticResource InverseBoolToVis}}">
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenYouTubeMusicCommand}"
                                         ToolTip="Buka Pemutar YouTube Music" Background="#23171F" BorderBrush="#4A2534" BorderThickness="1.2"
-                                        Padding="14,8" Cursor="Hand">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="&#x25B6;" Foreground="#FF4D6D" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="YT Music" Foreground="#FFD0DD" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                        Width="38" Height="38" Padding="0" Margin="0,0,8,0" Cursor="Hand">
+                                    <Grid Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Ellipse Fill="#FF0033" Width="20" Height="20"/>
+                                        <Path Data="M 0,0 L 7.5,5 L 0,10 Z" Fill="#FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="1.5,0,0,0"/>
+                                    </Grid>
+                                </Button>
+
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenSpotifyCommand}"
+                                        ToolTip="Buka Pemutar Spotify" Background="#14241A" BorderBrush="#254A32" BorderThickness="1.2"
+                                        Width="38" Height="38" Padding="0" Cursor="Hand">
+                                    <Path Data="{StaticResource SpotifyIconGeometry}" Fill="#1DB954" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Button>
                             </StackPanel>
 

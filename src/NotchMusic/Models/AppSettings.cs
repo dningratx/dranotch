@@ -124,4 +124,11 @@ public class AppSettings
     public double YouTubeMusicWidth { get; set; } = 380;
     public double YouTubeMusicHeight { get; set; } = 740;
     public bool YouTubeMusicAlwaysOnTop { get; set; } = false;
+
+    // Spotify Window (Browser Spotify di Music Player - Default Seukuran Handphone)
+    public double SpotifyLeft { get; set; } = -1;
+    public double SpotifyTop { get; set; } = -1;
+    public double SpotifyWidth { get; set; } = 380;
+    public double SpotifyHeight { get; set; } = 740;
+    public bool SpotifyAlwaysOnTop { get; set; } = false;
 }

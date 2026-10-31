@@ -16,7 +16,9 @@ public partial class MainWindow : Window
     private readonly MainViewModel _viewModel;
     private readonly ISettingsService _settingsService;
     private readonly ITrayIconService _trayService;
+    private readonly IMediaSessionService _mediaService;
     private YouTubeMusicWindow? _ytMusicWindow;
+    private SpotifyWindow? _spotifyWindow;
     private FloatingBrowserWindow? _floatingBrowserWindow;
     private RadioWindow? _radioWindow;
     private MusicWindow? _musicWindow;
@@ -43,6 +45,12 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenSettings += OpenSettings;
         _viewModel.RequestOpenAbout += OpenAbout;
         _viewModel.RequestOpenYouTubeMusic += OpenYouTubeMusic;
+        _mediaService = mediaService;
+        _viewModel.RequestOpenSpotify += OpenSpotify;
+        _mediaService.PlaybackStartedOnSpotify += (s, e) => Dispatcher.Invoke(PauseYouTubeMusicPlayback);
+        _mediaService.PlaybackStartedOnYouTubeMusic += (s, e) => Dispatcher.Invoke(PauseSpotifyPlayback);
+        _viewModel.PlaybackStartedOnSpotify += () => Dispatcher.Invoke(PauseYouTubeMusicPlayback);
+        _viewModel.PlaybackStartedOnYouTubeMusic += () => Dispatcher.Invoke(PauseSpotifyPlayback);
         _viewModel.RequestVocalRemoverChanged += OnVocalRemoverChanged;
         _viewModel.RequestOpenFloatingBrowser += OpenFloatingBrowser;
         _viewModel.RequestOpenRadio += OpenRadio;
@@ -214,6 +222,7 @@ public partial class MainWindow : Window
         };
 
         _trayService.OpenYouTubeMusicRequested += () => Dispatcher.Invoke(OpenYouTubeMusic);
+        _trayService.OpenSpotifyRequested += () => Dispatcher.Invoke(OpenSpotify);
         _trayService.OpenRadioRequested += () => Dispatcher.Invoke(OpenRadio);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
@@ -553,6 +562,129 @@ public partial class MainWindow : Window
         }
     }
 
+    public void OpenSpotify()
+    {
+        try
+        {
+
+
+
+            _viewModel.CurrentMode = PanelMode.Compact;
+
+            if (_spotifyWindow == null)
+            {
+                _spotifyWindow = new SpotifyWindow(_viewModel, _settingsService);
+                _spotifyWindow.Closed += (s, e) => _spotifyWindow = null;
+
+                var saved = _settingsService.CurrentSettings;
+                if (saved.SpotifyLeft > 0 && saved.SpotifyTop >= 0 &&
+                    saved.SpotifyWidth >= _spotifyWindow.MinWidth &&
+                    saved.SpotifyHeight >= _spotifyWindow.MinHeight)
+                {
+                    _spotifyWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                    _spotifyWindow.Left = saved.SpotifyLeft;
+                    _spotifyWindow.Top = saved.SpotifyTop;
+                    _spotifyWindow.Width = saved.SpotifyWidth;
+                    _spotifyWindow.Height = saved.SpotifyHeight;
+                }
+                else
+                {
+                    var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+                    var workingArea = screen.WorkingArea;
+
+                    var source = PresentationSource.FromVisual(this);
+                    double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                    double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+                    double areaLeft = workingArea.Left / dpiX;
+                    double areaTop = workingArea.Top / dpiY;
+                    double areaWidth = workingArea.Width / dpiX;
+                    double areaHeight = workingArea.Height / dpiY;
+
+                    double horizontalMargin = 20;
+                    double verticalMargin = 16;
+                    double targetWidth = Math.Min(380, areaWidth - (horizontalMargin * 2));
+                    if (targetWidth < _spotifyWindow.MinWidth)
+                    {
+                        targetWidth = Math.Min(_spotifyWindow.MinWidth, areaWidth - 10);
+                    }
+
+                    double notchHeight = 64;
+                    double notchBottom = Top + notchHeight;
+                    if (notchBottom < areaTop) notchBottom = areaTop;
+
+                    double targetTop = notchBottom + 8;
+                    double availableHeight = (areaTop + areaHeight) - targetTop - verticalMargin;
+                    double targetHeight = Math.Min(740, availableHeight);
+
+                    if (targetHeight < _spotifyWindow.MinHeight)
+                    {
+                        targetHeight = Math.Min(_spotifyWindow.MinHeight, areaHeight - 30);
+                        targetTop = Math.Max(areaTop + 4, (areaTop + areaHeight) - targetHeight - verticalMargin);
+                    }
+
+                    double targetLeft = areaLeft + (areaWidth - targetWidth) / 2.0;
+
+                    _spotifyWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                    _spotifyWindow.Left = targetLeft;
+                    _spotifyWindow.Top = targetTop;
+                    _spotifyWindow.Width = targetWidth;
+                    _spotifyWindow.Height = targetHeight;
+                }
+            }
+
+            if (_spotifyWindow.WindowState == WindowState.Minimized)
+            {
+                _spotifyWindow.WindowState = WindowState.Normal;
+            }
+
+            _spotifyWindow.Show();
+            _spotifyWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka pemutar Spotify:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    public void PauseYouTubeMusicPlayback()
+    {
+        _ytMusicWindow?.PausePlaybackAsync();
+    }
+
+    public void PauseSpotifyPlayback()
+    {
+        _spotifyWindow?.PausePlaybackAsync();
+        _ = _mediaService.PauseSessionByKeywordAsync("spotify");
+    }
+
+    public void PauseAndHideYouTubeMusic()
+    {
+        PauseYouTubeMusicPlayback();
+        if (_ytMusicWindow != null)
+        {
+            _ytMusicWindow.Hide();
+        }
+    }
+
+    public void PauseAndHideSpotify()
+    {
+        PauseSpotifyPlayback();
+        if (_spotifyWindow != null)
+        {
+            _spotifyWindow.Hide();
+        }
+    }
+
+    public void PauseSpotify()
+    {
+        PauseSpotifyPlayback();
+    }
+
     public void OpenFloatingBrowser()
     {
         try
@@ -732,6 +864,7 @@ public partial class MainWindow : Window
         }
 
         _ytMusicWindow?.ForceClose();
+        _spotifyWindow?.ForceClose();
         _floatingBrowserWindow?.ForceClose();
         _radioWindow?.ForceClose();
         _musicWindow?.ForceClose();

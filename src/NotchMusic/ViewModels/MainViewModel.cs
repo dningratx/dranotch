@@ -97,6 +97,9 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestExpand;
     public event Action? RequestOpenSettings;
     public event Action? RequestOpenYouTubeMusic;
+    public event Action? RequestOpenSpotify;
+    public event Action? PlaybackStartedOnSpotify;
+    public event Action? PlaybackStartedOnYouTubeMusic;
     public event Action? RequestOpenFloatingBrowser;
     public event Action? RequestOpenRadio;
     public event Action? RequestOpenMusic;
@@ -1303,6 +1306,7 @@ public class MainViewModel : ViewModelBase
     public ICommand OpenSettingsCommand { get; }
     public ICommand OpenAboutCommand { get; }
     public ICommand OpenYouTubeMusicCommand { get; }
+    public ICommand OpenSpotifyCommand { get; }
     public ICommand OpenTodoCommand { get; }
     public ICommand OpenFloatingBrowserCommand { get; }
     public ICommand ImportLyricsCommand { get; }
@@ -1597,6 +1601,7 @@ public ICommand TogglePrayerPanelCommand { get; }
         OpenSettingsCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
         OpenAboutCommand = new RelayCommand(() => RequestOpenAbout?.Invoke());
         OpenYouTubeMusicCommand = new RelayCommand(() => RequestOpenYouTubeMusic?.Invoke());
+        OpenSpotifyCommand = new RelayCommand(() => RequestOpenSpotify?.Invoke());
         ToggleVocalRemoverCommand = new RelayCommand(() => IsVocalRemoverEnabled = !IsVocalRemoverEnabled);
         OpenTodoCommand = new RelayCommand(() =>
         {
@@ -1878,6 +1883,17 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         _interpolationTimer.Start();
 
         StartCloudSyncPollingTimer();
+    }
+
+    public void NotifyYouTubeMusicPlaying()
+    {
+        _ = _mediaService.PauseSessionByKeywordAsync("spotify");
+        PlaybackStartedOnYouTubeMusic?.Invoke();
+    }
+
+    public void NotifySpotifyPlaying()
+    {
+        PlaybackStartedOnSpotify?.Invoke();
     }
 
     private DispatcherTimer? _cloudSyncPollingTimer;

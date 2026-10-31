@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -38,6 +38,9 @@ public class PrayerTests
         public Task NextAsync() => Task.CompletedTask;
         public Task SeekAsync(TimeSpan position) => Task.CompletedTask;
         public void Dispose() { }
+        public event EventHandler? PlaybackStartedOnSpotify;
+        public event EventHandler? PlaybackStartedOnYouTubeMusic;
+        public Task PauseSessionByKeywordAsync(string keyword) => Task.CompletedTask;
     }
 
     private class FakeLyricsService : ILyricsService

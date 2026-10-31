@@ -99,6 +99,47 @@ public partial class YouTubeMusicWindow : Window
             webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             webView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = true;
 
+            webView.CoreWebView2.WebMessageReceived += (s, ev) =>
+            {
+                try
+                {
+                    var msg = ev.TryGetWebMessageAsString();
+                    if (msg == "yt_playing")
+                    {
+                        _viewModel?.NotifyYouTubeMusicPlaying();
+                    }
+                }
+                catch { }
+            };
+
+            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+                (function() {
+                    function hookMedia() {
+                        var v = document.querySelector('video') || document.querySelector('audio');
+                        if (v && !v.__dranotchHooked) {
+                            v.__dranotchHooked = true;
+                            v.addEventListener('play', function() {
+                                if (window.chrome && window.chrome.webview) {
+                                    window.chrome.webview.postMessage('yt_playing');
+                                }
+                            });
+                        }
+                    }
+                    hookMedia();
+                    setInterval(hookMedia, 1500);
+
+                    document.addEventListener('click', function(e) {
+                        try {
+                            var target = e.target;
+                            var btn = target.closest('#play-pause-button, button[aria-label*=""Play"" i], button[aria-label*=""Putar"" i]');
+                            if (btn && window.chrome && window.chrome.webview) {
+                                window.chrome.webview.postMessage('yt_playing');
+                            }
+                        } catch(err) {}
+                    }, true);
+                })();
+            ");
+
             await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
                 WebAudioVocalRemoverScript.GetBootstrapScript(_isVocalRemoverEnabled));
 
@@ -425,6 +466,29 @@ public partial class YouTubeMusicWindow : Window
     {
         _isForceClose = true;
         Close();
+    }
+
+    public async Task PausePlaybackAsync()
+    {
+        try
+        {
+            if (webView?.CoreWebView2 != null)
+            {
+                await webView.CoreWebView2.ExecuteScriptAsync(
+                    "(function() { var v = document.querySelector('video') || document.querySelector('audio'); if (v && !v.paused) { v.pause(); } })();"
+                );
+            }
+        }
+        catch { }
+    }
+
+    public void PauseAndHide()
+    {
+        _ = PausePlaybackAsync();
+        if (IsVisible)
+        {
+            Hide();
+        }
     }
 
     protected override void OnClosing(CancelEventArgs e)

@@ -443,7 +443,6 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- To-Do Icon Badge -->
@@ -477,23 +476,14 @@
                         </Grid>
                     </Border>
 
-                    <!-- Quick Complete Button -->
-                    <Button Grid.Column="2" Command="{Binding CompleteCurrentTickerCommand}"
-                            ToolTip="Tandai tugas selesai" Style="{StaticResource ControlButtonStyle}"
-                            Width="26" Height="26" VerticalAlignment="Center" Margin="0,0,4,0"
-                            Visibility="{Binding HasPendingTodos, Converter={StaticResource BoolToVis}}">
-                        <Border Width="22" Height="22" CornerRadius="6" Background="#18181C" BorderBrush="#2E2E36" BorderThickness="1">
-                            <TextBlock Text="✓" Foreground="#FFFFFF" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </Button>
-
-                    <!-- Actions (Expand, Pasang, Close) -->
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandTodoWindowCommand}" Content="&#x25BE;" ToolTip="Perluas To-Do"/>
+                    <!-- Actions (Expand, Pasang) -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandTodoWindowCommand}" ToolTip="Perluas To-Do">
+                            <TextBlock Text="&#x25BC;" FontSize="10"/>
+                        </Button>
                         <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachTodoCommand}" ToolTip="Pasang kembali ke musik" Margin="2,0,0,0">
                             <TextBlock Text="&#x21F2;" FontSize="11"/>
                         </Button>
-
                     </StackPanel>
                 </Grid>
 

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.Media;
@@ -33,6 +33,9 @@ public class TodoTests
         public Task SeekAsync(TimeSpan position) => Task.CompletedTask;
         public void TriggerTrackChanged(TrackInfo? track) => TrackChanged?.Invoke(this, track);
         public void Dispose() { }
+        public event EventHandler? PlaybackStartedOnSpotify;
+        public event EventHandler? PlaybackStartedOnYouTubeMusic;
+        public Task PauseSessionByKeywordAsync(string keyword) => Task.CompletedTask;
     }
 
     private class FakeLyricsService : ILyricsService
