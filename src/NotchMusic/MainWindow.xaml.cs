@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 using NotchMusic.Helpers;
 using NotchMusic.Models;
@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private SpotifyWindow? _spotifyWindow;
     private FloatingBrowserWindow? _floatingBrowserWindow;
     private RadioWindow? _radioWindow;
+    private LiveTvWindow? _liveTvWindow;
     private MusicWindow? _musicWindow;
     private TodoWindow? _todoWindow;
     private PrayerWindow? _prayerWindow;
@@ -54,16 +55,17 @@ public partial class MainWindow : Window
         _viewModel.RequestVocalRemoverChanged += OnVocalRemoverChanged;
         _viewModel.RequestOpenFloatingBrowser += OpenFloatingBrowser;
         _viewModel.RequestOpenRadio += OpenRadio;
+        _viewModel.RequestOpenLiveTv += OpenLiveTv;
         _viewModel.RequestOpenMusic += OpenMusic;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
             UpdateTodoWindowState();
             UpdatePrayerWindowState();
-        UpdateMusicWindowState();
+            UpdateMusicWindowState();
             UpdateBrowserWindowState();
             UpdateRadioWindowState();
-            UpdateMusicWindowState();
+            UpdateLiveTvWindowState();
         });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
 
@@ -224,6 +226,7 @@ public partial class MainWindow : Window
         _trayService.OpenYouTubeMusicRequested += () => Dispatcher.Invoke(OpenYouTubeMusic);
         _trayService.OpenSpotifyRequested += () => Dispatcher.Invoke(OpenSpotify);
         _trayService.OpenRadioRequested += () => Dispatcher.Invoke(OpenRadio);
+        _trayService.OpenLiveTvRequested += () => Dispatcher.Invoke(OpenLiveTv);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
@@ -389,6 +392,18 @@ public partial class MainWindow : Window
         else
         {
             _radioWindow?.Hide();
+        }
+    }
+
+    private void UpdateLiveTvWindowState()
+    {
+        if (_viewModel.IsLiveTvWindowOpen)
+        {
+            OpenLiveTv();
+        }
+        else
+        {
+            _liveTvWindow?.Hide();
         }
     }
 
@@ -801,6 +816,37 @@ public partial class MainWindow : Window
         }
     }
 
+    public void OpenLiveTv()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsLiveTvWindowOpen = true;
+
+            if (_liveTvWindow == null)
+            {
+                _liveTvWindow = new LiveTvWindow(_viewModel, _settingsService);
+                _liveTvWindow.Closed += (s, e) => _liveTvWindow = null;
+            }
+
+            if (_liveTvWindow.WindowState == WindowState.Minimized)
+            {
+                _liveTvWindow.WindowState = WindowState.Normal;
+            }
+
+            _liveTvWindow.Show();
+            _liveTvWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Live TV:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void Island_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
@@ -867,8 +913,10 @@ public partial class MainWindow : Window
         _spotifyWindow?.ForceClose();
         _floatingBrowserWindow?.ForceClose();
         _radioWindow?.ForceClose();
+        _liveTvWindow?.ForceClose();
         _musicWindow?.ForceClose();
         _viewModel.RadioService.Dispose();
+        _viewModel.LiveTvService.Dispose();
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _aboutWindow?.Close();

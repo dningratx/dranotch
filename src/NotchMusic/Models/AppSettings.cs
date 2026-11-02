@@ -131,4 +131,19 @@ public class AppSettings
     public double SpotifyWidth { get; set; } = 380;
     public double SpotifyHeight { get; set; } = 740;
     public bool SpotifyAlwaysOnTop { get; set; } = false;
+
+    // Live TV (Komponen ke-6)
+    public bool IsLiveTvWindowOpen { get; set; } = false;
+    public double LiveTvWindowLeft { get; set; } = -1;
+    public double LiveTvWindowTop { get; set; } = -1;
+    public double LiveTvWindowWidth { get; set; } = 480;
+    public double LiveTvWindowHeight { get; set; } = 640;
+    public bool IsLiveTvWindowCompact { get; set; } = false;
+    public bool LiveTvAlwaysOnTop { get; set; } = true;
+    public double LiveTvVolume { get; set; } = 0.85;
+    public bool LiveTvMuted { get; set; } = false;
+    public string LastLiveTvChannelId { get; set; } = string.Empty;
+    public string LastLiveTvCountryCode { get; set; } = "id";
+    public List<string> FavoriteLiveTvChannelIds { get; set; } = new();
+    public List<LiveTvChannel> CustomLiveTvChannels { get; set; } = new();
 }

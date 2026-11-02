@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🎵 DRANOTCH
 
@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
+Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.8.2)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.8.3)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -213,9 +213,23 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Default Seukuran Handphone (`380 × 740`)**: Saat jendela browser YouTube Music dibuka, ukuran default kini menyerupai layar smartphone vertikal yang proporsional, hemat ruang, dan nyaman diletakkan di samping monitor.
 - **Pembersihan Mode Karaoke**: Menghilangkan tombol karaoke dari jendela browser YouTube Music untuk pengalaman browsing yang lebih bersih dan terfokus.
 
-### 📂 27. Tombol Expand & Collapse Kategori To-Do List *(Baru di v1.8.0)*
+### 📂 27. Tombol Expand & Collapse Kategori To-Do List *(v1.8.0)*
 - **Buka & Tutup Per Folder Kategori**: Setiap folder kategori dilengkapi ikon chevron interaktif (`▾` / `▸`) untuk membuka atau menyembunyikan daftar tugas di bawahnya.
 - **Tombol Global Buka Semua & Tutup Semua**: Tombol pill `⊞ Buka Semua` dan `⊟ Tutup Semua` untuk merapikan seluruh kategori dalam satu klik.
+
+### 💚 28. Pemutar Spotify Web Bawaan, Saling Jeda Pintar & Ikon Presisi *(v1.8.2)*
+- **Pemutar Spotify Web Bawaan (`SpotifyWindow`)**: Pemutar bawaan terisolasi berbasis WebView2 dengan penyimpanan sesi login akun Spotify permanen, ukuran default handphone (`380 × 740`), preset ukuran instan, dan pemutaran latar belakang.
+- **Saling Jeda Cerdas (*Mutual Auto-Pause on Play*)**: Saat menekan Play di YouTube Music, pemutar Spotify otomatis dijeda, dan sebaliknya saat menekan Play di Spotify, YouTube Music otomatis dijeda.
+- **Ikon YouTube Music & Spotify Presisi (`26 × 26 px`)**: Desain tombol ikon simetris tanpa label teks di kapsul notch.
+
+### 📺 29. Komponen ke-6: Live TV Indonesia & Dunia *(Baru di v1.8.3)*
+- **6 Komponen Modular Terintegrasi**: Menambahkan komponen **Live TV** di Dynamic Notch dan System Tray, mendampingi Pemutar Musik, Radio Online, Waktu Sholat, To-Do List, dan Browser Mengambang.
+- **Streaming TV Langsung Indonesia & Internasional (`LiveTvWindow`)**:
+  - Katalog saluran TV nasional Indonesia (RCTI, SCTV, Indosiar, Trans TV, Trans 7, Kompas TV, Metro TV, tvOne, CNN Indonesia, CNBC Indonesia, TVRI Nasional, RTV, BTV, Garuda TV, Nusantara TV, Moji, NET., Rodja TV, TVMu, dll.) serta saluran berita, olahraga, film, anak, dan dokumenter dunia (Al Jazeera, CNA, NHK World, DW, France 24, Euronews, NASA TV, Red Bull TV, dll.).
+  - **Pemutar Hybrid HLS (`.m3u8`) & YouTube Live**: Mendukung pemutaran langsung aliran IPTV HLS (`hls.js`) maupun siaran langsung YouTube dengan pergantian otomatis jalur stream cadangan (*Multi-Source Failover* `🔄`) apabila salah satu server sedang gangguan.
+  - **Filter Negara & Kategori + Pencarian Online Dunia**: Pilih puluhan negara (`🇮🇩 Indonesia`, `🇲🇾 Malaysia`, `🇸🇬 Singapura`, `🇸🇦 Arab Saudi`, `🇯🇵 Jepang`, `🇰🇷 Korea Selatan`, `🇬🇧 Inggris`, `🇺🇸 Amerika Serikat`, dll.), filter kategori (*Berita*, *Hiburan*, *Olahraga*, *Religi*, *Musik*, *Anak*, *Dunia*), dan cari ribuan saluran TV dari seluruh dunia secara online.
+  - **Mode Bioskop (`⛶`), Mini Picture-in-Picture (`📺 PiP`), & Saluran Custom (`+ URL`)**: Sembunyikan daftar saluran untuk menonton layar penuh di jendela mengambang, perkecil ke jendela Mini TV PiP yang selalu tampil di atas aplikasi lain, tandai saluran favorit (`★`), atau tambahkan URL `.m3u8` / YouTube Live milik Anda sendiri.
+  - **Koordinasi Audio Pintar**: Memutar saluran Live TV secara otomatis menghentikan pemutaran Radio Online agar suara tidak bertumpuk.
 
 ---
 
@@ -245,7 +259,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.3.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 
