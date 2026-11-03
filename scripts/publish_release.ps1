@@ -1,7 +1,8 @@
 param(
     [string]$Version = "1.8.1",
     [string]$Title = "DRANOTCH v1.8.1 - Perbaikan Binding Suara Azan, Sinkronisasi Real-Time dan Desain Ikon Tombol Tes",
-    [string]$NotesFile = "release_notes_v1.8.1.md"
+    [string]$NotesFile = "release_notes_v1.8.1.md",
+    [switch]$ForceOverwriteAssets
 )
 
 $ErrorActionPreference = "Stop"
@@ -173,8 +174,16 @@ foreach ($asset in $assets) {
     }
 
     if ($existingAssetNames -contains $asset.Name) {
-        Write-Host "Asset $($asset.Name) already uploaded, skipping." -ForegroundColor Yellow
-        continue
+        if ($ForceOverwriteAssets) {
+            $existingAsset = $existingAssets | Where-Object { $_.name -eq $asset.Name } | Select-Object -First 1
+            if ($existingAsset) {
+                Write-Host "Deleting existing asset $($asset.Name) (ID $($existingAsset.id)) before re-upload..." -ForegroundColor Yellow
+                Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/assets/$($existingAsset.id)" -Headers $headers -Method Delete | Out-Null
+            }
+        } else {
+            Write-Host "Asset $($asset.Name) already uploaded, skipping." -ForegroundColor Yellow
+            continue
+        }
     }
 
     Write-Host "Uploading $($asset.Name)..." -ForegroundColor Cyan

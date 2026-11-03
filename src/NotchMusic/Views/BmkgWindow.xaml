@@ -303,15 +303,27 @@
                                 <TextBlock Grid.Column="1" Text="Cuaca &amp; Gempa BMKG" FontSize="14.5" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
 
                                 <Border Grid.Column="2" Background="#1C263B" BorderBrush="#3B527E" BorderThickness="1" CornerRadius="6"
-                                        Padding="6,1.5" Margin="8,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="115">
-                                    <TextBlock Text="{Binding BmkgWeatherCityText}" Foreground="#7DD3FC" FontSize="10.5" FontWeight="Bold"
-                                               TextTrimming="CharacterEllipsis" ToolTip="{Binding BmkgWeatherLocationSubtitle}"/>
+                                        Padding="7,2" Margin="8,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="135"
+                                        Cursor="Hand" ToolTip="Klik untuk mengubah lokasi Kelurahan/Desa">
+                                    <Border.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding TogglePreciseRegionSelectorCommand}"/>
+                                    </Border.InputBindings>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource PinLocationIconGeometry}" Fill="#4CD964" Width="10" Height="10" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding BmkgWeatherCityText}" Foreground="#7DD3FC" FontSize="10.5" FontWeight="Bold"
+                                                   TextTrimming="CharacterEllipsis" MaxWidth="98"/>
+                                        <TextBlock Text=" &#x25BE;" Foreground="#7DD3FC" FontSize="9" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    </StackPanel>
                                 </Border>
                             </Grid>
                             <TextBlock Text="{Binding BmkgStatusMessage}" FontSize="10.5" Foreground="#A6ACCD" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button Style="{StaticResource SmallPillButton}" Command="{Binding TogglePreciseRegionSelectorCommand}"
+                                    ToolTip="Pengaturan Lokasi Cuaca Presisi (Kelurahan/Desa)" Margin="0,0,3,0" Padding="7,4">
+                                <Path Data="{StaticResource PinLocationIconGeometry}" Fill="#4CD964" Width="12" Height="12" Stretch="Uniform"/>
+                            </Button>
                             <Button Style="{StaticResource SmallPillButton}" Command="{Binding RefreshBmkgCommand}"
                                     ToolTip="Perbarui Data Cuaca &amp; Gempa BMKG Sekarang" Margin="0,0,3,0" Padding="7,4">
                                 <TextBlock Text="&#x21BB;" Foreground="#7DD3FC" FontSize="12" FontWeight="Bold"/>
@@ -410,242 +422,6 @@
                     <!-- ================= ROW 2A: TAB PRAKIRAAN CUACA BMKG ================= -->
                     <StackPanel Grid.Row="2" Visibility="{Binding IsBmkgWeatherTab, Converter={StaticResource BoolToVis}}">
 
-                        <!-- Bar Pilihan & Pencarian Lokasi Presisi BMKG -->
-                        <Border Background="#131520" BorderBrush="#282C42" BorderThickness="1.2" CornerRadius="12" Padding="10,8" Margin="0,0,0,8">
-                            <StackPanel>
-                                <!-- Baris 1: Pencarian Langsung Kelurahan / Kecamatan / Kota + Deteksi + Pilih Bertingkat -->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- Search Box Kelurahan / Kecamatan / Kota -->
-                                    <Grid Grid.Column="0" Margin="0,0,5,0">
-                                        <TextBox x:Name="LocationSearchBox"
-                                                 Text="{Binding BmkgLocationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Background="#1B1E2E" Foreground="#FFFFFF" CaretBrush="#FFFFFF"
-                                                 BorderBrush="#3A405E" BorderThickness="1"
-                                                 Padding="26,4,8,4" Height="28" FontSize="11" VerticalContentAlignment="Center"
-                                                 ToolTip="Ketik nama Kelurahan/Desa, Kecamatan, atau Kota lalu tekan Enter">
-                                            <TextBox.InputBindings>
-                                                <KeyBinding Key="Return" Command="{Binding SearchBmkgLocationCommand}"/>
-                                            </TextBox.InputBindings>
-                                        </TextBox>
-                                        <Path Data="{StaticResource SearchIconGeometry}" Stroke="#7DD3FC" StrokeThickness="1.8"
-                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                              Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                              Margin="8,0,0,0" IsHitTestVisible="False"/>
-                                        <TextBlock Text="Cari Kelurahan / Kecamatan / Kota..."
-                                                   Foreground="#7880A0" FontSize="10.5" VerticalAlignment="Center" Margin="26,0,6,0"
-                                                   IsHitTestVisible="False">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Text, ElementName=LocationSearchBox}" Value="">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Grid>
-
-                                    <!-- Tombol Cari -->
-                                    <Button Grid.Column="1" Style="{StaticResource SmallPillButton}"
-                                            Command="{Binding SearchBmkgLocationCommand}"
-                                            Background="#203254" BorderBrush="#4C6EF5" Padding="8,4" Margin="0,0,4,0"
-                                            ToolTip="Cari lokasi presisi tingkat Kelurahan/Desa &amp; Kecamatan">
-                                        <TextBlock Text="{Binding BmkgLocationSearchButtonText}" Foreground="#FFFFFF" FontSize="10.5" FontWeight="Bold"/>
-                                    </Button>
-
-                                    <!-- Tombol Deteksi Presisi -->
-                                    <Button Grid.Column="2" Style="{StaticResource SmallPillButton}"
-                                            Command="{Binding DetectBmkgLocationCommand}"
-                                            Padding="8,4" Margin="0,0,4,0"
-                                            ToolTip="Deteksi otomatis lokasi Anda hingga tingkat Kelurahan/Desa">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Path Data="{StaticResource PinLocationIconGeometry}" Fill="#4CD964" Width="11" Height="11" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="Deteksi" Foreground="#FFFFFF" FontSize="10.5" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!-- Tombol Pilih Wilayah Presisi Bertingkat (Provinsi -> Kab/Kota -> Kecamatan -> Kelurahan) -->
-                                    <Button Grid.Column="3" Style="{StaticResource SmallPillButton}"
-                                            Command="{Binding TogglePreciseRegionSelectorCommand}"
-                                            Padding="8,4" Margin="0"
-                                            ToolTip="Pilih manual secara presisi: Provinsi ▸ Kab/Kota ▸ Kecamatan ▸ Kelurahan/Desa">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <TextBlock Text="&#x25BE;" Foreground="#FFD43B" FontSize="11" FontWeight="Bold" Margin="0,0,4,0"/>
-                                            <TextBlock Text="Pilih Wilayah" Foreground="#FFFFFF" FontSize="10.5" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </Button>
-                                </Grid>
-
-                                <!-- Daftar Hasil Pencarian Lokasi Presisi (Muncul saat hasil ditemukan) -->
-                                <Border Visibility="{Binding HasBmkgLocationSearchResults, Converter={StaticResource BoolToVis}}"
-                                        Background="#0E1018" BorderBrush="#3A466E" BorderThickness="1" CornerRadius="8" Padding="6" Margin="0,6,0,2">
-                                    <StackPanel>
-                                        <DockPanel Margin="2,0,2,4" LastChildFill="True">
-                                            <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
-                                                    Command="{Binding ClearBmkgLocationSearchCommand}" Content="&#x2715;" Padding="5,1" FontSize="9.5"/>
-                                            <TextBlock Text="Pilih Kelurahan / Kecamatan hasil pencarian:" FontSize="10" FontWeight="Bold" Foreground="#7DD3FC" VerticalAlignment="Center"/>
-                                        </DockPanel>
-                                        <ScrollViewer MaxHeight="145" VerticalScrollBarVisibility="Auto">
-                                            <ItemsControl ItemsSource="{Binding BmkgLocationSearchResults}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Button Command="{Binding DataContext.SelectBmkgSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                CommandParameter="{Binding}"
-                                                                Cursor="Hand" Margin="0,0,0,3">
-                                                            <Button.Template>
-                                                                <ControlTemplate TargetType="Button">
-                                                                    <Border x:Name="ResBorder" Background="#171A28" BorderBrush="#2C324C" BorderThickness="1" CornerRadius="7" Padding="8,5">
-                                                                        <Grid>
-                                                                            <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="Auto"/>
-                                                                                <ColumnDefinition Width="*"/>
-                                                                                <ColumnDefinition Width="Auto"/>
-                                                                            </Grid.ColumnDefinitions>
-                                                                            <Path Grid.Column="0" Data="{StaticResource PinLocationIconGeometry}" Fill="#38BDF8"
-                                                                                  Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,7,0"/>
-                                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                                                <TextBlock Text="{Binding DisplayTitle}" Foreground="#FFFFFF" FontSize="11" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                                                                                <TextBlock Text="{Binding DisplaySubtitle}" Foreground="#9AA4C4" FontSize="9.5" TextTrimming="CharacterEllipsis"/>
-                                                                            </StackPanel>
-                                                                            <Border Grid.Column="2" Background="#1E2C46" CornerRadius="4" Padding="5,2" VerticalAlignment="Center" Margin="6,0,0,0">
-                                                                                <TextBlock Text="Pilih" Foreground="#7DD3FC" FontSize="9.5" FontWeight="Bold"/>
-                                                                            </Border>
-                                                                        </Grid>
-                                                                    </Border>
-                                                                    <ControlTemplate.Triggers>
-                                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                                            <Setter TargetName="ResBorder" Property="Background" Value="#222840"/>
-                                                                            <Setter TargetName="ResBorder" Property="BorderBrush" Value="#5C7CFA"/>
-                                                                        </Trigger>
-                                                                    </ControlTemplate.Triggers>
-                                                                </ControlTemplate>
-                                                            </Button.Template>
-                                                        </Button>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </ScrollViewer>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Panel Pilih Wilayah Presisi 4 Tingkat (Provinsi ▸ Kab/Kota ▸ Kecamatan ▸ Kelurahan/Desa) -->
-                                <Border Visibility="{Binding IsSelectingPreciseRegion, Converter={StaticResource BoolToVis}}"
-                                        Background="#0D0F17" BorderBrush="#323854" BorderThickness="1" CornerRadius="9" Padding="9,8" Margin="0,6,0,2">
-                                    <StackPanel>
-                                        <DockPanel Margin="0,0,0,6" LastChildFill="True">
-                                            <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
-                                                    Command="{Binding ToggleCustomAdm4EditCommand}"
-                                                    Content="Input Kode ADM4" FontSize="9.5" Padding="6,2"/>
-                                            <TextBlock Text="🎯 Pilih Lokasi Manual Presisi (Tingkat Kelurahan / Desa):"
-                                                       Foreground="#FFD43B" FontSize="10.5" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        </DockPanel>
-
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="8"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="6"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
-
-                                            <!-- 1. Provinsi -->
-                                            <StackPanel Grid.Row="0" Grid.Column="0">
-                                                <TextBlock Text="1. Provinsi:" Foreground="#B0B8D4" FontSize="9.5" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
-                                                          ItemsSource="{Binding BmkgProvinces}"
-                                                          SelectedItem="{Binding SelectedBmkgProvince, Mode=TwoWay}"
-                                                          DisplayMemberPath="Name" Height="26"/>
-                                            </StackPanel>
-
-                                            <!-- 2. Kabupaten / Kota -->
-                                            <StackPanel Grid.Row="0" Grid.Column="2">
-                                                <TextBlock Text="2. Kabupaten / Kota:" Foreground="#B0B8D4" FontSize="9.5" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
-                                                          ItemsSource="{Binding BmkgRegencies}"
-                                                          SelectedItem="{Binding SelectedBmkgRegency, Mode=TwoWay}"
-                                                          DisplayMemberPath="Name" Height="26"/>
-                                            </StackPanel>
-
-                                            <!-- 3. Kecamatan -->
-                                            <StackPanel Grid.Row="2" Grid.Column="0">
-                                                <TextBlock Text="3. Kecamatan:" Foreground="#B0B8D4" FontSize="9.5" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
-                                                          ItemsSource="{Binding BmkgDistricts}"
-                                                          SelectedItem="{Binding SelectedBmkgDistrict, Mode=TwoWay}"
-                                                          DisplayMemberPath="Name" Height="26"/>
-                                            </StackPanel>
-
-                                            <!-- 4. Kelurahan / Desa -->
-                                            <StackPanel Grid.Row="2" Grid.Column="2">
-                                                <TextBlock Text="4. Kelurahan / Desa (Presisi):" Foreground="#4CD964" FontSize="9.5" FontWeight="Bold" Margin="0,0,0,2"/>
-                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
-                                                          ItemsSource="{Binding BmkgVillages}"
-                                                          SelectedItem="{Binding SelectedBmkgVillage, Mode=TwoWay}"
-                                                          DisplayMemberPath="Name" Height="26"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- Pilihan Cepat Kota Besar (Opsional) -->
-                                        <Grid Margin="0,7,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Pintasan Kota Besar:" Foreground="#9AA4C4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                            <ComboBox Grid.Column="1" Style="{StaticResource BmkgDarkComboBoxStyle}"
-                                                      ItemsSource="{Binding BmkgCities}"
-                                                      SelectedItem="{Binding SelectedBmkgCity, Mode=TwoWay}"
-                                                      DisplayMemberPath="DisplayName" Height="25"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Input Kode Wilayah ADM4 Kustom (Opsional) -->
-                                <Border Visibility="{Binding IsEditingCustomAdm4, Converter={StaticResource BoolToVis}}"
-                                        Background="#0D0D12" BorderBrush="#383E5A" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,6,0,2">
-                                    <StackPanel>
-                                        <TextBlock Text="Kode Wilayah Kelurahan/Desa (ADM4 Kemendagri/BMKG, misal 31.74.06.1001):"
-                                                   Foreground="#C4CAE0" FontSize="10" Margin="0,0,0,4"/>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBox Grid.Column="0" Text="{Binding BmkgCustomAdm4Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                     Background="#161824" Foreground="#FFFFFF" CaretBrush="#FFFFFF" BorderBrush="#464C6E" BorderThickness="1"
-                                                     Padding="6,3" FontSize="11" VerticalContentAlignment="Center" Margin="0,0,6,0"/>
-                                            <Button Grid.Column="1" Style="{StaticResource SmallPillButton}"
-                                                    Command="{Binding ApplyCustomAdm4Command}"
-                                                    Content="Terapkan" Background="#253458" BorderBrush="#4C6EF5"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Info Lokasi & Toggle Sinkronisasi Waktu Sholat -->
-                                <DockPanel Margin="0,6,0,0" LastChildFill="True">
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding BmkgActiveAdm4Text}" Foreground="#8A92B2" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <CheckBox Content="Sinkronkan lokasi presisi dengan Waktu Sholat" IsChecked="{Binding BmkgFollowPrayerCity, Mode=TwoWay}"
-                                              Foreground="#D0D6EC" FontSize="10.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                </DockPanel>
-
-                                <TextBlock Text="{Binding BmkgLocationStatus}" Foreground="#4CD964" FontSize="10" FontWeight="SemiBold" Margin="0,3,0,0"
-                                           TextWrapping="Wrap" Visibility="{Binding BmkgLocationStatus, Converter={StaticResource StringNotEmptyToVis}}"/>
-                            </StackPanel>
-                        </Border>
-
                         <!-- Hero Card Cuaca Saat Ini -->
                         <Border Background="#141826" BorderBrush="#2E3654" BorderThickness="1.2" CornerRadius="14" Padding="14,12" Margin="0,0,0,10">
                             <StackPanel>
@@ -665,7 +441,7 @@
                                               Width="30" Height="30" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
 
-                                    <!-- Temp & Weather Desc -->
+                                    <!-- Temp & Weather Desc + Location Subtitle with Quick Popup Button -->
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding BmkgWeatherTempText}" FontSize="26" FontWeight="ExtraBold" Foreground="#FFFFFF" Margin="0,0,8,0"/>
@@ -674,8 +450,25 @@
                                                 <TextBlock Text="{Binding CurrentWeatherSlot.FullTimeLabel, FallbackValue='Prakiraan Saat Ini'}" FontSize="10.5" Foreground="#A6B0D0"/>
                                             </StackPanel>
                                         </StackPanel>
-                                        <TextBlock Text="{Binding BmkgWeatherLocationSubtitle}" FontSize="10.5" FontWeight="SemiBold" Foreground="#7DD3FC"
-                                                   Margin="0,3,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding BmkgWeatherLocationSubtitle}"/>
+
+                                        <DockPanel Margin="0,4,0,0" LastChildFill="True">
+                                            <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
+                                                    Command="{Binding TogglePreciseRegionSelectorCommand}"
+                                                    Padding="7,2.5" Margin="6,0,0,0" VerticalAlignment="Center"
+                                                    ToolTip="Buka Pop-up Pengaturan Lokasi (Kelurahan / Desa / Kecamatan)">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="{StaticResource PinLocationIconGeometry}" Fill="#4CD964" Width="9.5" Height="9.5" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Atur Lokasi" Foreground="#FFFFFF" FontSize="9.5" FontWeight="Bold"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <TextBlock Text="{Binding BmkgWeatherLocationSubtitle}" FontSize="10.5" FontWeight="SemiBold" Foreground="#7DD3FC"
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding BmkgWeatherLocationSubtitle}"
+                                                       Cursor="Hand">
+                                                <TextBlock.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick" Command="{Binding TogglePreciseRegionSelectorCommand}"/>
+                                                </TextBlock.InputBindings>
+                                            </TextBlock>
+                                        </DockPanel>
                                     </StackPanel>
 
                                     <!-- Min-Max Today Badge -->
@@ -750,7 +543,7 @@
                                     </StackPanel>
                                 </DockPanel>
 
-                                <ScrollViewer MaxHeight="245" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer MaxHeight="340" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                     <ItemsControl ItemsSource="{Binding BmkgWeatherDayGroups}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
@@ -1108,6 +901,259 @@
                         <TextBlock Text="Sumber Data Terbuka: Badan Meteorologi, Klimatologi, dan Geofisika (BMKG)"
                                    FontSize="9.5" Foreground="#98A0BE" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </DockPanel>
+
+                    <!-- ================= MODAL POP-UP PENGATURAN LOKASI PRESISI BMKG ================= -->
+                    <Grid Grid.Row="0" Grid.RowSpan="4" Panel.ZIndex="60"
+                          Visibility="{Binding IsSelectingPreciseRegion, Converter={StaticResource BoolToVis}}"
+                          Margin="-16,-14">
+                        <!-- Backdrop Gelap Semi-Transparan (Klik di luar untuk menutup pop-up) -->
+                        <Border Background="#E8060810" CornerRadius="20">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding TogglePreciseRegionSelectorCommand}"/>
+                            </Border.InputBindings>
+                        </Border>
+
+                        <!-- Kartu Pop-up Pengaturan Lokasi Presisi -->
+                        <Border Background="#121522" BorderBrush="#465892" BorderThickness="1.4" CornerRadius="14"
+                                Padding="14,12" Margin="14,16" VerticalAlignment="Center">
+                            <StackPanel>
+                                <!-- Header Pop-up -->
+                                <DockPanel Margin="0,0,0,10" LastChildFill="True">
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
+                                            Command="{Binding TogglePreciseRegionSelectorCommand}"
+                                            Padding="7,3" ToolTip="Tutup Pop-up Pengaturan Lokasi">
+                                        <TextBlock Text="&#x2715;" Foreground="#FF8787" FontSize="11" FontWeight="Bold"/>
+                                    </Button>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource PinLocationIconGeometry}" Fill="#4CD964" Width="14" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Pengaturan Lokasi Cuaca Presisi" Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <!-- Baris 1: Pencarian Langsung Kelurahan / Kecamatan / Kota + Tombol Deteksi -->
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid Grid.Column="0" Margin="0,0,5,0">
+                                        <TextBox x:Name="LocationSearchBox"
+                                                 Text="{Binding BmkgLocationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="#1B1E2E" Foreground="#FFFFFF" CaretBrush="#FFFFFF"
+                                                 BorderBrush="#3A405E" BorderThickness="1"
+                                                 Padding="26,4,8,4" Height="28" FontSize="11" VerticalContentAlignment="Center"
+                                                 ToolTip="Ketik nama Kelurahan/Desa, Kecamatan, atau Kota lalu tekan Enter">
+                                            <TextBox.InputBindings>
+                                                <KeyBinding Key="Return" Command="{Binding SearchBmkgLocationCommand}"/>
+                                            </TextBox.InputBindings>
+                                        </TextBox>
+                                        <Path Data="{StaticResource SearchIconGeometry}" Stroke="#7DD3FC" StrokeThickness="1.8"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                              Margin="8,0,0,0" IsHitTestVisible="False"/>
+                                        <TextBlock Text="Cari Kelurahan / Kecamatan / Kota..."
+                                                   Foreground="#7880A0" FontSize="10.5" VerticalAlignment="Center" Margin="26,0,6,0"
+                                                   IsHitTestVisible="False">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=LocationSearchBox}" Value="">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+
+                                    <Button Grid.Column="1" Style="{StaticResource SmallPillButton}"
+                                            Command="{Binding SearchBmkgLocationCommand}"
+                                            Background="#203254" BorderBrush="#4C6EF5" Padding="9,4" Margin="0,0,4,0"
+                                            ToolTip="Cari lokasi presisi tingkat Kelurahan/Desa &amp; Kecamatan">
+                                        <TextBlock Text="{Binding BmkgLocationSearchButtonText}" Foreground="#FFFFFF" FontSize="10.5" FontWeight="Bold"/>
+                                    </Button>
+
+                                    <Button Grid.Column="2" Style="{StaticResource SmallPillButton}"
+                                            Command="{Binding DetectBmkgLocationCommand}"
+                                            Padding="9,4" Margin="0"
+                                            ToolTip="Deteksi otomatis lokasi Anda hingga tingkat Kelurahan/Desa">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="{StaticResource PinLocationIconGeometry}" Fill="#4CD964" Width="11" Height="11" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Deteksi" Foreground="#FFFFFF" FontSize="10.5" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <!-- Daftar Hasil Pencarian Lokasi Presisi (Muncul saat hasil ditemukan) -->
+                                <Border Visibility="{Binding HasBmkgLocationSearchResults, Converter={StaticResource BoolToVis}}"
+                                        Background="#0D0F18" BorderBrush="#3A466E" BorderThickness="1" CornerRadius="8" Padding="6" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <DockPanel Margin="2,0,2,4" LastChildFill="True">
+                                            <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
+                                                    Command="{Binding ClearBmkgLocationSearchCommand}" Content="&#x2715;" Padding="5,1" FontSize="9.5"/>
+                                            <TextBlock Text="Pilih Kelurahan / Kecamatan hasil pencarian:" FontSize="10" FontWeight="Bold" Foreground="#7DD3FC" VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                        <ScrollViewer MaxHeight="135" VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding BmkgLocationSearchResults}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Command="{Binding DataContext.SelectBmkgSearchResultCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                Cursor="Hand" Margin="0,0,0,3">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border x:Name="ResBorder" Background="#171A28" BorderBrush="#2C324C" BorderThickness="1" CornerRadius="7" Padding="8,5">
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                <ColumnDefinition Width="*"/>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <Path Grid.Column="0" Data="{StaticResource PinLocationIconGeometry}" Fill="#38BDF8"
+                                                                                  Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,7,0"/>
+                                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                                <TextBlock Text="{Binding DisplayTitle}" Foreground="#FFFFFF" FontSize="11" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                                                                                <TextBlock Text="{Binding DisplaySubtitle}" Foreground="#9AA4C4" FontSize="9.5" TextTrimming="CharacterEllipsis"/>
+                                                                            </StackPanel>
+                                                                            <Border Grid.Column="2" Background="#1E2C46" CornerRadius="4" Padding="5,2" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                                                <TextBlock Text="Pilih" Foreground="#7DD3FC" FontSize="9.5" FontWeight="Bold"/>
+                                                                            </Border>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="ResBorder" Property="Background" Value="#222840"/>
+                                                                            <Setter TargetName="ResBorder" Property="BorderBrush" Value="#5C7CFA"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Panel Pilih Wilayah Presisi 4 Tingkat (Provinsi ▸ Kab/Kota ▸ Kecamatan ▸ Kelurahan/Desa) -->
+                                <Border Background="#0D0F17" BorderBrush="#323854" BorderThickness="1" CornerRadius="10" Padding="10,9" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <DockPanel Margin="0,0,0,7" LastChildFill="True">
+                                            <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
+                                                    Command="{Binding ToggleCustomAdm4EditCommand}"
+                                                    Content="Input Kode ADM4" FontSize="9.5" Padding="6,2" Margin="6,0,0,0"/>
+                                            <TextBlock Text="Pilih Wilayah Manual Presisi (Kelurahan / Desa):"
+                                                       Foreground="#FFD43B" FontSize="10.5" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </DockPanel>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="7"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- 1. Provinsi -->
+                                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                                <TextBlock Text="1. Provinsi:" Foreground="#B0B8D4" FontSize="9.5" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
+                                                          ItemsSource="{Binding BmkgProvinces}"
+                                                          SelectedItem="{Binding SelectedBmkgProvince, Mode=TwoWay}"
+                                                          DisplayMemberPath="Name" Height="27"/>
+                                            </StackPanel>
+
+                                            <!-- 2. Kabupaten / Kota -->
+                                            <StackPanel Grid.Row="0" Grid.Column="2">
+                                                <TextBlock Text="2. Kabupaten / Kota:" Foreground="#B0B8D4" FontSize="9.5" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
+                                                          ItemsSource="{Binding BmkgRegencies}"
+                                                          SelectedItem="{Binding SelectedBmkgRegency, Mode=TwoWay}"
+                                                          DisplayMemberPath="Name" Height="27"/>
+                                            </StackPanel>
+
+                                            <!-- 3. Kecamatan -->
+                                            <StackPanel Grid.Row="2" Grid.Column="0">
+                                                <TextBlock Text="3. Kecamatan:" Foreground="#B0B8D4" FontSize="9.5" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
+                                                          ItemsSource="{Binding BmkgDistricts}"
+                                                          SelectedItem="{Binding SelectedBmkgDistrict, Mode=TwoWay}"
+                                                          DisplayMemberPath="Name" Height="27"/>
+                                            </StackPanel>
+
+                                            <!-- 4. Kelurahan / Desa -->
+                                            <StackPanel Grid.Row="2" Grid.Column="2">
+                                                <TextBlock Text="4. Kelurahan / Desa (Presisi):" Foreground="#4CD964" FontSize="9.5" FontWeight="Bold" Margin="0,0,0,2"/>
+                                                <ComboBox Style="{StaticResource BmkgDarkComboBoxStyle}"
+                                                          ItemsSource="{Binding BmkgVillages}"
+                                                          SelectedItem="{Binding SelectedBmkgVillage, Mode=TwoWay}"
+                                                          DisplayMemberPath="Name" Height="27"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Pilihan Cepat Kota Besar (Opsional) -->
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Pintasan Kota Besar:" Foreground="#9AA4C4" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <ComboBox Grid.Column="1" Style="{StaticResource BmkgDarkComboBoxStyle}"
+                                                      ItemsSource="{Binding BmkgCities}"
+                                                      SelectedItem="{Binding SelectedBmkgCity, Mode=TwoWay}"
+                                                      DisplayMemberPath="DisplayName" Height="26"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Input Kode Wilayah ADM4 Kustom (Opsional) -->
+                                <Border Visibility="{Binding IsEditingCustomAdm4, Converter={StaticResource BoolToVis}}"
+                                        Background="#0D0D12" BorderBrush="#383E5A" BorderThickness="1" CornerRadius="8" Padding="8,6" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="Kode Wilayah Kelurahan/Desa (ADM4 Kemendagri/BMKG, misal 31.74.06.1001):"
+                                                   Foreground="#C4CAE0" FontSize="10" Margin="0,0,0,4"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Text="{Binding BmkgCustomAdm4Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Background="#161824" Foreground="#FFFFFF" CaretBrush="#FFFFFF" BorderBrush="#464C6E" BorderThickness="1"
+                                                     Padding="6,3" FontSize="11" VerticalContentAlignment="Center" Margin="0,0,6,0"/>
+                                            <Button Grid.Column="1" Style="{StaticResource SmallPillButton}"
+                                                    Command="{Binding ApplyCustomAdm4Command}"
+                                                    Content="Terapkan" Background="#253458" BorderBrush="#4C6EF5"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Info Lokasi & Toggle Sinkronisasi Waktu Sholat -->
+                                <DockPanel Margin="0,2,0,4" LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding BmkgActiveAdm4Text}" Foreground="#8A92B2" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    <CheckBox Content="Sinkronkan lokasi presisi dengan Waktu Sholat" IsChecked="{Binding BmkgFollowPrayerCity, Mode=TwoWay}"
+                                              Foreground="#D0D6EC" FontSize="10.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                </DockPanel>
+
+                                <DockPanel Margin="0,4,0,0" LastChildFill="True">
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
+                                            Command="{Binding TogglePreciseRegionSelectorCommand}"
+                                            Background="#1E3A2F" BorderBrush="#38A169" Padding="12,5" Margin="8,0,0,0">
+                                        <TextBlock Text="&#x2713; Selesai" Foreground="#4CD964" FontSize="11" FontWeight="Bold"/>
+                                    </Button>
+                                    <TextBlock Text="{Binding BmkgLocationStatus}" Foreground="#4CD964" FontSize="10" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
             </Grid>
         </Border>
