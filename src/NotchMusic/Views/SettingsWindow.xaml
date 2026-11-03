@@ -380,7 +380,7 @@
                 </Border>
 
                 <!-- 5. Waktu Sholat & Pengingat (Prayer Times) -->
-                <Border Background="#202026" CornerRadius="8" Padding="14">
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
                     <StackPanel>
                         <Grid Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
@@ -497,11 +497,6 @@
                                               IsChecked="{Binding PrayerAutoPauseMusic}" Margin="0,4"/>
                                     <TextBlock Text="Otomatis menghentikan lagu saat adzan tiba sehingga Anda dapat langsung mendengarkan adzan dan sholat." 
                                                FontSize="10.5" Foreground="#777788" Margin="22,0,0,6" TextWrapping="Wrap"/>
-
-                                    <CheckBox Content="Tampilkan Waktu Sholat di samping logo DRANOTCH saat idle" 
-                                              IsChecked="{Binding ShowPrayerInCompactNotch}" Margin="0,4"/>
-
-
                                 </StackPanel>
                             </Border>
 
@@ -762,6 +757,41 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 6. Cuaca & Gempa Bumi (BMKG) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="&#x1F324; Cuaca &amp; Gempa Bumi (BMKG)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                <TextBlock Text="Prakiraan cuaca per 3 jam (3 hari) dan info gempa bumi real-time dari data terbuka resmi BMKG" FontSize="11" Foreground="#999999" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <CheckBox Content="Aktifkan fitur Cuaca &amp; Gempa Bumi (BMKG)" IsChecked="{Binding EnableBmkg}"/>
+
+                        <StackPanel Visibility="{Binding EnableBmkg, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                            <Border Background="#141418" CornerRadius="6" Padding="10,8">
+                                <StackPanel>
+                                    <CheckBox Content="Tampilkan pill cuaca &amp; gempa di samping logo DRANOTCH saat idle" 
+                                              IsChecked="{Binding ShowWeatherInCompactNotch}"/>
+                                    <CheckBox Content="Ikuti kota Waktu Sholat / deteksi IP otomatis untuk prakiraan cuaca" 
+                                              IsChecked="{Binding BmkgFollowPrayerCity}"/>
+                                    <CheckBox Content="Notifikasi otomatis saat ada gempa bumi baru dari BMKG" 
+                                              IsChecked="{Binding BmkgNotifyNewEarthquake}"/>
+                                    <CheckBox Content="Peringatan otomatis saat terdeteksi potensi hujan lebat / petir" 
+                                              IsChecked="{Binding BmkgNotifyExtremeWeather}"/>
+                                    <TextBlock Text="Sumber Data: Badan Meteorologi, Klimatologi, dan Geofisika (BMKG) — data.bmkg.go.id &amp; api.bmkg.go.id"
+                                               FontSize="10" Foreground="#777788" Margin="0,6,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>

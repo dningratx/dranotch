@@ -106,6 +106,9 @@
         <!-- 6b. Live TV - Famelack (Komponen ke-6): Luxury TV Screen, Play Triangle & Dual Antenna -->
         <Geometry x:Key="LuxuryLiveTvIconGeometry">M 8.5,2.5 L 12,6 L 15.5,2.5 L 16.9,3.9 L 14.3,6.5 H 19.5 A 2.5,2.5 0 0 1 22,9 V 18.5 A 2.5,2.5 0 0 1 19.5,21 H 4.5 A 2.5,2.5 0 0 1 2,18.5 V 9 A 2.5,2.5 0 0 1 4.5,6.5 H 9.7 L 7.1,3.9 Z M 4.5,8.8 V 18.2 H 19.5 V 8.8 Z M 9.8,10.8 L 15.5,13.5 L 9.8,16.2 Z</Geometry>
 
+        <!-- 6c. Cuaca & Gempa Bumi BMKG (Komponen ke-7): Luxury Cloud & Seismic Pulse Wave -->
+        <Geometry x:Key="LuxuryBmkgIconGeometry">M 6.5,14.8 H 17.5 A 3.4,3.4 0 0 0 18.1,8.1 A 4.8,4.8 0 0 0 8.8,6.5 A 3.8,3.8 0 0 0 6.5,14.8 Z M 2.5,19.2 H 7.2 L 9.0,16.2 L 11.4,21.5 L 13.8,17.2 L 15.2,19.2 H 21.5</Geometry>
+
         <!-- 7. Spotify Icon Geometry (24x24 ViewBox) -->
         <Geometry x:Key="SpotifyIconGeometry">M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 16.59,16.59 C 16.35,16.97 15.85,17.09 15.47,16.85 C 12.66,15.13 9.36,14.77 5.48,15.66 C 5.05,15.76 4.61,15.48 4.51,15.05 C 4.41,14.61 4.68,14.17 5.12,14.07 C 9.36,13.1 13.02,13.52 16.16,15.44 C 16.54,15.67 16.66,16.17 16.42,16.56 Z M 17.92,13.44 C 17.66,13.88 17.09,14.02 16.66,13.75 C 13.62,11.88 9.01,11.34 5.41,12.44 C 4.91,12.59 4.38,12.31 4.22,11.81 C 4.06,11.31 4.34,10.78 4.84,10.62 C 8.95,9.38 14.05,9.98 17.52,12.11 C 17.95,12.38 18.09,12.94 17.83,13.38 Z M 18.06,10.23 C 14.41,8.06 8.38,7.86 4.88,8.92 C 4.31,9.09 3.72,8.78 3.55,8.22 C 3.38,7.66 3.69,7.06 4.25,6.89 C 8.28,5.66 14.94,5.9 19.14,8.39 C 19.64,8.69 19.81,9.33 19.52,9.83 C 19.22,10.33 18.58,10.5 18.08,10.2 Z</Geometry>
 
@@ -712,7 +715,6 @@
                         </StackPanel>
 
                         <!-- TENGAH: LOGO DRANOTCH (Selalu Tampil; Saat Idle Hanya Ini yang Terlihat) -->
-                        <!-- TENGAH: LOGO DRANOTCH & WAKTU SHOLAT SAAT IDLE -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Width="44" Height="44" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,2,0" Cursor="Hand"
                                 ToolTip="DRANOTCH (Klik untuk melihat info tentang DRANOTCH)">
@@ -726,33 +728,9 @@
                                        RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Grid>
                         </Border>
-
-
-                            <!-- Waktu Sholat di Samping Logo DRANOTCH saat Idle (Dapat diatur tampil/tidak di Pengaturan) -->
-                            <Border Style="{StaticResource NotchPrayerPillStyle}"
-                                    Height="44" Margin="6,0,2,0" Padding="8,4,10,4" Cursor="Hand"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding ShowIdlePrayerBesideLogo, Converter={StaticResource BoolToVis}}"
-                                    ToolTip="{Binding PrayerScheduleTooltip}">
-                                <Border.InputBindings>
-                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
-                                </Border.InputBindings>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Border Width="26" Height="26" CornerRadius="8" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                            BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,7,0" VerticalAlignment="Center">
-                                        <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                              Width="13.5" Height="13.5" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="12.5" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="5" Padding="5,1.5" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#30D158" FontSize="11" FontWeight="Bold"/>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
                         </StackPanel>
 
-                        <!-- SISI KANAN: KOMPONEN 4 (BROWSER) & KOMPONEN 5 (TO-DO LIST LENGKAP DI PALING KANAN) (Muncul saat Hover) -->
+                        <!-- SISI KANAN: KOMPONEN 4 (BROWSER), KOMPONEN BMKG, & KOMPONEN 5 (TO-DO LIST LENGKAP DI PALING KANAN) (Muncul saat Hover) -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
                                     >
                             <!-- 4. Browser Mengambang (Di sebelah kanan Logo DRANOTCH) -->
@@ -768,6 +746,23 @@
                                     <!-- Indikator Hijau saat Browser sedang Terbuka -->
                                     <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
                                              Visibility="{Binding IsBrowserWindowOpen, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 4b. Cuaca & Gempa Bumi BMKG (Komponen ke-7) -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="4,0,2,0" Cursor="Hand"
+                                    Visibility="{Binding EnableBmkg, Converter={StaticResource BoolToVis}}"
+                                    ToolTip="{Binding BmkgNotchTooltip}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenBmkgCommand}"/>
+                                </Border.InputBindings>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryBmkgIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
+                                          StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                          Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Indikator Hijau saat Jendela BMKG sedang Terbuka -->
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                                             Visibility="{Binding IsBmkgWindowOpen, Converter={StaticResource BoolToVis}}"/>
                                 </Grid>
                             </Border>
 
@@ -867,31 +862,62 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Tengah: Komponen 3 (Waktu Sholat) -->
-                        <Border Grid.Column="1" Style="{StaticResource NotchPrayerPillStyle}" Visibility="{Binding EnablePrayerTimes, Converter={StaticResource BoolToVis}}"
-                                Height="30" Padding="8,2,10,2" Cursor="Hand"
-                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                                ToolTip="{Binding PrayerScheduleTooltip}">
-                            <Border.InputBindings>
-                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
-                            </Border.InputBindings>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <!-- Ikon Bulan Sabit & Bintang Luxury -->
-                                <Border Width="22" Height="22" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
-                                        BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
-                                          Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <!-- Nama Sholat Berikutnya -->
-                                <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <!-- Waktu / Jam Sholat -->
-                                <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <!-- Badge Hitung Mundur Sholat -->
-                                <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="5" Padding="5,1" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#30D158" FontSize="10.5" FontWeight="Bold"/>
-                                </Border>
-                            </StackPanel>
-                        </Border>
+                        <!-- Tengah: Komponen 3 (Waktu Sholat) & Komponen BMKG (Cuaca + Gempa) -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Style="{StaticResource NotchPrayerPillStyle}" Visibility="{Binding EnablePrayerTimes, Converter={StaticResource BoolToVis}}"
+                                    Height="30" Padding="8,2,10,2" Cursor="Hand"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    ToolTip="{Binding PrayerScheduleTooltip}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenPrayerScheduleCommand}"/>
+                                </Border.InputBindings>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- Ikon Bulan Sabit & Bintang Luxury -->
+                                    <Border Width="22" Height="22" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
+                                            BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                              Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <!-- Nama Sholat Berikutnya -->
+                                    <TextBlock Text="{Binding NextPrayerName}" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <!-- Waktu / Jam Sholat -->
+                                    <TextBlock Text="{Binding NextPrayerTimeFormatted}" Foreground="#E8E8F2" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <!-- Badge Hitung Mundur Sholat -->
+                                    <Border Background="#222230" BorderBrush="#36364A" BorderThickness="1" CornerRadius="5" Padding="5,1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding NextPrayerCountdownBadge}" Foreground="#30D158" FontSize="10.5" FontWeight="Bold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Pill Cuaca & Gempa BMKG saat Hover -->
+                            <Border Style="{StaticResource NotchPrayerPillStyle}" Visibility="{Binding ShowHoverWeatherPill, Converter={StaticResource BoolToVis}}"
+                                    Height="30" Margin="6,0,0,0" Padding="8,2,10,2" Cursor="Hand"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    ToolTip="{Binding BmkgNotchTooltip}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenBmkgCommand}"/>
+                                </Border.InputBindings>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border Width="22" Height="22" CornerRadius="7" Background="{StaticResource MetallicIconBadgeBgBrush}"
+                                            BorderBrush="{StaticResource MetallicIconBadgeBorderBrush}" BorderThickness="1" Margin="0,0,5,0" VerticalAlignment="Center">
+                                        <Path Data="{Binding BmkgWeatherIconGeometry}"
+                                              Stroke="{Binding BmkgWeatherIconColor, FallbackValue=#FFD43B}"
+                                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="12" Height="12" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding BmkgWeatherTempText}" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding BmkgWeatherCityText}" Foreground="#D4D4E4" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <Border Background="{Binding LatestEarthquake.MagnitudeBadgeBackground, FallbackValue=#222230}"
+                                            BorderBrush="{Binding LatestEarthquake.MagnitudeBadgeBorder, FallbackValue=#36364A}"
+                                            BorderThickness="1" CornerRadius="5" Padding="5,1" VerticalAlignment="Center"
+                                            Visibility="{Binding HasLatestEarthquake, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="{Binding LatestEarthquakeBadge}"
+                                                   Foreground="{Binding LatestEarthquake.MagnitudeBadgeForeground, FallbackValue=#FFB74D}"
+                                                   FontSize="10" FontWeight="Bold"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
 
                         <!-- Sebelah Kanan: Tombol Versi -->
                         <Border Grid.Column="2" Style="{StaticResource NotchPrayerPillStyle}"
@@ -2455,7 +2481,8 @@
 
                         <!-- Icon -->
                         <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#1C1C26" Margin="0,0,10,0">
-                            <TextBlock Text="&#x1F54C;" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="#FFD43B"
+                                  Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
 
                         <!-- Info -->
@@ -2472,6 +2499,49 @@
                         <!-- Dismiss button -->
                         <Button Grid.Column="2" Command="{Binding DismissPrayerNotificationCommand}"
                                 Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Notifikasi"
+                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- ================= FLOATING ISLAND BMKG EARTHQUAKE & WEATHER ALERT BANNER ================= -->
+                <Border Grid.Row="0" Visibility="{Binding HasActiveBmkgNotification, Converter={StaticResource BoolToVis}}"
+                        Background="#1A1014" BorderBrush="#FF6B8B" BorderThickness="1.5" CornerRadius="22"
+                        Padding="12,6" Margin="4,2" VerticalAlignment="Center">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Icon -->
+                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#361822" BorderBrush="#5A2838" BorderThickness="1" Margin="0,0,10,0">
+                            <Path Data="{StaticResource LuxuryBmkgIconGeometry}" Stroke="#FF6B8B" StrokeThickness="2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Info -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+                            <DockPanel LastChildFill="True">
+                                <Border DockPanel.Dock="Right" Background="#3B1A24" BorderBrush="#FF6B8B" BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ActiveBmkgNotification.MagnitudeBadge}" Foreground="#FFB74D" FontSize="10" FontWeight="Bold"/>
+                                </Border>
+                                <TextBlock Text="{Binding ActiveBmkgNotification.Title}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding ActiveBmkgNotification.Message}" Foreground="#E2E2EC" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <!-- Lihat Detail Button -->
+                        <Button Grid.Column="2" Command="{Binding OpenBmkgNotificationDetailCommand}"
+                                Style="{StaticResource SmallPillButton}" Content="Lihat Detail" ToolTip="Buka detail gempa &amp; peta guncangan (Shakemap) BMKG"
+                                Background="#2D1C28" Foreground="#FFB74D" BorderBrush="#5C3448"
+                                Height="24" Padding="8,0" Margin="0,0,6,0" VerticalAlignment="Center"/>
+
+                        <!-- Dismiss button -->
+                        <Button Grid.Column="3" Command="{Binding DismissBmkgNotificationCommand}"
+                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Peringatan BMKG"
                                 Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
                     </Grid>
                 </Border>

@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
+Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.8.3)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.8.4)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -222,7 +222,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Saling Jeda Cerdas (*Mutual Auto-Pause on Play*)**: Saat menekan Play di YouTube Music, pemutar Spotify otomatis dijeda, dan sebaliknya saat menekan Play di Spotify, YouTube Music otomatis dijeda.
 - **Ikon YouTube Music & Spotify Presisi (`26 × 26 px`)**: Desain tombol ikon simetris tanpa label teks di kapsul notch.
 
-### 📺 29. Komponen ke-6: Live TV Indonesia & Dunia *(Baru di v1.8.3)*
+### 📺 29. Komponen ke-6: Live TV Indonesia & Dunia *(v1.8.3)*
 - **6 Komponen Modular Terintegrasi**: Menambahkan komponen **Live TV** di Dynamic Notch dan System Tray, mendampingi Pemutar Musik, Radio Online, Waktu Sholat, To-Do List, dan Browser Mengambang.
 - **Streaming TV Langsung Indonesia & Internasional (`LiveTvWindow`)**:
   - Katalog saluran TV nasional Indonesia (RCTI, SCTV, Indosiar, Trans TV, Trans 7, Kompas TV, Metro TV, tvOne, CNN Indonesia, CNBC Indonesia, TVRI Nasional, RTV, BTV, Garuda TV, Nusantara TV, Moji, NET., Rodja TV, TVMu, dll.) serta saluran berita, olahraga, film, anak, dan dokumenter dunia (Al Jazeera, CNA, NHK World, DW, France 24, Euronews, NASA TV, Red Bull TV, dll.).
@@ -230,6 +230,20 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - **Filter Negara & Kategori + Pencarian Online Dunia**: Pilih puluhan negara (`🇮🇩 Indonesia`, `🇲🇾 Malaysia`, `🇸🇬 Singapura`, `🇸🇦 Arab Saudi`, `🇯🇵 Jepang`, `🇰🇷 Korea Selatan`, `🇬🇧 Inggris`, `🇺🇸 Amerika Serikat`, dll.), filter kategori (*Berita*, *Hiburan*, *Olahraga*, *Religi*, *Musik*, *Anak*, *Dunia*), dan cari ribuan saluran TV dari seluruh dunia secara online.
   - **Mode Bioskop (`⛶`), Mini Picture-in-Picture (`📺 PiP`), & Saluran Custom (`+ URL`)**: Sembunyikan daftar saluran untuk menonton layar penuh di jendela mengambang, perkecil ke jendela Mini TV PiP yang selalu tampil di atas aplikasi lain, tandai saluran favorit (`★`), atau tambahkan URL `.m3u8` / YouTube Live milik Anda sendiri.
   - **Koordinasi Audio Pintar**: Memutar saluran Live TV secara otomatis menghentikan pemutaran Radio Online agar suara tidak bertumpuk.
+
+### 🌤️ 30. Komponen ke-7: Cuaca & Gempa Bumi BMKG, Lokasi Presisi Kelurahan/Desa & Mode Idle Minimalis *(Baru di v1.8.4)*
+- **Integrasi Resmi Data Terbuka BMKG (`BmkgWindow`)**:
+  - Menampilkan **Prakiraan Cuaca Per 3 Jam (3 Hari)** langsung dari API publik resmi BMKG (`api.bmkg.go.id`), mencakup suhu udara (`°C`), kondisi langit, kelembapan (`%`), kecepatan & arah mata angin (`km/j`), tutupan awan (`%`), serta curah hujan (`mm`).
+  - Memantau **Informasi Gempa Bumi Real-Time (`data.bmkg.go.id`)** dalam 3 tab: **Gempa Terbaru (*AutoGempa*)** lengkap dengan pratinjau visual **Peta Guncangan (*Shakemap BMKG*)**, **15 Gempa Terkini (`M ≥ 5.0`)**, dan **15 Gempa Dirasakan (skala MMI)** beserta tautan langsung titik episentrum di Google Maps.
+- **Lokasi Presisi hingga Tingkat Kelurahan / Desa (`adm4`)**:
+  - **Pencarian Lokasi Langsung (*Live Search*)**: Ketik nama Kelurahan/Desa, Kecamatan, atau Kota di seluruh Indonesia untuk menemukan kode wilayah `adm4` secara akurat beserta titik koordinatnya.
+  - **Pemilih Wilayah Bertingkat 4 Level (`Pilih Wilayah`)**: Pilih berjenjang mulai dari **Provinsi (38 Provinsi)** ▸ **Kabupaten/Kota** ▸ **Kecamatan** ▸ **Kelurahan/Desa**.
+  - **Deteksi Lokasi Otomatis Presisi & Sinkronisasi Waktu Sholat**: Tombol **Deteksi** otomatis memetakan koordinat ke tingkat Kelurahan/Desa terdekat dan menyinkronkan koordinat jadwal Waktu Sholat secara presisi.
+- **Ikon Vektor Cuaca Berwarna Terang & Banner Peringatan Dini**:
+  - Seluruh ikon cuaca (Cerah, Cerah Berawan, Berawan, Udara Kabur/Kabut, Hujan, Hujan Petir) dan indikator dirancang menggunakan **ikon vektor SVG berwarna kontras tinggi** di atas tema gelap OLED.
+  - Dilengkapi **Banner Peringatan Dini Dynamic Island** otomatis saat terdeteksi gempa bumi baru atau peringatan cuaca ekstrem (hujan lebat/petir).
+- **Mode Idle Minimalis (Hanya Logo DRANOTCH)**:
+  - Saat kondisi *idle* (kursor tidak diarahkan dan notch tidak di-pin), Dynamic Notch hanya menampilkan **Logo DRANOTCH** yang bersih dan minimalis di tengah atas layar. Saat di-*hover*, seluruh 7 komponen dan informasi ringkas (Waktu Sholat & Cuaca/Gempa BMKG) muncul secara simetris.
 
 ---
 
@@ -259,7 +273,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.3.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.4.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

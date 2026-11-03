@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,7 +68,8 @@ public class CompactHoverIslandTests
         // When idle (not hovering, not pinned), ShowComponentIcons should be false and ShowIdlePrayerBesideLogo true by default
         Assert.False(vm.ShowComponentIcons);
         Assert.False(vm.ShowMusicInNotch);
-        Assert.True(vm.ShowIdlePrayerBesideLogo);
+        Assert.False(vm.ShowIdlePrayerBesideLogo);
+        Assert.False(vm.ShowIdleWeatherBesideLogo);
         Assert.False(vm.IsHovering);
     }
 
@@ -257,8 +258,8 @@ public class CompactHoverIslandTests
         fakeMedia.FireTrackChanged(new TrackInfo { Title = "Test Song", Artist = "Test Artist", IsPlaying = true });
         Assert.False(vmIdleMusic.ShowComponentIcons);
         Assert.True(vmIdleMusic.IsPlaying);
-        Assert.True(vmIdleMusic.ShowMusicInNotch);
-        Assert.True(vmIdleMusic.ShowMusicPillInNotch);
+        Assert.False(vmIdleMusic.ShowMusicInNotch);
+        Assert.False(vmIdleMusic.ShowMusicPillInNotch);
 
         // Verify ToggleBezelMinimizeCommand minimizes the idle notch into the top bezel and restores it
         Assert.False(vmIdleMusic.IsBezelMinimized);

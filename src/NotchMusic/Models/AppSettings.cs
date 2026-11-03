@@ -146,4 +146,21 @@ public class AppSettings
     public string LastLiveTvCountryCode { get; set; } = "id";
     public List<string> FavoriteLiveTvChannelIds { get; set; } = new();
     public List<LiveTvChannel> CustomLiveTvChannels { get; set; } = new();
+
+    // Cuaca & Gempa Bumi BMKG (Komponen ke-7)
+    public bool EnableBmkg { get; set; } = true;
+    public bool IsBmkgWindowOpen { get; set; } = false;
+    public double BmkgWindowLeft { get; set; } = -1;
+    public double BmkgWindowTop { get; set; } = -1;
+    public double BmkgWindowWidth { get; set; } = 440;
+    public double BmkgWindowHeight { get; set; } = 600;
+    public bool IsBmkgWindowCompact { get; set; } = false;
+    public bool ShowWeatherInCompactNotch { get; set; } = true;
+    public bool BmkgFollowPrayerCity { get; set; } = true;
+    public string BmkgSelectedCity { get; set; } = "Jakarta";
+    public string BmkgCustomAdm4Code { get; set; } = string.Empty;
+    public bool BmkgNotifyNewEarthquake { get; set; } = true;
+    public bool BmkgNotifyExtremeWeather { get; set; } = true;
+    public string LastNotifiedEarthquakeId { get; set; } = string.Empty;
+    public string LastNotifiedWeatherAlertId { get; set; } = string.Empty;
 }

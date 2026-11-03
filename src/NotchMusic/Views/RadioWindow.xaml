@@ -6,6 +6,7 @@
         Width="410" MinWidth="340"
         SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Foreground="#FFFFFF"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"
         WindowStartupLocation="Manual">

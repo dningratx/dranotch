@@ -11,6 +11,7 @@ public interface ITrayIconService : IDisposable
     event Action? OpenSpotifyRequested;
     event Action? OpenRadioRequested;
     event Action? OpenLiveTvRequested;
+    event Action? OpenBmkgRequested;
     event Action? OpenFloatingBrowserRequested;
     event Action<PanelMode>? ModeChangeRequested;
     event Action? OpenSettingsRequested;
@@ -29,6 +30,7 @@ public class TrayIconService : ITrayIconService
     public event Action? OpenSpotifyRequested;
     public event Action? OpenRadioRequested;
     public event Action? OpenLiveTvRequested;
+    public event Action? OpenBmkgRequested;
     public event Action? OpenFloatingBrowserRequested;
     public event Action<PanelMode>? ModeChangeRequested;
     public event Action? OpenSettingsRequested;
@@ -116,6 +118,9 @@ public class TrayIconService : ITrayIconService
 
         var liveTvItem = new ToolStripMenuItem("Buka Live TV (Streaming TV)", null, (s, e) => OpenLiveTvRequested?.Invoke());
         contextMenu.Items.Add(liveTvItem);
+
+        var bmkgItem = new ToolStripMenuItem("Buka Cuaca & Gempa Bumi (BMKG)", null, (s, e) => OpenBmkgRequested?.Invoke());
+        contextMenu.Items.Add(bmkgItem);
 
         var browserItem = new ToolStripMenuItem("Buka Browser Mengambang (Web / Video)", null, (s, e) => OpenFloatingBrowserRequested?.Invoke());
         contextMenu.Items.Add(browserItem);

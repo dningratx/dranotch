@@ -6,6 +6,7 @@
         Width="360" MinWidth="300"
         SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Foreground="#FFFFFF"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"
         WindowStartupLocation="Manual">
@@ -106,11 +107,11 @@
 
                     <!-- Actions (Expand, Pasang ke Notch, Close) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandPrayerWindowCommand}" Content="&#x25BE;" ToolTip="Perluas Jadwal"/>
+                        <Button Style="{StaticResource SmallPillButton}" Command="{Binding ExpandPrayerWindowCommand}" Content="&#x25BE;" Foreground="#FFFFFF" ToolTip="Perluas Jadwal"/>
                         <Button Style="{StaticResource SmallPillButton}" Command="{Binding AttachPrayerCommand}" ToolTip="Pasang kembali ke notch utama" Margin="2,0,0,0">
-                            <TextBlock Text="&#x21F2;" FontSize="11"/>
+                            <TextBlock Text="&#x21F2;" Foreground="#FFFFFF" FontSize="11"/>
                         </Button>
-                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="&#x2715;" ToolTip="Tutup Waktu Sholat" Margin="2,0,0,0"/>
+                        <Button Style="{StaticResource SmallPillButton}" Click="CloseButton_Click" Content="&#x2715;" Foreground="#FFFFFF" ToolTip="Tutup Waktu Sholat" Margin="2,0,0,0"/>
                     </StackPanel>
                 </Grid>
 
@@ -298,13 +299,13 @@
                                     <Button Grid.Column="2" Style="{StaticResource SmallPillButton}" Command="{Binding ToggleAdhanPlayPauseCommand}"
                                             Visibility="{Binding IsAdhanPlaying, Converter={StaticResource BoolToVis}}"
                                             ToolTip="Jeda / Lanjutkan" Padding="6,2" Margin="0,0,3,0">
-                                        <TextBlock Text="{Binding AdhanPlayPauseButtonIcon}" FontSize="9"/>
+                                        <TextBlock Text="{Binding AdhanPlayPauseButtonIcon}" Foreground="#FFFFFF" FontSize="9"/>
                                     </Button>
 
                                     <!-- Tombol Tes / Stop (Hanya Icon) -->
                                     <Button Grid.Column="3" Style="{StaticResource SmallPillButton}" Command="{Binding PlayAdhanPreviewCommand}"
                                             ToolTip="{Binding AdhanPlayButtonTooltip}" Padding="6,2" Margin="0">
-                                        <TextBlock Text="{Binding AdhanPlayButtonIcon}" FontSize="9"/>
+                                        <TextBlock Text="{Binding AdhanPlayButtonIcon}" Foreground="#FFFFFF" FontSize="9"/>
                                     </Button>
                                 </Grid>
 

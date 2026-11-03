@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     private MusicWindow? _musicWindow;
     private TodoWindow? _todoWindow;
     private PrayerWindow? _prayerWindow;
+    private BmkgWindow? _bmkgWindow;
     private AboutWindow? _aboutWindow;
     private HotkeyManager? _hotkeyManager;
     private bool _isRealExit;
@@ -57,11 +58,13 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenRadio += OpenRadio;
         _viewModel.RequestOpenLiveTv += OpenLiveTv;
         _viewModel.RequestOpenMusic += OpenMusic;
+        _viewModel.RequestOpenBmkg += OpenBmkg;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
             UpdateTodoWindowState();
             UpdatePrayerWindowState();
+            UpdateBmkgWindowState();
             UpdateMusicWindowState();
             UpdateBrowserWindowState();
             UpdateRadioWindowState();
@@ -80,6 +83,7 @@ public partial class MainWindow : Window
                 ev.PropertyName == nameof(MainViewModel.IsMusicWindowOpen) ||
                 ev.PropertyName == nameof(MainViewModel.ShowMusicInNotch) ||
                 ev.PropertyName == nameof(MainViewModel.ShowIdlePrayerBesideLogo) ||
+                ev.PropertyName == nameof(MainViewModel.ShowIdleWeatherBesideLogo) ||
                 ev.PropertyName == nameof(MainViewModel.IsTodoDetachedWindowVisible))
             {
                 Dispatcher.BeginInvoke(new Action(() =>
@@ -162,6 +166,7 @@ public partial class MainWindow : Window
 
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
+        UpdateBmkgWindowState();
         UpdateMusicWindowState();
 
         await _viewModel.InitializeAsync();
@@ -179,6 +184,7 @@ public partial class MainWindow : Window
                     Hide();
                     _todoWindow?.Hide();
                     _prayerWindow?.Hide();
+                    _bmkgWindow?.Hide();
                     _musicWindow?.Hide();
                 }
                 else
@@ -196,6 +202,10 @@ public partial class MainWindow : Window
                     if (_viewModel.IsPrayerDetached && _viewModel.EnablePrayerTimes)
                     {
                         _prayerWindow?.Show();
+                    }
+                    if (_viewModel.EnableBmkg && _viewModel.IsBmkgWindowOpen)
+                    {
+                        _bmkgWindow?.Show();
                     }
                 }
             });
@@ -227,6 +237,7 @@ public partial class MainWindow : Window
         _trayService.OpenSpotifyRequested += () => Dispatcher.Invoke(OpenSpotify);
         _trayService.OpenRadioRequested += () => Dispatcher.Invoke(OpenRadio);
         _trayService.OpenLiveTvRequested += () => Dispatcher.Invoke(OpenLiveTv);
+        _trayService.OpenBmkgRequested += () => Dispatcher.Invoke(OpenBmkg);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
@@ -407,6 +418,49 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateBmkgWindowState()
+    {
+        if (_viewModel.EnableBmkg && _viewModel.IsBmkgWindowOpen)
+        {
+            OpenBmkg();
+        }
+        else
+        {
+            _bmkgWindow?.Hide();
+        }
+    }
+
+    public void OpenBmkg()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsBmkgWindowOpen = true;
+
+            if (_bmkgWindow == null)
+            {
+                _bmkgWindow = new BmkgWindow(_viewModel, _settingsService);
+                _bmkgWindow.Closed += (s, e) => _bmkgWindow = null;
+            }
+
+            if (_bmkgWindow.WindowState == WindowState.Minimized)
+            {
+                _bmkgWindow.WindowState = WindowState.Normal;
+            }
+
+            _bmkgWindow.Show();
+            _bmkgWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Cuaca & Gempa Bumi BMKG:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     public void OpenAbout()
     {
         if (_aboutWindow != null && _aboutWindow.IsVisible)
@@ -446,7 +500,9 @@ public partial class MainWindow : Window
         {
             _viewModel.RefreshComponentLayout();
             UpdatePrayerWindowState();
+            UpdateBmkgWindowState();
             UpdateTodoWindowState();
+            _ = _viewModel.BmkgService.RefreshAllAsync();
         };
         if (_viewModel.HasAvailableUpdate && _viewModel.AvailableUpdateInfo != null)
         {
@@ -459,6 +515,7 @@ public partial class MainWindow : Window
         _viewModel.RefreshComponentLayout();
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
+        UpdateBmkgWindowState();
         UpdateMusicWindowState();
         UpdateBrowserWindowState();
         UpdateRadioWindowState();
@@ -917,6 +974,8 @@ public partial class MainWindow : Window
         _musicWindow?.ForceClose();
         _viewModel.RadioService.Dispose();
         _viewModel.LiveTvService.Dispose();
+        _viewModel.BmkgService.Dispose();
+        _bmkgWindow?.ForceClose();
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _aboutWindow?.Close();

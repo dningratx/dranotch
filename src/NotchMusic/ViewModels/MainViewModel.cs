@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using NotchMusic.Helpers;
 using NotchMusic.Models;
+using NotchMusic.Services.Bmkg;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.LiveTv;
 using NotchMusic.Services.Media;
@@ -32,11 +33,30 @@ public class MainViewModel : ViewModelBase
     private readonly IPrayerReminderService _prayerReminderService;
     private readonly IRadioService _radioService;
     private readonly ILiveTvService _liveTvService;
+    private readonly IBmkgService _bmkgService;
     private readonly DispatcherTimer _interpolationTimer;
 
     private PrayerNotificationEvent? _activePrayerNotification;
     private DispatcherTimer? _notificationDismissTimer;
     private bool _isPrayerPanelOpen;
+
+    // BMKG Cuaca & Gempa Bumi Fields (Komponen ke-7)
+    private BmkgNotificationEvent? _activeBmkgNotification;
+    private DispatcherTimer? _bmkgNotificationDismissTimer;
+    private string _bmkgActiveTab = "Weather"; // "Weather", "Earthquake"
+    private string _bmkgEarthquakeSubTab = "AutoGempa"; // "AutoGempa", "Terkini", "Dirasakan"
+    private bool _isShowingShakemap = true;
+    private bool _isEditingCustomAdm4;
+    private string _bmkgLocationStatus = string.Empty;
+    private bool _isSelectingPreciseRegion;
+    private bool _isSyncingRegionSelectors;
+    private BmkgRegionItem? _selectedBmkgProvince;
+    private BmkgRegionItem? _selectedBmkgRegency;
+    private BmkgRegionItem? _selectedBmkgDistrict;
+    private BmkgRegionItem? _selectedBmkgVillage;
+    private string _bmkgLocationSearchQuery = string.Empty;
+    private bool _isSearchingBmkgLocation;
+    private CancellationTokenSource? _bmkgLocationSearchCts;
 
     private readonly ICollectionView _filteredTodos;
     private string _todoFilter = "All";
@@ -117,6 +137,7 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenFloatingBrowser;
     public event Action? RequestOpenRadio;
     public event Action? RequestOpenLiveTv;
+    public event Action? RequestOpenBmkg;
     public event Action? RequestOpenMusic;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
@@ -153,6 +174,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowCompactTodoOnlyView));
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+                OnPropertyChanged(nameof(ShowHoverWeatherPill));
                 OnPropertyChanged(nameof(ShowMusicInNotch));
                 OnPropertyChanged(nameof(ShowMusicPillInNotch));
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
@@ -173,6 +196,8 @@ public class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+                OnPropertyChanged(nameof(ShowHoverWeatherPill));
                 OnPropertyChanged(nameof(ShowMusicInNotch));
                 OnPropertyChanged(nameof(ShowMusicPillInNotch));
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
@@ -202,6 +227,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowCompactView));
                 OnPropertyChanged(nameof(ShowComponentIcons));
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
+                OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+                OnPropertyChanged(nameof(ShowHoverWeatherPill));
                 OnPropertyChanged(nameof(ShowMusicInNotch));
                 OnPropertyChanged(nameof(ShowMusicPillInNotch));
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
@@ -223,10 +250,12 @@ public class MainViewModel : ViewModelBase
         : "▲ Minimize Notch ke Bezel Atas";
 
     public bool ShowComponentIcons => IsCompactMode && !_isBezelMinimized && (_isHovering || IsPinned);
-    public bool ShowMusicInNotch => IsCompactMode && !_isBezelMinimized && (ShowComponentIcons || IsPlaying);
+    public bool ShowMusicInNotch => ShowComponentIcons;
     public bool ShowMusicPillInNotch => ShowMusicInNotch && !IsMusicWindowOpen;
     public bool ShowMusicIconInNotch => ShowMusicInNotch && IsMusicWindowOpen;
-    public bool ShowIdlePrayerBesideLogo => IsCompactMode && !_isBezelMinimized && !ShowComponentIcons && Settings.EnablePrayerTimes && Settings.ShowPrayerInCompactNotch;
+    public bool ShowIdlePrayerBesideLogo => false;
+    public bool ShowIdleWeatherBesideLogo => false;
+    public bool ShowHoverWeatherPill => IsCompactMode && !_isBezelMinimized && ShowComponentIcons && Settings.EnableBmkg;
 
     public string MusicNotchTooltip => HasTrack
         ? $"{CurrentTrack?.Title} - {CurrentTrack?.Artist}\nKlik untuk perluas pemutar & lirik"
@@ -752,6 +781,356 @@ public class MainViewModel : ViewModelBase
     {
         get => _customLiveTvUrl;
         set => SetProperty(ref _customLiveTvUrl, value);
+    }
+
+    // ================= BMKG CUACA & GEMPA BUMI PROPERTIES (KOMPONEN KE-7) =================
+    public IBmkgService BmkgService => _bmkgService;
+    public List<CityLocation> BmkgCities { get; } = CityLocation.GetIndonesianCities();
+
+    public bool EnableBmkg
+    {
+        get => Settings.EnableBmkg;
+        set
+        {
+            if (Settings.EnableBmkg != value)
+            {
+                Settings.EnableBmkg = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(EnableBmkg));
+                OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+                OnPropertyChanged(nameof(ShowHoverWeatherPill));
+                OnPropertyChanged(nameof(HasActiveBmkgNotification));
+                if (value)
+                {
+                    _bmkgService.Start();
+                }
+                else
+                {
+                    _bmkgService.Stop();
+                    ActiveBmkgNotification = null;
+                }
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool ShowWeatherInCompactNotch
+    {
+        get => Settings.ShowWeatherInCompactNotch;
+        set
+        {
+            if (Settings.ShowWeatherInCompactNotch != value)
+            {
+                Settings.ShowWeatherInCompactNotch = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(ShowWeatherInCompactNotch));
+                OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+            }
+        }
+    }
+
+    public bool IsBmkgWindowOpen
+    {
+        get => Settings.IsBmkgWindowOpen;
+        set
+        {
+            if (Settings.IsBmkgWindowOpen != value)
+            {
+                Settings.IsBmkgWindowOpen = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsBmkgWindowOpen));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool IsBmkgWindowCompact
+    {
+        get => Settings.IsBmkgWindowCompact;
+        set
+        {
+            if (Settings.IsBmkgWindowCompact != value)
+            {
+                Settings.IsBmkgWindowCompact = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsBmkgWindowCompact));
+                OnPropertyChanged(nameof(IsBmkgWindowExpanded));
+            }
+        }
+    }
+
+    public bool IsBmkgWindowExpanded => !IsBmkgWindowCompact;
+
+    public string BmkgActiveTab
+    {
+        get => _bmkgActiveTab;
+        set
+        {
+            if (SetProperty(ref _bmkgActiveTab, value ?? "Weather"))
+            {
+                OnPropertyChanged(nameof(IsBmkgWeatherTab));
+                OnPropertyChanged(nameof(IsBmkgEarthquakeTab));
+            }
+        }
+    }
+
+    public bool IsBmkgWeatherTab => string.Equals(_bmkgActiveTab, "Weather", StringComparison.OrdinalIgnoreCase);
+    public bool IsBmkgEarthquakeTab => string.Equals(_bmkgActiveTab, "Earthquake", StringComparison.OrdinalIgnoreCase);
+
+    public string BmkgEarthquakeSubTab
+    {
+        get => _bmkgEarthquakeSubTab;
+        set
+        {
+            if (SetProperty(ref _bmkgEarthquakeSubTab, value ?? "AutoGempa"))
+            {
+                OnPropertyChanged(nameof(IsBmkgEqAutoTab));
+                OnPropertyChanged(nameof(IsBmkgEqTerkiniTab));
+                OnPropertyChanged(nameof(IsBmkgEqDirasakanTab));
+            }
+        }
+    }
+
+    public bool IsBmkgEqAutoTab => string.Equals(_bmkgEarthquakeSubTab, "AutoGempa", StringComparison.OrdinalIgnoreCase);
+    public bool IsBmkgEqTerkiniTab => string.Equals(_bmkgEarthquakeSubTab, "Terkini", StringComparison.OrdinalIgnoreCase);
+    public bool IsBmkgEqDirasakanTab => string.Equals(_bmkgEarthquakeSubTab, "Dirasakan", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsShowingShakemap
+    {
+        get => _isShowingShakemap;
+        set => SetProperty(ref _isShowingShakemap, value);
+    }
+
+    public bool IsEditingCustomAdm4
+    {
+        get => _isEditingCustomAdm4;
+        set => SetProperty(ref _isEditingCustomAdm4, value);
+    }
+
+    public bool IsSelectingPreciseRegion
+    {
+        get => _isSelectingPreciseRegion;
+        set
+        {
+            if (SetProperty(ref _isSelectingPreciseRegion, value) && value)
+            {
+                _ = SyncRegionSelectorsFromCurrentAdm4Async();
+            }
+        }
+    }
+
+    public IReadOnlyList<BmkgRegionItem> BmkgProvinces => _bmkgService.GetProvinces();
+    public ObservableCollection<BmkgRegionItem> BmkgRegencies { get; } = new();
+    public ObservableCollection<BmkgRegionItem> BmkgDistricts { get; } = new();
+    public ObservableCollection<BmkgRegionItem> BmkgVillages { get; } = new();
+    public ObservableCollection<BmkgLocationSearchResult> BmkgLocationSearchResults { get; } = new();
+    public bool HasBmkgLocationSearchResults => BmkgLocationSearchResults.Count > 0;
+
+    public string BmkgLocationSearchQuery
+    {
+        get => _bmkgLocationSearchQuery;
+        set => SetProperty(ref _bmkgLocationSearchQuery, value ?? string.Empty);
+    }
+
+    public bool IsSearchingBmkgLocation
+    {
+        get => _isSearchingBmkgLocation;
+        set
+        {
+            if (SetProperty(ref _isSearchingBmkgLocation, value))
+            {
+                OnPropertyChanged(nameof(BmkgLocationSearchButtonText));
+            }
+        }
+    }
+
+    public string BmkgLocationSearchButtonText => IsSearchingBmkgLocation ? "Mencari..." : "Cari";
+
+    public BmkgRegionItem? SelectedBmkgProvince
+    {
+        get => _selectedBmkgProvince;
+        set
+        {
+            if (SetProperty(ref _selectedBmkgProvince, value) && !_isSyncingRegionSelectors && value != null)
+            {
+                _ = OnSelectedProvinceChangedAsync(value.Code);
+            }
+        }
+    }
+
+    public BmkgRegionItem? SelectedBmkgRegency
+    {
+        get => _selectedBmkgRegency;
+        set
+        {
+            if (SetProperty(ref _selectedBmkgRegency, value) && !_isSyncingRegionSelectors && value != null)
+            {
+                _ = OnSelectedRegencyChangedAsync(value.Code);
+            }
+        }
+    }
+
+    public BmkgRegionItem? SelectedBmkgDistrict
+    {
+        get => _selectedBmkgDistrict;
+        set
+        {
+            if (SetProperty(ref _selectedBmkgDistrict, value) && !_isSyncingRegionSelectors && value != null)
+            {
+                _ = OnSelectedDistrictChangedAsync(value.Code);
+            }
+        }
+    }
+
+    public BmkgRegionItem? SelectedBmkgVillage
+    {
+        get => _selectedBmkgVillage;
+        set
+        {
+            if (SetProperty(ref _selectedBmkgVillage, value) && !_isSyncingRegionSelectors && value != null)
+            {
+                ApplyPreciseVillageSelection(value);
+            }
+        }
+    }
+
+    public string BmkgLocationStatus
+    {
+        get => _bmkgLocationStatus;
+        set => SetProperty(ref _bmkgLocationStatus, value);
+    }
+
+    public bool BmkgFollowPrayerCity
+    {
+        get => Settings.BmkgFollowPrayerCity;
+        set
+        {
+            if (Settings.BmkgFollowPrayerCity != value)
+            {
+                Settings.BmkgFollowPrayerCity = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(BmkgFollowPrayerCity));
+                OnPropertyChanged(nameof(SelectedBmkgCity));
+                OnPropertyChanged(nameof(BmkgWeatherCityText));
+                _ = _bmkgService.RefreshWeatherAsync();
+            }
+        }
+    }
+
+    public CityLocation? SelectedBmkgCity
+    {
+        get
+        {
+            string target = Settings.BmkgFollowPrayerCity ? Settings.PrayerCity : Settings.BmkgSelectedCity;
+            return BmkgCities.FirstOrDefault(c => c.Name.Equals(target, StringComparison.OrdinalIgnoreCase))
+                   ?? CityLocation.FindBestMatchOrNearest(target, Settings.PrayerLatitude, Settings.PrayerLongitude);
+        }
+        set
+        {
+            if (value != null)
+            {
+                Settings.BmkgSelectedCity = value.Name;
+                Settings.BmkgCustomAdm4Code = value.BmkgAdm4Code;
+                if (Settings.BmkgFollowPrayerCity)
+                {
+                    Settings.PrayerCity = value.Name;
+                    Settings.PrayerLatitude = value.Latitude;
+                    Settings.PrayerLongitude = value.Longitude;
+                    Settings.PrayerTimezone = value.Timezone;
+                    _prayerReminderService.RefreshSchedule();
+                    OnPropertyChanged(nameof(CurrentPrayerSchedule));
+                    OnPropertyChanged(nameof(NextPrayerName));
+                    OnPropertyChanged(nameof(NextPrayerTimeFormatted));
+                    OnPropertyChanged(nameof(NextPrayerCountdownBadge));
+                }
+                _settingsService.Save();
+                OnPropertyChanged(nameof(SelectedBmkgCity));
+                OnPropertyChanged(nameof(BmkgCustomAdm4Code));
+                OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+                OnPropertyChanged(nameof(BmkgWeatherCityText));
+                BmkgLocationStatus = $"✓ Kota dipilih: {value.DisplayName} (Anda dapat memilih Kecamatan/Kelurahan lebih spesifik di bawah)";
+                _ = SyncRegionSelectorsFromCurrentAdm4Async();
+                _ = _bmkgService.RefreshWeatherAsync();
+            }
+        }
+    }
+
+    public string BmkgCustomAdm4Code
+    {
+        get => Settings.BmkgCustomAdm4Code;
+        set
+        {
+            if (Settings.BmkgCustomAdm4Code != value)
+            {
+                Settings.BmkgCustomAdm4Code = value?.Trim() ?? string.Empty;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(BmkgCustomAdm4Code));
+                OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+            }
+        }
+    }
+
+    public string BmkgActiveAdm4Text => $"Kode ADM4: {_bmkgService.GetActiveAdm4Code()}";
+
+    public BmkgWeatherData? CurrentBmkgWeather => _bmkgService.CurrentWeatherData;
+    public BmkgWeatherForecastItem? CurrentWeatherSlot => _bmkgService.CurrentWeatherData?.CurrentWeather;
+    public List<BmkgWeatherDayGroup> BmkgWeatherDayGroups => _bmkgService.CurrentWeatherData?.DayGroups ?? new();
+
+    public string BmkgWeatherEmoji => CurrentWeatherSlot?.WeatherEmoji ?? "🌤";
+    public string BmkgWeatherIconGeometry => CurrentWeatherSlot?.WeatherIconGeometry ?? BmkgWeatherForecastItem.PartlyCloudyGeometry;
+    public string BmkgWeatherIconColor => CurrentWeatherSlot?.WeatherIconColor ?? "#FFD43B";
+    public string BmkgWeatherTempText => CurrentWeatherSlot != null ? $"{CurrentWeatherSlot.TemperatureC}°C" : "--°C";
+    public string BmkgWeatherDescText => CurrentWeatherSlot?.WeatherDesc ?? "Memuat cuaca...";
+    public string BmkgWeatherCityText => _bmkgService.CurrentWeatherData?.CompactCityLabel ?? _bmkgService.GetActiveCityName();
+    public string BmkgWeatherFullCityText => _bmkgService.CurrentWeatherData?.ShortCityLabel ?? _bmkgService.GetActiveCityName();
+    public string BmkgWeatherLocationSubtitle => _bmkgService.CurrentWeatherData?.FullLocationSubtitle ?? "Indonesia • BMKG";
+    public string BmkgWeatherRangeText => _bmkgService.CurrentWeatherData?.TodayTempRangeFormatted ?? "-";
+    public string BmkgWeatherHumidityText => CurrentWeatherSlot?.HumidityFormatted ?? "--%";
+    public string BmkgWeatherWindText => CurrentWeatherSlot != null ? $"{CurrentWeatherSlot.WindSpeedFormatted} ({CurrentWeatherSlot.WindDirectionLabel})" : "-";
+    public string BmkgWeatherCloudText => CurrentWeatherSlot?.CloudCoverFormatted ?? "--%";
+    public string BmkgWeatherRainText => CurrentWeatherSlot?.PrecipitationFormatted ?? "0 mm";
+
+    public BmkgEarthquakeItem? LatestEarthquake => _bmkgService.LatestEarthquake;
+    public IReadOnlyList<BmkgEarthquakeItem> RecentEarthquakes => _bmkgService.RecentEarthquakes;
+    public IReadOnlyList<BmkgEarthquakeItem> FeltEarthquakes => _bmkgService.FeltEarthquakes;
+    public bool HasLatestEarthquake => _bmkgService.LatestEarthquake != null;
+
+    public string LatestEarthquakeBadge => LatestEarthquake != null ? $"M {LatestEarthquake.Magnitude}" : "Gempa";
+    public string LatestEarthquakeCompactText => LatestEarthquake != null
+        ? $"M {LatestEarthquake.Magnitude} • {LatestEarthquake.Wilayah}"
+        : "Belum ada data gempa terkini";
+
+    public string BmkgStatusMessage => _bmkgService.StatusMessage;
+    public bool IsBmkgLoading => _bmkgService.IsLoadingWeather || _bmkgService.IsLoadingEarthquake;
+
+    public string BmkgNotchTooltip
+    {
+        get
+        {
+            var weatherLine = CurrentWeatherSlot != null
+                ? $"🌤️ Cuaca BMKG ({BmkgWeatherCityText}): {BmkgWeatherTempText} • {BmkgWeatherDescText} (Kelembapan {BmkgWeatherHumidityText})"
+                : $"🌤️ Cuaca BMKG ({BmkgWeatherCityText}): Memuat...";
+
+            var eqLine = LatestEarthquake != null
+                ? $"🌋 Gempa Terbaru: M {LatestEarthquake.Magnitude} • {LatestEarthquake.Wilayah} ({LatestEarthquake.Jam}, Kedalaman {LatestEarthquake.Kedalaman})"
+                : "🌋 Gempa Bumi BMKG: Siap memantau...";
+
+            return $"{weatherLine}\n{eqLine}\nKlik untuk membuka jendela Cuaca & Gempa Bumi BMKG";
+        }
+    }
+
+    public bool HasActiveBmkgNotification => EnableBmkg && _activeBmkgNotification != null;
+    public BmkgNotificationEvent? ActiveBmkgNotification
+    {
+        get => _activeBmkgNotification;
+        private set
+        {
+            if (SetProperty(ref _activeBmkgNotification, value))
+            {
+                OnPropertyChanged(nameof(HasActiveBmkgNotification));
+            }
+        }
     }
 
     public string ComponentsButtonSymbol
@@ -1593,6 +1972,33 @@ public ICommand TogglePrayerPanelCommand { get; }
     public ICommand ToggleAddCustomLiveTvCommand { get; }
     public ICommand SaveCustomLiveTvCommand { get; }
     public ICommand DeleteCustomLiveTvChannelCommand { get; }
+
+    // BMKG Cuaca & Gempa Bumi Commands
+    public ICommand OpenBmkgCommand { get; }
+    public ICommand OpenBmkgWeatherTabCommand { get; }
+    public ICommand OpenBmkgEarthquakeTabCommand { get; }
+    public ICommand ToggleBmkgWindowCommand { get; }
+    public ICommand CloseBmkgWindowCommand { get; }
+    public ICommand MinimizeBmkgWindowCommand { get; }
+    public ICommand ExpandBmkgWindowCommand { get; }
+    public ICommand SetBmkgTabCommand { get; }
+    public ICommand SetBmkgEarthquakeSubTabCommand { get; }
+    public ICommand RefreshBmkgCommand { get; }
+    public ICommand DetectBmkgLocationCommand { get; }
+    public ICommand ToggleShakemapCommand { get; }
+    public ICommand OpenEarthquakeMapCommand { get; }
+    public ICommand OpenShakemapBrowserCommand { get; }
+    public ICommand OpenBmkgWebsiteCommand { get; }
+    public ICommand ToggleCustomAdm4EditCommand { get; }
+    public ICommand ApplyCustomAdm4Command { get; }
+    public ICommand TogglePreciseRegionSelectorCommand { get; }
+    public ICommand SearchBmkgLocationCommand { get; }
+    public ICommand SelectBmkgSearchResultCommand { get; }
+    public ICommand ClearBmkgLocationSearchCommand { get; }
+    public ICommand TestBmkgAlertCommand { get; }
+    public ICommand DismissBmkgNotificationCommand { get; }
+    public ICommand OpenBmkgNotificationDetailCommand { get; }
+
     public ICommand WakeFromIdleCommand { get; }
     public ICommand ToggleMiniModeCommand { get; }
     public ICommand ToggleVocalRemoverCommand { get; }
@@ -1612,7 +2018,8 @@ public ICommand TogglePrayerPanelCommand { get; }
         IPrayerService? prayerService = null,
         IPrayerReminderService? prayerReminderService = null,
         IRadioService? radioService = null,
-        ILiveTvService? liveTvService = null)
+        ILiveTvService? liveTvService = null,
+        IBmkgService? bmkgService = null)
     {
         _mediaService = mediaService;
         _lyricsService = lyricsService;
@@ -1626,6 +2033,10 @@ public ICommand TogglePrayerPanelCommand { get; }
         _prayerReminderService = prayerReminderService ?? new PrayerReminderService(_prayerService, settingsService);
         _radioService = radioService ?? new RadioService(settingsService);
         _liveTvService = liveTvService ?? new LiveTvService(settingsService);
+        _bmkgService = bmkgService ?? new BmkgService(settingsService);
+
+        _bmkgService.DataUpdated += (s, e) => OnBmkgDataUpdated();
+        _bmkgService.NotificationTriggered += (s, evt) => OnBmkgNotificationTriggered(evt);
 
         foreach (var st in _radioService.Stations)
         {
@@ -2177,6 +2588,140 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
             }
         });
 
+        // BMKG Cuaca & Gempa Bumi Commands
+        OpenBmkgCommand = new RelayCommand(() =>
+        {
+            IsBmkgWindowOpen = true;
+            IsComponentsMenuOpen = false;
+            RequestOpenBmkg?.Invoke();
+            _ = _bmkgService.RefreshAllAsync(forceWeather: false);
+        });
+        OpenBmkgWeatherTabCommand = new RelayCommand(() =>
+        {
+            BmkgActiveTab = "Weather";
+            IsBmkgWindowCompact = false;
+            IsBmkgWindowOpen = true;
+            IsComponentsMenuOpen = false;
+            RequestOpenBmkg?.Invoke();
+            _ = _bmkgService.RefreshAllAsync(forceWeather: false);
+        });
+        OpenBmkgEarthquakeTabCommand = new RelayCommand(() =>
+        {
+            BmkgActiveTab = "Earthquake";
+            IsBmkgWindowCompact = false;
+            IsBmkgWindowOpen = true;
+            IsComponentsMenuOpen = false;
+            RequestOpenBmkg?.Invoke();
+            _ = _bmkgService.RefreshAllAsync(forceWeather: false);
+        });
+        ToggleBmkgWindowCommand = new RelayCommand(() =>
+        {
+            IsBmkgWindowOpen = !IsBmkgWindowOpen;
+            IsComponentsMenuOpen = false;
+            if (IsBmkgWindowOpen)
+            {
+                RequestOpenBmkg?.Invoke();
+                _ = _bmkgService.RefreshAllAsync(forceWeather: false);
+            }
+        });
+        CloseBmkgWindowCommand = new RelayCommand(() =>
+        {
+            IsBmkgWindowOpen = false;
+            IsComponentsMenuOpen = false;
+        });
+        MinimizeBmkgWindowCommand = new RelayCommand(() => IsBmkgWindowCompact = true);
+        ExpandBmkgWindowCommand = new RelayCommand(() => IsBmkgWindowCompact = false);
+        SetBmkgTabCommand = new RelayCommand((tabObj) =>
+        {
+            if (tabObj is string tab && !string.IsNullOrWhiteSpace(tab))
+            {
+                BmkgActiveTab = tab;
+            }
+        });
+        SetBmkgEarthquakeSubTabCommand = new RelayCommand((subObj) =>
+        {
+            if (subObj is string sub && !string.IsNullOrWhiteSpace(sub))
+            {
+                BmkgEarthquakeSubTab = sub;
+            }
+        });
+        RefreshBmkgCommand = new RelayCommand(async () =>
+        {
+            await _bmkgService.RefreshAllAsync(forceWeather: true);
+        });
+        DetectBmkgLocationCommand = new RelayCommand(async () => await DetectBmkgLocationAsync());
+        ToggleShakemapCommand = new RelayCommand(() => IsShowingShakemap = !IsShowingShakemap);
+        OpenEarthquakeMapCommand = new RelayCommand((eqObj) =>
+        {
+            var eq = eqObj as BmkgEarthquakeItem ?? LatestEarthquake;
+            if (eq != null && !string.IsNullOrWhiteSpace(eq.GoogleMapsUrl))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(eq.GoogleMapsUrl) { UseShellExecute = true });
+                }
+                catch { }
+            }
+        });
+        OpenShakemapBrowserCommand = new RelayCommand(() =>
+        {
+            if (LatestEarthquake != null && LatestEarthquake.HasShakemap)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(LatestEarthquake.ShakemapUrl) { UseShellExecute = true });
+                }
+                catch { }
+            }
+        });
+        OpenBmkgWebsiteCommand = new RelayCommand(() =>
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("https://www.bmkg.go.id") { UseShellExecute = true });
+            }
+            catch { }
+        });
+        ToggleCustomAdm4EditCommand = new RelayCommand(() => IsEditingCustomAdm4 = !IsEditingCustomAdm4);
+        ApplyCustomAdm4Command = new RelayCommand(async () =>
+        {
+            IsEditingCustomAdm4 = false;
+            OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+            _ = SyncRegionSelectorsFromCurrentAdm4Async();
+            await _bmkgService.RefreshWeatherAsync();
+        });
+        TogglePreciseRegionSelectorCommand = new RelayCommand(() => IsSelectingPreciseRegion = !IsSelectingPreciseRegion);
+        SearchBmkgLocationCommand = new RelayCommand(async () => await ExecuteBmkgPreciseLocationSearchAsync());
+        SelectBmkgSearchResultCommand = new RelayCommand(async (resObj) =>
+        {
+            if (resObj is BmkgLocationSearchResult res)
+            {
+                await ApplyBmkgSearchResultAsync(res);
+            }
+        });
+        ClearBmkgLocationSearchCommand = new RelayCommand(() =>
+        {
+            BmkgLocationSearchResults.Clear();
+            OnPropertyChanged(nameof(HasBmkgLocationSearchResults));
+        });
+        TestBmkgAlertCommand = new RelayCommand(() => _bmkgService.TriggerTestEarthquakeAlert());
+        DismissBmkgNotificationCommand = new RelayCommand(() =>
+        {
+            _bmkgNotificationDismissTimer?.Stop();
+            ActiveBmkgNotification = null;
+        });
+        OpenBmkgNotificationDetailCommand = new RelayCommand(() =>
+        {
+            bool isEq = ActiveBmkgNotification?.IsEarthquake ?? true;
+            _bmkgNotificationDismissTimer?.Stop();
+            ActiveBmkgNotification = null;
+            BmkgActiveTab = isEq ? "Earthquake" : "Weather";
+            if (isEq) BmkgEarthquakeSubTab = "AutoGempa";
+            IsBmkgWindowCompact = false;
+            IsBmkgWindowOpen = true;
+            RequestOpenBmkg?.Invoke();
+        });
+
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
         _mediaService.SessionsChanged += (s, list) =>
@@ -2282,8 +2827,20 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         OnPropertyChanged(nameof(IsRadioActiveOrOpen));
         OnPropertyChanged(nameof(RadioStatusSummary));
         OnPropertyChanged(nameof(RadioButtonActionText));
+        OnPropertyChanged(nameof(EnableBmkg));
+        OnPropertyChanged(nameof(ShowWeatherInCompactNotch));
+        OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+        OnPropertyChanged(nameof(ShowHoverWeatherPill));
+        OnPropertyChanged(nameof(IsBmkgWindowOpen));
+        OnPropertyChanged(nameof(SelectedBmkgCity));
+        OnPropertyChanged(nameof(BmkgWeatherCityText));
+        OnPropertyChanged(nameof(BmkgActiveAdm4Text));
         RefreshAdhanSettings();
         _prayerReminderService.RefreshSchedule();
+        if (EnableBmkg)
+        {
+            _ = _bmkgService.RefreshAllAsync(forceWeather: false);
+        }
         RequestComponentLayoutChanged?.Invoke();
     }
 
@@ -2669,10 +3226,410 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         });
     }
 
+    private void OnBmkgDataUpdated()
+    {
+        void Notify()
+        {
+            var w = _bmkgService.CurrentWeatherData;
+            if (w != null && Settings.BmkgFollowPrayerCity && Math.Abs(w.Latitude) > 0.001 && Math.Abs(w.Longitude) > 0.001)
+            {
+                bool coordChanged = Math.Abs(Settings.PrayerLatitude - w.Latitude) > 0.002 ||
+                                    Math.Abs(Settings.PrayerLongitude - w.Longitude) > 0.002;
+                if (coordChanged)
+                {
+                    _prayerService.UpdateLocation(w.ShortCityLabel, w.Latitude, w.Longitude, w.TimezoneOffsetHours);
+                    _prayerReminderService.RefreshSchedule();
+                    OnPropertyChanged(nameof(CurrentPrayerSchedule));
+                    OnPropertyChanged(nameof(NextPrayerName));
+                    OnPropertyChanged(nameof(NextPrayerTimeFormatted));
+                    OnPropertyChanged(nameof(NextPrayerCountdownBadge));
+                    OnPropertyChanged(nameof(PrayerScheduleTooltip));
+                }
+            }
+
+            OnPropertyChanged(nameof(CurrentBmkgWeather));
+            OnPropertyChanged(nameof(CurrentWeatherSlot));
+            OnPropertyChanged(nameof(BmkgWeatherDayGroups));
+            OnPropertyChanged(nameof(BmkgWeatherEmoji));
+            OnPropertyChanged(nameof(BmkgWeatherIconGeometry));
+            OnPropertyChanged(nameof(BmkgWeatherIconColor));
+            OnPropertyChanged(nameof(BmkgWeatherTempText));
+            OnPropertyChanged(nameof(BmkgWeatherDescText));
+            OnPropertyChanged(nameof(BmkgWeatherCityText));
+            OnPropertyChanged(nameof(BmkgWeatherFullCityText));
+            OnPropertyChanged(nameof(BmkgWeatherLocationSubtitle));
+            OnPropertyChanged(nameof(BmkgWeatherRangeText));
+            OnPropertyChanged(nameof(BmkgWeatherHumidityText));
+            OnPropertyChanged(nameof(BmkgWeatherWindText));
+            OnPropertyChanged(nameof(BmkgWeatherCloudText));
+            OnPropertyChanged(nameof(BmkgWeatherRainText));
+            OnPropertyChanged(nameof(LatestEarthquake));
+            OnPropertyChanged(nameof(RecentEarthquakes));
+            OnPropertyChanged(nameof(FeltEarthquakes));
+            OnPropertyChanged(nameof(HasLatestEarthquake));
+            OnPropertyChanged(nameof(LatestEarthquakeBadge));
+            OnPropertyChanged(nameof(LatestEarthquakeCompactText));
+            OnPropertyChanged(nameof(BmkgStatusMessage));
+            OnPropertyChanged(nameof(IsBmkgLoading));
+            OnPropertyChanged(nameof(BmkgNotchTooltip));
+            OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+            OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
+            OnPropertyChanged(nameof(ShowHoverWeatherPill));
+        }
+
+        if (System.Windows.Application.Current?.Dispatcher != null &&
+            !System.Windows.Application.Current.Dispatcher.CheckAccess())
+        {
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(Notify);
+        }
+        else
+        {
+            Notify();
+        }
+    }
+
+    private void OnBmkgNotificationTriggered(BmkgNotificationEvent evt)
+    {
+        System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+        {
+            ActiveBmkgNotification = evt;
+            RequestShowTrayNotification?.Invoke(evt.Title, evt.Message);
+
+            _bmkgNotificationDismissTimer?.Stop();
+            _bmkgNotificationDismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(22) };
+            _bmkgNotificationDismissTimer.Tick += (s, e) =>
+            {
+                _bmkgNotificationDismissTimer?.Stop();
+                ActiveBmkgNotification = null;
+            };
+            _bmkgNotificationDismissTimer.Start();
+        });
+    }
+
+    private async Task DetectBmkgLocationAsync()
+    {
+        BmkgLocationStatus = "Mendeteksi lokasi presisi...";
+        try
+        {
+            var loc = await _prayerService.DetectLocationAsync();
+            if (loc != null)
+            {
+                var precise = await _bmkgService.ResolveCoordinatesToPreciseAdm4Async(loc.Latitude, loc.Longitude, loc.Name);
+                if (precise != null && !string.IsNullOrWhiteSpace(precise.Adm4Code))
+                {
+                    await ApplyBmkgSearchResultAsync(precise);
+                    BmkgLocationStatus = $"✓ Terdeteksi presisi: {precise.FullLabel} ({precise.Adm4Code})";
+                    return;
+                }
+
+                var nearest = CityLocation.FindBestMatchOrNearest(loc.Name, loc.Latitude, loc.Longitude);
+                Settings.BmkgSelectedCity = nearest.Name;
+                Settings.BmkgCustomAdm4Code = nearest.BmkgAdm4Code;
+                if (Settings.BmkgFollowPrayerCity)
+                {
+                    _prayerService.UpdateLocation(nearest.Name, loc.Latitude, loc.Longitude, nearest.Timezone);
+                    _prayerReminderService.RefreshSchedule();
+                    OnPropertyChanged(nameof(CurrentPrayerSchedule));
+                    OnPropertyChanged(nameof(NextPrayerName));
+                    OnPropertyChanged(nameof(NextPrayerTimeFormatted));
+                    OnPropertyChanged(nameof(NextPrayerCountdownBadge));
+                }
+                else
+                {
+                    _settingsService.Save();
+                }
+
+                OnPropertyChanged(nameof(SelectedBmkgCity));
+                OnPropertyChanged(nameof(BmkgCustomAdm4Code));
+                OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+                OnPropertyChanged(nameof(BmkgWeatherCityText));
+
+                BmkgLocationStatus = $"✓ Lokasi: {nearest.DisplayName}";
+                _ = SyncRegionSelectorsFromCurrentAdm4Async();
+                await _bmkgService.RefreshWeatherAsync();
+            }
+            else
+            {
+                BmkgLocationStatus = "Gagal mendeteksi lokasi otomatis. Gunakan pencarian atau pilih wilayah manual.";
+            }
+        }
+        catch
+        {
+            BmkgLocationStatus = "Gagal mendeteksi lokasi otomatis.";
+        }
+    }
+
+    private async Task ExecuteBmkgPreciseLocationSearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(BmkgLocationSearchQuery))
+        {
+            BmkgLocationStatus = "Ketik nama Kelurahan, Kecamatan, atau Kota terlebih dahulu.";
+            return;
+        }
+
+        _bmkgLocationSearchCts?.Cancel();
+        _bmkgLocationSearchCts?.Dispose();
+        _bmkgLocationSearchCts = new CancellationTokenSource();
+        var token = _bmkgLocationSearchCts.Token;
+
+        IsSearchingBmkgLocation = true;
+        BmkgLocationStatus = $"Mencari wilayah '{BmkgLocationSearchQuery.Trim()}'...";
+
+        try
+        {
+            var results = await _bmkgService.SearchPreciseLocationsAsync(BmkgLocationSearchQuery, token);
+            if (token.IsCancellationRequested) return;
+
+            BmkgLocationSearchResults.Clear();
+            foreach (var r in results)
+            {
+                BmkgLocationSearchResults.Add(r);
+            }
+            OnPropertyChanged(nameof(HasBmkgLocationSearchResults));
+
+            if (results.Count == 1)
+            {
+                await ApplyBmkgSearchResultAsync(results[0]);
+            }
+            else if (results.Count > 1)
+            {
+                BmkgLocationStatus = $"Ditemukan {results.Count} wilayah presisi — klik salah satu di bawah untuk menerapkan:";
+            }
+            else
+            {
+                BmkgLocationStatus = "Wilayah tidak ditemukan. Gunakan tombol 'Pilih Wilayah' (Provinsi ▸ Kota ▸ Kecamatan ▸ Kelurahan).";
+            }
+        }
+        catch (Exception ex)
+        {
+            BmkgLocationStatus = $"Pencarian gagal: {ex.Message}";
+        }
+        finally
+        {
+            IsSearchingBmkgLocation = false;
+        }
+    }
+
+    private async Task ApplyBmkgSearchResultAsync(BmkgLocationSearchResult res)
+    {
+        Settings.BmkgCustomAdm4Code = res.Adm4Code;
+        Settings.BmkgSelectedCity = !string.IsNullOrWhiteSpace(res.VillageName)
+            ? $"{res.VillageName}, {res.RegencyName}"
+            : res.RegencyName;
+
+        if (Settings.BmkgFollowPrayerCity && Math.Abs(res.Latitude) > 0.001 && Math.Abs(res.Longitude) > 0.001)
+        {
+            _prayerService.UpdateLocation(Settings.BmkgSelectedCity, res.Latitude, res.Longitude, res.Timezone);
+            _prayerReminderService.RefreshSchedule();
+            OnPropertyChanged(nameof(CurrentPrayerSchedule));
+            OnPropertyChanged(nameof(NextPrayerName));
+            OnPropertyChanged(nameof(NextPrayerTimeFormatted));
+            OnPropertyChanged(nameof(NextPrayerCountdownBadge));
+        }
+
+        _settingsService.Save();
+        BmkgLocationSearchResults.Clear();
+        OnPropertyChanged(nameof(HasBmkgLocationSearchResults));
+        OnPropertyChanged(nameof(BmkgCustomAdm4Code));
+        OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+        OnPropertyChanged(nameof(BmkgWeatherCityText));
+        OnPropertyChanged(nameof(BmkgWeatherFullCityText));
+
+        BmkgLocationStatus = $"✓ Lokasi presisi: {res.FullLabel} ({res.Adm4Code})";
+        _ = SyncRegionSelectorsFromCurrentAdm4Async();
+        await _bmkgService.RefreshWeatherAsync();
+    }
+
+    public async Task SyncRegionSelectorsFromCurrentAdm4Async()
+    {
+        if (_isSyncingRegionSelectors) return;
+        _isSyncingRegionSelectors = true;
+
+        try
+        {
+            string adm4 = _bmkgService.GetActiveAdm4Code();
+            var parts = adm4.Split('.');
+            string provCode = parts.Length >= 1 ? parts[0] : "31";
+            string regCode = parts.Length >= 2 ? $"{parts[0]}.{parts[1]}" : "31.71";
+            string distCode = parts.Length >= 3 ? $"{parts[0]}.{parts[1]}.{parts[2]}" : "31.71.01";
+
+            var prov = BmkgProvinces.FirstOrDefault(p => p.Code == provCode) ?? BmkgProvinces.FirstOrDefault();
+            _selectedBmkgProvince = prov;
+            OnPropertyChanged(nameof(SelectedBmkgProvince));
+
+            if (prov != null)
+            {
+                var regencies = await _bmkgService.GetRegenciesAsync(prov.Code);
+                BmkgRegencies.Clear();
+                foreach (var r in regencies) BmkgRegencies.Add(r);
+
+                var reg = BmkgRegencies.FirstOrDefault(r => r.Code == regCode) ?? BmkgRegencies.FirstOrDefault();
+                _selectedBmkgRegency = reg;
+                OnPropertyChanged(nameof(SelectedBmkgRegency));
+
+                if (reg != null)
+                {
+                    var districts = await _bmkgService.GetDistrictsAsync(reg.Code);
+                    BmkgDistricts.Clear();
+                    foreach (var d in districts) BmkgDistricts.Add(d);
+
+                    var dist = BmkgDistricts.FirstOrDefault(d => d.Code == distCode) ?? BmkgDistricts.FirstOrDefault();
+                    _selectedBmkgDistrict = dist;
+                    OnPropertyChanged(nameof(SelectedBmkgDistrict));
+
+                    if (dist != null)
+                    {
+                        var villages = await _bmkgService.GetVillagesAsync(dist.Code);
+                        BmkgVillages.Clear();
+                        foreach (var v in villages) BmkgVillages.Add(v);
+
+                        var vil = BmkgVillages.FirstOrDefault(v => v.Code == adm4) ?? BmkgVillages.FirstOrDefault();
+                        _selectedBmkgVillage = vil;
+                        OnPropertyChanged(nameof(SelectedBmkgVillage));
+                    }
+                }
+            }
+        }
+        catch { }
+        finally
+        {
+            _isSyncingRegionSelectors = false;
+        }
+    }
+
+    private async Task OnSelectedProvinceChangedAsync(string provCode)
+    {
+        if (_isSyncingRegionSelectors) return;
+        _isSyncingRegionSelectors = true;
+        try
+        {
+            var regencies = await _bmkgService.GetRegenciesAsync(provCode);
+            BmkgRegencies.Clear();
+            foreach (var r in regencies) BmkgRegencies.Add(r);
+
+            var firstReg = BmkgRegencies.FirstOrDefault();
+            _selectedBmkgRegency = firstReg;
+            OnPropertyChanged(nameof(SelectedBmkgRegency));
+
+            if (firstReg != null)
+            {
+                var districts = await _bmkgService.GetDistrictsAsync(firstReg.Code);
+                BmkgDistricts.Clear();
+                foreach (var d in districts) BmkgDistricts.Add(d);
+
+                var firstDist = BmkgDistricts.FirstOrDefault();
+                _selectedBmkgDistrict = firstDist;
+                OnPropertyChanged(nameof(SelectedBmkgDistrict));
+
+                if (firstDist != null)
+                {
+                    var villages = await _bmkgService.GetVillagesAsync(firstDist.Code);
+                    BmkgVillages.Clear();
+                    foreach (var v in villages) BmkgVillages.Add(v);
+
+                    var firstVil = BmkgVillages.FirstOrDefault();
+                    _selectedBmkgVillage = firstVil;
+                    OnPropertyChanged(nameof(SelectedBmkgVillage));
+
+                    if (firstVil != null)
+                    {
+                        ApplyPreciseVillageSelection(firstVil);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            _isSyncingRegionSelectors = false;
+        }
+    }
+
+    private async Task OnSelectedRegencyChangedAsync(string regCode)
+    {
+        if (_isSyncingRegionSelectors) return;
+        _isSyncingRegionSelectors = true;
+        try
+        {
+            var districts = await _bmkgService.GetDistrictsAsync(regCode);
+            BmkgDistricts.Clear();
+            foreach (var d in districts) BmkgDistricts.Add(d);
+
+            var firstDist = BmkgDistricts.FirstOrDefault();
+            _selectedBmkgDistrict = firstDist;
+            OnPropertyChanged(nameof(SelectedBmkgDistrict));
+
+            if (firstDist != null)
+            {
+                var villages = await _bmkgService.GetVillagesAsync(firstDist.Code);
+                BmkgVillages.Clear();
+                foreach (var v in villages) BmkgVillages.Add(v);
+
+                var firstVil = BmkgVillages.FirstOrDefault();
+                _selectedBmkgVillage = firstVil;
+                OnPropertyChanged(nameof(SelectedBmkgVillage));
+
+                if (firstVil != null)
+                {
+                    ApplyPreciseVillageSelection(firstVil);
+                }
+            }
+        }
+        finally
+        {
+            _isSyncingRegionSelectors = false;
+        }
+    }
+
+    private async Task OnSelectedDistrictChangedAsync(string distCode)
+    {
+        if (_isSyncingRegionSelectors) return;
+        _isSyncingRegionSelectors = true;
+        try
+        {
+            var villages = await _bmkgService.GetVillagesAsync(distCode);
+            BmkgVillages.Clear();
+            foreach (var v in villages) BmkgVillages.Add(v);
+
+            var firstVil = BmkgVillages.FirstOrDefault();
+            _selectedBmkgVillage = firstVil;
+            OnPropertyChanged(nameof(SelectedBmkgVillage));
+
+            if (firstVil != null)
+            {
+                ApplyPreciseVillageSelection(firstVil);
+            }
+        }
+        finally
+        {
+            _isSyncingRegionSelectors = false;
+        }
+    }
+
+    private void ApplyPreciseVillageSelection(BmkgRegionItem village)
+    {
+        Settings.BmkgCustomAdm4Code = village.Code;
+        string regName = _selectedBmkgRegency?.Name ?? "";
+        string distName = _selectedBmkgDistrict?.Name ?? "";
+        Settings.BmkgSelectedCity = !string.IsNullOrWhiteSpace(regName) ? $"{village.Name}, {regName}" : village.Name;
+        _settingsService.Save();
+
+        OnPropertyChanged(nameof(BmkgCustomAdm4Code));
+        OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+        OnPropertyChanged(nameof(BmkgWeatherCityText));
+        OnPropertyChanged(nameof(BmkgWeatherFullCityText));
+
+        BmkgLocationStatus = $"✓ Lokasi presisi: Kel./Desa {village.Name}, Kec. {distName}, {regName} ({village.Code})";
+        _ = _bmkgService.RefreshWeatherAsync();
+    }
+
     public async Task InitializeAsync()
     {
         await _mediaService.InitializeAsync();
         _prayerReminderService.Start();
+        if (Settings.EnableBmkg)
+        {
+            _bmkgService.Start();
+        }
 
         if (!IsPinned && !_isHovering)
         {
@@ -3716,7 +4673,7 @@ public void ExpandAllCategories()
 
     public void EnterIdleMiniMode()
     {
-        if (IsPinned || IsLyricsMode || IsComponentsMenuOpen || HasActivePrayerNotification)
+        if (IsPinned || IsLyricsMode || IsComponentsMenuOpen || HasActivePrayerNotification || HasActiveBmkgNotification)
         {
             return;
         }
@@ -3755,7 +4712,7 @@ public void ExpandAllCategories()
         _idleTimer.Tick += (s, e) =>
         {
             _idleTimer?.Stop();
-            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification)
+            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification && !HasActiveBmkgNotification)
             {
                 IsHovering = false;
                 EnterIdleMiniMode();
