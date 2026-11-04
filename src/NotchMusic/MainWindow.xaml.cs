@@ -26,6 +26,7 @@ public partial class MainWindow : Window
     private TodoWindow? _todoWindow;
     private PrayerWindow? _prayerWindow;
     private BmkgWindow? _bmkgWindow;
+    private ReminderWindow? _reminderWindow;
     private AboutWindow? _aboutWindow;
     private HotkeyManager? _hotkeyManager;
     private bool _isRealExit;
@@ -59,12 +60,14 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenLiveTv += OpenLiveTv;
         _viewModel.RequestOpenMusic += OpenMusic;
         _viewModel.RequestOpenBmkg += OpenBmkg;
+        _viewModel.RequestOpenReminder += OpenReminder;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
             UpdateTodoWindowState();
             UpdatePrayerWindowState();
             UpdateBmkgWindowState();
+            UpdateReminderWindowState();
             UpdateMusicWindowState();
             UpdateBrowserWindowState();
             UpdateRadioWindowState();
@@ -167,6 +170,7 @@ public partial class MainWindow : Window
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
         UpdateBmkgWindowState();
+        UpdateReminderWindowState();
         UpdateMusicWindowState();
 
         await _viewModel.InitializeAsync();
@@ -185,6 +189,7 @@ public partial class MainWindow : Window
                     _todoWindow?.Hide();
                     _prayerWindow?.Hide();
                     _bmkgWindow?.Hide();
+                    _reminderWindow?.Hide();
                     _musicWindow?.Hide();
                 }
                 else
@@ -206,6 +211,10 @@ public partial class MainWindow : Window
                     if (_viewModel.EnableBmkg && _viewModel.IsBmkgWindowOpen)
                     {
                         _bmkgWindow?.Show();
+                    }
+                    if (_viewModel.EnableReminders && _viewModel.IsReminderWindowOpen)
+                    {
+                        _reminderWindow?.Show();
                     }
                 }
             });
@@ -238,6 +247,7 @@ public partial class MainWindow : Window
         _trayService.OpenRadioRequested += () => Dispatcher.Invoke(OpenRadio);
         _trayService.OpenLiveTvRequested += () => Dispatcher.Invoke(OpenLiveTv);
         _trayService.OpenBmkgRequested += () => Dispatcher.Invoke(OpenBmkg);
+        _trayService.OpenReminderRequested += () => Dispatcher.Invoke(OpenReminder);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
@@ -461,6 +471,49 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateReminderWindowState()
+    {
+        if (_viewModel.EnableReminders && _viewModel.IsReminderWindowOpen)
+        {
+            OpenReminder();
+        }
+        else
+        {
+            _reminderWindow?.Hide();
+        }
+    }
+
+    public void OpenReminder()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsReminderWindowOpen = true;
+
+            if (_reminderWindow == null)
+            {
+                _reminderWindow = new ReminderWindow(_viewModel, _settingsService);
+                _reminderWindow.Closed += (s, e) => _reminderWindow = null;
+            }
+
+            if (_reminderWindow.WindowState == WindowState.Minimized)
+            {
+                _reminderWindow.WindowState = WindowState.Normal;
+            }
+
+            _reminderWindow.Show();
+            _reminderWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Pengingat Pintar:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     public void OpenAbout()
     {
         if (_aboutWindow != null && _aboutWindow.IsVisible)
@@ -501,6 +554,7 @@ public partial class MainWindow : Window
             _viewModel.RefreshComponentLayout();
             UpdatePrayerWindowState();
             UpdateBmkgWindowState();
+            UpdateReminderWindowState();
             UpdateTodoWindowState();
             _ = _viewModel.BmkgService.RefreshAllAsync();
         };
@@ -516,6 +570,7 @@ public partial class MainWindow : Window
         UpdateTodoWindowState();
         UpdatePrayerWindowState();
         UpdateBmkgWindowState();
+        UpdateReminderWindowState();
         UpdateMusicWindowState();
         UpdateBrowserWindowState();
         UpdateRadioWindowState();
@@ -975,7 +1030,9 @@ public partial class MainWindow : Window
         _viewModel.RadioService.Dispose();
         _viewModel.LiveTvService.Dispose();
         _viewModel.BmkgService.Dispose();
+        _viewModel.ReminderService.Dispose();
         _bmkgWindow?.ForceClose();
+        _reminderWindow?.ForceClose();
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _aboutWindow?.Close();

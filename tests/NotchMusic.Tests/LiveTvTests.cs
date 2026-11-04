@@ -15,6 +15,7 @@ using Xunit;
 
 namespace NotchMusic.Tests;
 
+[Collection("WpfWindowTests")]
 public class LiveTvTests
 {
     private class FakeMediaSessionService : IMediaSessionService

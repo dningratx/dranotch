@@ -163,4 +163,15 @@ public class AppSettings
     public bool BmkgNotifyExtremeWeather { get; set; } = true;
     public string LastNotifiedEarthquakeId { get; set; } = string.Empty;
     public string LastNotifiedWeatherAlertId { get; set; } = string.Empty;
+
+    // Pengingat Pintar: Minum Air, Minum Obat, & Aktivitas (Komponen ke-8)
+    public bool EnableReminders { get; set; } = true;
+    public bool IsReminderWindowOpen { get; set; } = false;
+    public double ReminderWindowLeft { get; set; } = -1;
+    public double ReminderWindowTop { get; set; } = -1;
+    public double ReminderWindowWidth { get; set; } = 420;
+    public double ReminderWindowHeight { get; set; } = 560;
+    public bool IsReminderWindowCompact { get; set; } = false;
+    public bool ShowReminderInCompactNotch { get; set; } = true;
+    public bool ReminderSoundAlert { get; set; } = true;
 }

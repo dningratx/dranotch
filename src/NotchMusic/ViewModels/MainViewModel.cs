@@ -14,6 +14,7 @@ using NotchMusic.Services.LiveTv;
 using NotchMusic.Services.Media;
 using NotchMusic.Services.Prayer;
 using NotchMusic.Services.Radio;
+using NotchMusic.Services.Reminder;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Sync;
 using NotchMusic.Services.Todo;
@@ -34,11 +35,25 @@ public class MainViewModel : ViewModelBase
     private readonly IRadioService _radioService;
     private readonly ILiveTvService _liveTvService;
     private readonly IBmkgService _bmkgService;
+    private readonly IReminderService _reminderService;
     private readonly DispatcherTimer _interpolationTimer;
 
     private PrayerNotificationEvent? _activePrayerNotification;
     private DispatcherTimer? _notificationDismissTimer;
     private bool _isPrayerPanelOpen;
+
+    // Pengingat Pintar Fields (Komponen ke-8)
+    private ReminderNotificationEvent? _activeReminderNotification;
+    private DispatcherTimer? _reminderNotificationDismissTimer;
+    private bool _isAddingOrEditingReminder;
+    private string? _editingReminderId;
+    private string _formReminderTitle = string.Empty;
+    private string _formReminderCategory = "Hidrasi";
+    private string _formReminderIcon = "💧";
+    private string _formReminderNotes = string.Empty;
+    private ReminderType _formReminderType = ReminderType.Interval;
+    private int _formReminderIntervalMinutes = 60;
+    private string _formReminderDailyTimesText = "08:00, 13:00, 20:00";
 
     // BMKG Cuaca & Gempa Bumi Fields (Komponen ke-7)
     private BmkgNotificationEvent? _activeBmkgNotification;
@@ -138,6 +153,7 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenRadio;
     public event Action? RequestOpenLiveTv;
     public event Action? RequestOpenBmkg;
+    public event Action? RequestOpenReminder;
     public event Action? RequestOpenMusic;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
@@ -176,6 +192,7 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
                 OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
                 OnPropertyChanged(nameof(ShowHoverWeatherPill));
+                OnPropertyChanged(nameof(ShowHoverReminderPill));
                 OnPropertyChanged(nameof(ShowMusicInNotch));
                 OnPropertyChanged(nameof(ShowMusicPillInNotch));
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
@@ -198,6 +215,7 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
                 OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
                 OnPropertyChanged(nameof(ShowHoverWeatherPill));
+                OnPropertyChanged(nameof(ShowHoverReminderPill));
                 OnPropertyChanged(nameof(ShowMusicInNotch));
                 OnPropertyChanged(nameof(ShowMusicPillInNotch));
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
@@ -229,6 +247,7 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowIdlePrayerBesideLogo));
                 OnPropertyChanged(nameof(ShowIdleWeatherBesideLogo));
                 OnPropertyChanged(nameof(ShowHoverWeatherPill));
+                OnPropertyChanged(nameof(ShowHoverReminderPill));
                 OnPropertyChanged(nameof(ShowMusicInNotch));
                 OnPropertyChanged(nameof(ShowMusicPillInNotch));
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
@@ -1133,6 +1152,238 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    // ================= PENGINGAT PINTAR (MINUM AIR, OBAT, DLL.) PROPERTIES (KOMPONEN KE-8) =================
+    public IReminderService ReminderService => _reminderService;
+    public ObservableCollection<ReminderItem> Reminders { get; } = new();
+    public ObservableCollection<ReminderItem> ActiveReminders { get; } = new();
+    public IReadOnlyList<ReminderPresetOption> ReminderPresets => _reminderService.Presets;
+    public IReadOnlyList<string> AvailableReminderIcons { get; } = new[] { "💧", "💊", "👀", "🧘", "🍽️", "☕", "⏰", "🏃" };
+    public IReadOnlyList<ReminderIconOption> AvailableReminderIconOptions { get; } = new[]
+    {
+        new ReminderIconOption { Key = "💧", Label = "Air" },
+        new ReminderIconOption { Key = "💊", Label = "Obat" },
+        new ReminderIconOption { Key = "👀", Label = "Mata" },
+        new ReminderIconOption { Key = "🧘", Label = "Regang" },
+        new ReminderIconOption { Key = "🍽️", Label = "Makan" },
+        new ReminderIconOption { Key = "☕", Label = "Kopi/Teh" },
+        new ReminderIconOption { Key = "🏃", Label = "Olahraga" },
+        new ReminderIconOption { Key = "⏰", Label = "Alarm" }
+    };
+
+    public bool EnableReminders
+    {
+        get => Settings.EnableReminders;
+        set
+        {
+            if (Settings.EnableReminders != value)
+            {
+                Settings.EnableReminders = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(EnableReminders));
+                OnPropertyChanged(nameof(ShowHoverReminderPill));
+                OnPropertyChanged(nameof(HasActiveReminderNotification));
+                if (value)
+                {
+                    _reminderService.Start();
+                }
+                else
+                {
+                    _reminderService.Stop();
+                    ActiveReminderNotification = null;
+                }
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool ShowReminderInCompactNotch
+    {
+        get => Settings.ShowReminderInCompactNotch;
+        set
+        {
+            if (Settings.ShowReminderInCompactNotch != value)
+            {
+                Settings.ShowReminderInCompactNotch = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(ShowReminderInCompactNotch));
+                OnPropertyChanged(nameof(ShowHoverReminderPill));
+            }
+        }
+    }
+
+    public bool IsReminderWindowOpen
+    {
+        get => Settings.IsReminderWindowOpen;
+        set
+        {
+            if (Settings.IsReminderWindowOpen != value)
+            {
+                Settings.IsReminderWindowOpen = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsReminderWindowOpen));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool IsReminderWindowCompact
+    {
+        get => Settings.IsReminderWindowCompact;
+        set
+        {
+            if (Settings.IsReminderWindowCompact != value)
+            {
+                Settings.IsReminderWindowCompact = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsReminderWindowCompact));
+                OnPropertyChanged(nameof(IsReminderWindowExpanded));
+            }
+        }
+    }
+
+    public bool IsReminderWindowExpanded => !IsReminderWindowCompact;
+
+    public bool ShowHoverReminderPill => IsCompactMode && !_isBezelMinimized && ShowComponentIcons && Settings.EnableReminders && Settings.ShowReminderInCompactNotch && HasActiveReminders;
+
+    public ReminderItem? NextUpcomingReminder => _reminderService.NextUpcomingReminder;
+    public bool HasActiveReminders => Reminders.Any(r => r.IsEnabled);
+    public int ActiveRemindersCount => Reminders.Count(r => r.IsEnabled);
+    public int CompletedTodayTotalCount => Reminders.Where(r => r.LastCompletedDate.Date == DateTime.Today).Sum(r => r.CompletedTodayCount);
+    public string ReminderSummaryText => ActiveRemindersCount > 0
+        ? $"{ActiveRemindersCount} pengingat aktif • {CompletedTodayTotalCount}x selesai hari ini"
+        : "Belum ada pengingat aktif";
+
+    public string NextReminderIcon => NextUpcomingReminder?.Icon ?? "💧";
+    public string NextReminderIconGeometry => ReminderItem.GetIconGeometryForKey(NextReminderIcon);
+    public string NextReminderAccentColor => ReminderItem.GetAccentColorForKey(NextReminderIcon);
+    public string NextReminderBadgeBackground => ReminderItem.GetBadgeBackgroundForKey(NextReminderIcon);
+    public string NextReminderBadgeBorder => ReminderItem.GetBadgeBorderForKey(NextReminderIcon);
+    public string NextReminderTitle => NextUpcomingReminder?.Title ?? "Pengingat Pintar";
+    public string NextReminderShortTitle
+    {
+        get
+        {
+            var t = NextUpcomingReminder?.Title;
+            if (string.IsNullOrWhiteSpace(t)) return "Pengingat";
+            return t.Length > 18 ? t.Substring(0, 17).Trim() + "…" : t;
+        }
+    }
+    public string NextReminderTimeFormatted => NextUpcomingReminder?.NextTriggerFormatted ?? "-";
+    public string NextReminderCountdownBadge => NextUpcomingReminder?.CountdownText ?? "Siap";
+    public string NextReminderScheduleText => NextUpcomingReminder?.ScheduleSummaryText ?? "Klik untuk atur pengingat minum air, obat, dll.";
+
+    public string ReminderNotchTooltip
+    {
+        get
+        {
+            var active = Reminders.Where(r => r.IsEnabled).ToList();
+            if (active.Count > 0)
+            {
+                var lines = active.Select(r => $"{r.Icon} {r.Title}: {r.CountdownText} ({r.NextTriggerFormatted})");
+                return "Pengingat Aktif:\n" + string.Join("\n", lines) + "\nKlik untuk membuka jendela Pengingat Pintar";
+            }
+            return "💧💊 Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata, dll.)\nKlik untuk membuka dan mengatur jadwal pengingat";
+        }
+    }
+
+    public bool IsAddingOrEditingReminder
+    {
+        get => _isAddingOrEditingReminder;
+        set
+        {
+            if (SetProperty(ref _isAddingOrEditingReminder, value))
+            {
+                OnPropertyChanged(nameof(ReminderFormHeaderTitle));
+                OnPropertyChanged(nameof(ReminderFormSaveButtonText));
+            }
+        }
+    }
+
+    public bool IsEditingExistingReminder => !string.IsNullOrEmpty(_editingReminderId);
+    public string ReminderFormHeaderTitle => IsEditingExistingReminder ? "Edit Pengingat" : "Tambah Pengingat Baru";
+    public string ReminderFormSaveButtonText => IsEditingExistingReminder ? "Simpan Perubahan" : "Tambah Pengingat";
+
+    public string FormReminderTitle
+    {
+        get => _formReminderTitle;
+        set => SetProperty(ref _formReminderTitle, value ?? string.Empty);
+    }
+
+    public string FormReminderCategory
+    {
+        get => _formReminderCategory;
+        set => SetProperty(ref _formReminderCategory, value ?? "Kesehatan");
+    }
+
+    public string FormReminderIcon
+    {
+        get => _formReminderIcon;
+        set
+        {
+            if (SetProperty(ref _formReminderIcon, string.IsNullOrWhiteSpace(value) ? "💧" : value))
+            {
+                OnPropertyChanged(nameof(FormReminderIconGeometry));
+                OnPropertyChanged(nameof(FormReminderAccentColor));
+                OnPropertyChanged(nameof(FormReminderBadgeBackground));
+                OnPropertyChanged(nameof(FormReminderBadgeBorder));
+            }
+        }
+    }
+
+    public string FormReminderIconGeometry => ReminderItem.GetIconGeometryForKey(_formReminderIcon);
+    public string FormReminderAccentColor => ReminderItem.GetAccentColorForKey(_formReminderIcon);
+    public string FormReminderBadgeBackground => ReminderItem.GetBadgeBackgroundForKey(_formReminderIcon);
+    public string FormReminderBadgeBorder => ReminderItem.GetBadgeBorderForKey(_formReminderIcon);
+
+    public string FormReminderNotes
+    {
+        get => _formReminderNotes;
+        set => SetProperty(ref _formReminderNotes, value ?? string.Empty);
+    }
+
+    public ReminderType FormReminderType
+    {
+        get => _formReminderType;
+        set
+        {
+            if (SetProperty(ref _formReminderType, value))
+            {
+                OnPropertyChanged(nameof(IsFormIntervalType));
+                OnPropertyChanged(nameof(IsFormDailyTimeType));
+            }
+        }
+    }
+
+    public bool IsFormIntervalType => _formReminderType == ReminderType.Interval;
+    public bool IsFormDailyTimeType => _formReminderType == ReminderType.DailyTime;
+
+    public int FormReminderIntervalMinutes
+    {
+        get => _formReminderIntervalMinutes;
+        set => SetProperty(ref _formReminderIntervalMinutes, Math.Clamp(value, 1, 1440));
+    }
+
+    public string FormReminderDailyTimesText
+    {
+        get => _formReminderDailyTimesText;
+        set => SetProperty(ref _formReminderDailyTimesText, value ?? "08:00");
+    }
+
+    public bool HasActiveReminderNotification => EnableReminders && _activeReminderNotification != null;
+    public ReminderNotificationEvent? ActiveReminderNotification
+    {
+        get => _activeReminderNotification;
+        private set
+        {
+            if (SetProperty(ref _activeReminderNotification, value))
+            {
+                OnPropertyChanged(nameof(HasActiveReminderNotification));
+                OnPropertyChanged(nameof(IsNotchActive));
+            }
+        }
+    }
+
     public string ComponentsButtonSymbol
     {
         get
@@ -1999,6 +2250,30 @@ public ICommand TogglePrayerPanelCommand { get; }
     public ICommand DismissBmkgNotificationCommand { get; }
     public ICommand OpenBmkgNotificationDetailCommand { get; }
 
+    // Pengingat Pintar (Minum Air, Minum Obat, dll.) Commands
+    public ICommand OpenReminderCommand { get; }
+    public ICommand ToggleReminderWindowCommand { get; }
+    public ICommand CloseReminderWindowCommand { get; }
+    public ICommand MinimizeReminderWindowCommand { get; }
+    public ICommand ExpandReminderWindowCommand { get; }
+    public ICommand AddReminderPresetCommand { get; }
+    public ICommand OpenAddReminderFormCommand { get; }
+    public ICommand OpenEditReminderFormCommand { get; }
+    public ICommand CancelReminderFormCommand { get; }
+    public ICommand SaveReminderFormCommand { get; }
+    public ICommand SetFormReminderTypeCommand { get; }
+    public ICommand SetFormReminderIconCommand { get; }
+    public ICommand SetFormIntervalPresetCommand { get; }
+    public ICommand ToggleReminderItemCommand { get; }
+    public ICommand DeleteReminderItemCommand { get; }
+    public ICommand SnoozeReminderItemCommand { get; }
+    public ICommand CompleteReminderItemCommand { get; }
+    public ICommand ResetReminderTimerCommand { get; }
+    public ICommand TestReminderAlertCommand { get; }
+    public ICommand DismissReminderNotificationCommand { get; }
+    public ICommand SnoozeActiveReminderNotificationCommand { get; }
+    public ICommand CompleteActiveReminderNotificationCommand { get; }
+
     public ICommand WakeFromIdleCommand { get; }
     public ICommand ToggleMiniModeCommand { get; }
     public ICommand ToggleVocalRemoverCommand { get; }
@@ -2019,7 +2294,8 @@ public ICommand TogglePrayerPanelCommand { get; }
         IPrayerReminderService? prayerReminderService = null,
         IRadioService? radioService = null,
         ILiveTvService? liveTvService = null,
-        IBmkgService? bmkgService = null)
+        IBmkgService? bmkgService = null,
+        IReminderService? reminderService = null)
     {
         _mediaService = mediaService;
         _lyricsService = lyricsService;
@@ -2034,6 +2310,18 @@ public ICommand TogglePrayerPanelCommand { get; }
         _radioService = radioService ?? new RadioService(settingsService);
         _liveTvService = liveTvService ?? new LiveTvService(settingsService);
         _bmkgService = bmkgService ?? new BmkgService(settingsService);
+        _reminderService = reminderService ?? new ReminderService(settingsService);
+
+        foreach (var r in _reminderService.Reminders)
+        {
+            Reminders.Add(r);
+            if (r.IsEnabled)
+            {
+                ActiveReminders.Add(r);
+            }
+        }
+        _reminderService.RemindersUpdated += OnRemindersUpdated;
+        _reminderService.ReminderTriggered += OnSmartReminderTriggered;
 
         _bmkgService.DataUpdated += (s, e) => OnBmkgDataUpdated();
         _bmkgService.NotificationTriggered += (s, evt) => OnBmkgNotificationTriggered(evt);
@@ -2722,6 +3010,180 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
             RequestOpenBmkg?.Invoke();
         });
 
+        // Pengingat Pintar Commands
+        OpenReminderCommand = new RelayCommand(() =>
+        {
+            IsReminderWindowOpen = true;
+            IsComponentsMenuOpen = false;
+            RequestOpenReminder?.Invoke();
+        });
+        ToggleReminderWindowCommand = new RelayCommand(() =>
+        {
+            IsReminderWindowOpen = !IsReminderWindowOpen;
+            IsComponentsMenuOpen = false;
+            if (IsReminderWindowOpen)
+            {
+                RequestOpenReminder?.Invoke();
+            }
+        });
+        CloseReminderWindowCommand = new RelayCommand(() =>
+        {
+            IsReminderWindowOpen = false;
+            IsComponentsMenuOpen = false;
+        });
+        MinimizeReminderWindowCommand = new RelayCommand(() => IsReminderWindowCompact = true);
+        ExpandReminderWindowCommand = new RelayCommand(() => IsReminderWindowCompact = false);
+        AddReminderPresetCommand = new RelayCommand((presetObj) =>
+        {
+            if (presetObj is string presetId && !string.IsNullOrWhiteSpace(presetId))
+            {
+                _reminderService.AddFromPreset(presetId);
+                SyncRemindersCollection();
+            }
+            else if (presetObj is ReminderPresetOption preset)
+            {
+                _reminderService.AddFromPreset(preset.Id);
+                SyncRemindersCollection();
+            }
+        });
+        OpenAddReminderFormCommand = new RelayCommand(() =>
+        {
+            _editingReminderId = null;
+            FormReminderTitle = string.Empty;
+            FormReminderCategory = "Kesehatan";
+            FormReminderIcon = "💧";
+            FormReminderNotes = string.Empty;
+            FormReminderType = ReminderType.Interval;
+            FormReminderIntervalMinutes = 60;
+            FormReminderDailyTimesText = "08:00, 13:00, 20:00";
+            OnPropertyChanged(nameof(IsEditingExistingReminder));
+            IsAddingOrEditingReminder = true;
+        });
+        OpenEditReminderFormCommand = new RelayCommand((itemObj) =>
+        {
+            if (itemObj is ReminderItem item)
+            {
+                _editingReminderId = item.Id;
+                FormReminderTitle = item.Title;
+                FormReminderCategory = item.Category;
+                FormReminderIcon = item.Icon;
+                FormReminderNotes = item.Notes;
+                FormReminderType = item.Type;
+                FormReminderIntervalMinutes = item.IntervalMinutes;
+                FormReminderDailyTimesText = item.DailyTimes != null && item.DailyTimes.Count > 0
+                    ? string.Join(", ", item.DailyTimes)
+                    : "08:00";
+                OnPropertyChanged(nameof(IsEditingExistingReminder));
+                IsAddingOrEditingReminder = true;
+            }
+        });
+        CancelReminderFormCommand = new RelayCommand(() =>
+        {
+            _editingReminderId = null;
+            IsAddingOrEditingReminder = false;
+        });
+        SaveReminderFormCommand = new RelayCommand(SaveReminderFromForm);
+        SetFormReminderTypeCommand = new RelayCommand((tObj) =>
+        {
+            if (tObj is string tStr)
+            {
+                FormReminderType = string.Equals(tStr, "DailyTime", StringComparison.OrdinalIgnoreCase)
+                    ? ReminderType.DailyTime
+                    : ReminderType.Interval;
+            }
+            else if (tObj is ReminderType rt)
+            {
+                FormReminderType = rt;
+            }
+        });
+        SetFormReminderIconCommand = new RelayCommand((iconObj) =>
+        {
+            if (iconObj is string ic && !string.IsNullOrWhiteSpace(ic))
+            {
+                FormReminderIcon = ic;
+            }
+            else if (iconObj is ReminderIconOption opt && !string.IsNullOrWhiteSpace(opt.Key))
+            {
+                FormReminderIcon = opt.Key;
+            }
+        });
+        SetFormIntervalPresetCommand = new RelayCommand((minObj) =>
+        {
+            if (minObj is string s && int.TryParse(s, out int m))
+            {
+                FormReminderIntervalMinutes = m;
+            }
+            else if (minObj is int mVal)
+            {
+                FormReminderIntervalMinutes = mVal;
+            }
+        });
+        ToggleReminderItemCommand = new RelayCommand((itemObj) =>
+        {
+            if (itemObj is ReminderItem item)
+            {
+                _reminderService.ToggleReminder(item.Id);
+            }
+        });
+        DeleteReminderItemCommand = new RelayCommand((itemObj) =>
+        {
+            if (itemObj is ReminderItem item)
+            {
+                _reminderService.DeleteReminder(item.Id);
+                SyncRemindersCollection();
+            }
+        });
+        SnoozeReminderItemCommand = new RelayCommand((itemObj) =>
+        {
+            if (itemObj is ReminderItem item)
+            {
+                _reminderService.SnoozeReminder(item.Id, 10);
+            }
+        });
+        CompleteReminderItemCommand = new RelayCommand((itemObj) =>
+        {
+            if (itemObj is ReminderItem item)
+            {
+                _reminderService.CompleteReminderOccurrence(item.Id);
+            }
+        });
+        ResetReminderTimerCommand = new RelayCommand((itemObj) =>
+        {
+            if (itemObj is ReminderItem item)
+            {
+                _reminderService.ResetTimer(item.Id);
+            }
+        });
+        TestReminderAlertCommand = new RelayCommand((itemObj) =>
+        {
+            _reminderService.TriggerTestNotification(itemObj as ReminderItem);
+        });
+        DismissReminderNotificationCommand = new RelayCommand(() =>
+        {
+            _reminderNotificationDismissTimer?.Stop();
+            ActiveReminderNotification = null;
+        });
+        SnoozeActiveReminderNotificationCommand = new RelayCommand((minObj) =>
+        {
+            int mins = 10;
+            if (minObj is string s && int.TryParse(s, out int parsed)) mins = parsed;
+            if (ActiveReminderNotification != null && !string.IsNullOrEmpty(ActiveReminderNotification.ReminderId))
+            {
+                _reminderService.SnoozeReminder(ActiveReminderNotification.ReminderId, mins);
+            }
+            _reminderNotificationDismissTimer?.Stop();
+            ActiveReminderNotification = null;
+        });
+        CompleteActiveReminderNotificationCommand = new RelayCommand(() =>
+        {
+            if (ActiveReminderNotification != null && !string.IsNullOrEmpty(ActiveReminderNotification.ReminderId))
+            {
+                _reminderService.CompleteReminderOccurrence(ActiveReminderNotification.ReminderId);
+            }
+            _reminderNotificationDismissTimer?.Stop();
+            ActiveReminderNotification = null;
+        });
+
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
         _mediaService.SessionsChanged += (s, list) =>
@@ -2835,11 +3297,25 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         OnPropertyChanged(nameof(SelectedBmkgCity));
         OnPropertyChanged(nameof(BmkgWeatherCityText));
         OnPropertyChanged(nameof(BmkgActiveAdm4Text));
+        OnPropertyChanged(nameof(EnableReminders));
+        OnPropertyChanged(nameof(ShowReminderInCompactNotch));
+        OnPropertyChanged(nameof(ShowHoverReminderPill));
+        OnPropertyChanged(nameof(IsReminderWindowOpen));
+        OnPropertyChanged(nameof(HasActiveReminderNotification));
         RefreshAdhanSettings();
         _prayerReminderService.RefreshSchedule();
         if (EnableBmkg)
         {
             _ = _bmkgService.RefreshAllAsync(forceWeather: false);
+        }
+        if (EnableReminders)
+        {
+            _reminderService.Start();
+        }
+        else
+        {
+            _reminderService.Stop();
+            ActiveReminderNotification = null;
         }
         RequestComponentLayoutChanged?.Invoke();
     }
@@ -3622,6 +4098,150 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         _ = _bmkgService.RefreshWeatherAsync();
     }
 
+    // ================= PENGINGAT PINTAR HELPER METHODS =================
+    private void SyncRemindersCollection()
+    {
+        var currentList = _reminderService.Reminders.ToList();
+        Reminders.Clear();
+        foreach (var item in currentList)
+        {
+            Reminders.Add(item);
+        }
+        NotifyReminderPropertiesChanged();
+    }
+
+    private void OnRemindersUpdated()
+    {
+        void Notify()
+        {
+            NotifyReminderPropertiesChanged();
+        }
+
+        if (System.Windows.Application.Current?.Dispatcher != null &&
+            !System.Windows.Application.Current.Dispatcher.CheckAccess())
+        {
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(Notify);
+        }
+        else
+        {
+            Notify();
+        }
+    }
+
+    private void SyncActiveRemindersCollection()
+    {
+        var enabledList = Reminders.Where(r => r.IsEnabled).ToList();
+        if (!ActiveReminders.SequenceEqual(enabledList))
+        {
+            ActiveReminders.Clear();
+            foreach (var item in enabledList)
+            {
+                ActiveReminders.Add(item);
+            }
+        }
+    }
+
+    private void NotifyReminderPropertiesChanged()
+    {
+        SyncActiveRemindersCollection();
+        OnPropertyChanged(nameof(NextUpcomingReminder));
+        OnPropertyChanged(nameof(HasActiveReminders));
+        OnPropertyChanged(nameof(ActiveRemindersCount));
+        OnPropertyChanged(nameof(CompletedTodayTotalCount));
+        OnPropertyChanged(nameof(ReminderSummaryText));
+        OnPropertyChanged(nameof(NextReminderIcon));
+        OnPropertyChanged(nameof(NextReminderIconGeometry));
+        OnPropertyChanged(nameof(NextReminderAccentColor));
+        OnPropertyChanged(nameof(NextReminderBadgeBackground));
+        OnPropertyChanged(nameof(NextReminderBadgeBorder));
+        OnPropertyChanged(nameof(NextReminderTitle));
+        OnPropertyChanged(nameof(NextReminderShortTitle));
+        OnPropertyChanged(nameof(NextReminderTimeFormatted));
+        OnPropertyChanged(nameof(NextReminderCountdownBadge));
+        OnPropertyChanged(nameof(NextReminderScheduleText));
+        OnPropertyChanged(nameof(ReminderNotchTooltip));
+        OnPropertyChanged(nameof(ShowHoverReminderPill));
+    }
+
+    private void OnSmartReminderTriggered(ReminderNotificationEvent evt)
+    {
+        System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+        {
+            ActiveReminderNotification = evt;
+            RequestShowTrayNotification?.Invoke(evt.Title, evt.Message);
+
+            _reminderNotificationDismissTimer?.Stop();
+            _reminderNotificationDismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(28) };
+            _reminderNotificationDismissTimer.Tick += (s, e) =>
+            {
+                _reminderNotificationDismissTimer?.Stop();
+                ActiveReminderNotification = null;
+            };
+            _reminderNotificationDismissTimer.Start();
+        });
+    }
+
+    private void SaveReminderFromForm()
+    {
+        if (string.IsNullOrWhiteSpace(FormReminderTitle))
+            return;
+
+        var parsedTimes = new List<string>();
+        if (!string.IsNullOrWhiteSpace(FormReminderDailyTimesText))
+        {
+            var rawTokens = FormReminderDailyTimesText.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var tok in rawTokens)
+            {
+                var clean = tok.Trim();
+                if (TimeSpan.TryParse(clean, out var ts))
+                {
+                    parsedTimes.Add($"{ts.Hours:D2}:{ts.Minutes:D2}");
+                }
+            }
+        }
+        if (parsedTimes.Count == 0)
+        {
+            parsedTimes.Add("08:00");
+        }
+
+        if (!string.IsNullOrEmpty(_editingReminderId))
+        {
+            var existing = Reminders.FirstOrDefault(r => r.Id == _editingReminderId);
+            if (existing != null)
+            {
+                existing.Title = FormReminderTitle.Trim();
+                existing.Category = string.IsNullOrWhiteSpace(FormReminderCategory) ? "Kesehatan" : FormReminderCategory.Trim();
+                existing.Icon = string.IsNullOrWhiteSpace(FormReminderIcon) ? "💧" : FormReminderIcon.Trim();
+                existing.Notes = FormReminderNotes?.Trim() ?? string.Empty;
+                existing.Type = FormReminderType;
+                existing.IntervalMinutes = Math.Clamp(FormReminderIntervalMinutes, 1, 1440);
+                existing.DailyTimes = parsedTimes;
+                existing.IsEnabled = true;
+                _reminderService.UpdateReminder(existing);
+            }
+        }
+        else
+        {
+            var newItem = new ReminderItem
+            {
+                Title = FormReminderTitle.Trim(),
+                Category = string.IsNullOrWhiteSpace(FormReminderCategory) ? "Kesehatan" : FormReminderCategory.Trim(),
+                Icon = string.IsNullOrWhiteSpace(FormReminderIcon) ? "💧" : FormReminderIcon.Trim(),
+                Notes = FormReminderNotes?.Trim() ?? string.Empty,
+                Type = FormReminderType,
+                IntervalMinutes = Math.Clamp(FormReminderIntervalMinutes, 1, 1440),
+                DailyTimes = parsedTimes,
+                IsEnabled = true
+            };
+            _reminderService.AddReminder(newItem);
+            SyncRemindersCollection();
+        }
+
+        _editingReminderId = null;
+        IsAddingOrEditingReminder = false;
+        NotifyReminderPropertiesChanged();
+    }
+
     public async Task InitializeAsync()
     {
         await _mediaService.InitializeAsync();
@@ -3629,6 +4249,10 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         if (Settings.EnableBmkg)
         {
             _bmkgService.Start();
+        }
+        if (Settings.EnableReminders)
+        {
+            _reminderService.Start();
         }
 
         if (!IsPinned && !_isHovering)
@@ -4673,7 +5297,7 @@ public void ExpandAllCategories()
 
     public void EnterIdleMiniMode()
     {
-        if (IsPinned || IsLyricsMode || IsComponentsMenuOpen || HasActivePrayerNotification || HasActiveBmkgNotification)
+        if (IsPinned || IsLyricsMode || IsComponentsMenuOpen || HasActivePrayerNotification || HasActiveBmkgNotification || HasActiveReminderNotification)
         {
             return;
         }
@@ -4712,7 +5336,7 @@ public void ExpandAllCategories()
         _idleTimer.Tick += (s, e) =>
         {
             _idleTimer?.Stop();
-            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification && !HasActiveBmkgNotification)
+            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification && !HasActiveBmkgNotification && !HasActiveReminderNotification)
             {
                 IsHovering = false;
                 EnterIdleMiniMode();

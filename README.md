@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
+Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.8.4)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.8.5)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -231,7 +231,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - **Mode Bioskop (`⛶`), Mini Picture-in-Picture (`📺 PiP`), & Saluran Custom (`+ URL`)**: Sembunyikan daftar saluran untuk menonton layar penuh di jendela mengambang, perkecil ke jendela Mini TV PiP yang selalu tampil di atas aplikasi lain, tandai saluran favorit (`★`), atau tambahkan URL `.m3u8` / YouTube Live milik Anda sendiri.
   - **Koordinasi Audio Pintar**: Memutar saluran Live TV secara otomatis menghentikan pemutaran Radio Online agar suara tidak bertumpuk.
 
-### 🌤️ 30. Komponen ke-7: Cuaca & Gempa Bumi BMKG, Lokasi Presisi Kelurahan/Desa & Mode Idle Minimalis *(Baru di v1.8.4)*
+### 🌤️ 30. Komponen ke-7: Cuaca & Gempa Bumi BMKG, Lokasi Presisi Kelurahan/Desa & Mode Idle Minimalis *(v1.8.4)*
 - **Integrasi Resmi Data Terbuka BMKG (`BmkgWindow`)**:
   - Menampilkan **Prakiraan Cuaca Per 3 Jam (3 Hari)** langsung dari API publik resmi BMKG (`api.bmkg.go.id`), mencakup suhu udara (`°C`), kondisi langit, kelembapan (`%`), kecepatan & arah mata angin (`km/j`), tutupan awan (`%`), serta curah hujan (`mm`).
   - Memantau **Informasi Gempa Bumi Real-Time (`data.bmkg.go.id`)** dalam 3 tab: **Gempa Terbaru (*AutoGempa*)** lengkap dengan pratinjau visual **Peta Guncangan (*Shakemap BMKG*)**, **15 Gempa Terkini (`M ≥ 5.0`)**, dan **15 Gempa Dirasakan (skala MMI)** beserta tautan langsung titik episentrum di Google Maps.
@@ -243,7 +243,18 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - Seluruh ikon cuaca (Cerah, Cerah Berawan, Berawan, Udara Kabur/Kabut, Hujan, Hujan Petir) dan indikator dirancang menggunakan **ikon vektor SVG berwarna kontras tinggi** di atas tema gelap OLED.
   - Dilengkapi **Banner Peringatan Dini Dynamic Island** otomatis saat terdeteksi gempa bumi baru atau peringatan cuaca ekstrem (hujan lebat/petir).
 - **Mode Idle Minimalis (Hanya Logo DRANOTCH)**:
-  - Saat kondisi *idle* (kursor tidak diarahkan dan notch tidak di-pin), Dynamic Notch hanya menampilkan **Logo DRANOTCH** yang bersih dan minimalis di tengah atas layar. Saat di-*hover*, seluruh 7 komponen dan informasi ringkas (Waktu Sholat & Cuaca/Gempa BMKG) muncul secara simetris.
+  - Saat kondisi *idle* (kursor tidak diarahkan dan notch tidak di-pin), Dynamic Notch hanya menampilkan **Logo DRANOTCH** yang bersih dan minimalis di tengah atas layar. Saat di-*hover*, seluruh komponen dan informasi ringkas muncul secara simetris.
+
+### 💧 31. Komponen ke-8: Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas) *(Baru di v1.8.5)*
+- **Jendela Mandiri Pengingat Pintar (`ReminderWindow`)**:
+  - Mendukung 2 tipe jadwal pengingat: **Interval Berulang** (misal setiap 15m, 20m, 30m, 45m, 1 Jam, 2 Jam untuk minum air putih, istirahat mata 20-20-20, peregangan) dan **Jam Harian Tertentu** (misal pukul `08:00, 13:00, 20:00` untuk minum obat atau vitamin).
+  - Dilengkapi **Bar Preset Pintar 1-Klik** (`Minum Air 1 Jam`, `Minum Obat 3x Sehari`, `Istirahat Mata 20m`, `Peregangan 45m`), form kustomisasi lengkap, pencatatan jumlah selesai harian (`✓ Nx hari ini`), serta tombol cepat **Selesai (`✓`)**, **Tunda 10 Menit (`💤 +10m`)**, dan **Reset Timer (`↻`)**.
+- **Ikon Vektor SVG Berwarna Terang & Kontras Tinggi**:
+  - Setiap jenis pengingat ditampilkan dengan ikon vektor SVG tajam di dalam *badge* berwarna khusus: Tetesan Air Biru Cerah (`#38BDF8`), Kapsul Obat Rose (`#FB7185`), Mata Ungu Terang (`#C084FC`), Peregangan Hijau Zamrud (`#34D399`), Makan/Minum Amber (`#FBBF24`), Olahraga Teal (`#2DD4BF`), dan Alarm Biru (`#60A5FA`).
+- **Tata Letak Simetris Bar Bawah Saat Hover**:
+  - Saat *hover*, bar informasi bawah tersusun simetris: **Cuaca & Gempa BMKG di sebelah kiri**, **Waktu Sholat tepat di tengah**, dan **Pengingat Pintar di sebelah kanan** yang menampilkan seluruh ikon pengingat aktif beserta sisa waktunya secara ringkas.
+- **Banner Notifikasi Melayang Dynamic Island & Suara Pengingat**:
+  - Menampilkan kartu notifikasi melayang otomatis beserta suara pengingat saat jadwal tiba, dilengkapi aksi cepat **`✓ Sudah`** dan **`💤 +10m`** langsung dari notch.
 
 ---
 
@@ -251,7 +262,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 | Mode | Deskripsi |
 | :--- | :--- |
-| **Compact Notch** | Menampilkan artwork album, status lagu/lirik berjalan, ticker tugas aktif, pill waktu sholat, dan tombol putar/jeda. |
+| **Compact Notch** | Menampilkan artwork album, status lagu/lirik berjalan, ticker tugas aktif, pill cuaca BMKG, waktu sholat di tengah, dan ikon pengingat aktif di kanan. |
 | **Expanded Panel** | Panel gabungan kontrol musik lengkap, progress seekbar, lirik, dan daftar tugas To-Do. |
 | **Detached To-Do** | Jendela To-Do mandiri dengan tema gelap OLED monokrom, kontrol minimize independen, drag & drop bebas, dan auto-save posisi. |
 | **Lyrics Overlay** | Tampilan lirik berukuran besar dengan scrolling halus otomatis mengikuti vokal lagu. |
@@ -273,7 +284,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.4.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.5.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

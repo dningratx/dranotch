@@ -928,6 +928,49 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    // Pengingat Pintar (Minum Air, Minum Obat, dll.) Properties
+    public bool EnableReminders
+    {
+        get => Settings.EnableReminders;
+        set
+        {
+            if (Settings.EnableReminders != value)
+            {
+                Settings.EnableReminders = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ShowReminderInCompactNotch
+    {
+        get => Settings.ShowReminderInCompactNotch;
+        set
+        {
+            if (Settings.ShowReminderInCompactNotch != value)
+            {
+                Settings.ShowReminderInCompactNotch = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ReminderSoundAlert
+    {
+        get => Settings.ReminderSoundAlert;
+        set
+        {
+            if (Settings.ReminderSoundAlert != value)
+            {
+                Settings.ReminderSoundAlert = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public PrayerSchedule TodayPrayerSchedule => _prayerService.GetTodaySchedule();
 
     private bool _isDetectingLocation;
