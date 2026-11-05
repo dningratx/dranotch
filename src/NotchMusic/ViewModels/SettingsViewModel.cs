@@ -208,6 +208,35 @@ public class SettingsViewModel : ViewModelBase
 
     public string CachePath => _settingsService.GetLyricsCachePath();
 
+    // Catatan Tempel (Sticky Notes) Properties
+    public bool EnableStickyNotes
+    {
+        get => Settings.EnableStickyNotes;
+        set
+        {
+            if (Settings.EnableStickyNotes != value)
+            {
+                Settings.EnableStickyNotes = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string StickyNotesDefaultColor
+    {
+        get => Settings.StickyNotesDefaultColor;
+        set
+        {
+            if (Settings.StickyNotesDefaultColor != value)
+            {
+                Settings.StickyNotesDefaultColor = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     // Google Drive Sync Properties
     public string GoogleDriveClientId
     {

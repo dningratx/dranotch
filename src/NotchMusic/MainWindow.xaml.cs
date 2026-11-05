@@ -29,6 +29,8 @@ public partial class MainWindow : Window
     private PrayerWindow? _prayerWindow;
     private BmkgWindow? _bmkgWindow;
     private ReminderWindow? _reminderWindow;
+    private StickyNotesHubWindow? _stickyNotesHubWindow;
+    private readonly Dictionary<string, StickyNoteWindow> _stickyNoteWindows = new();
     private AboutWindow? _aboutWindow;
     private HotkeyManager? _hotkeyManager;
     private bool _isRealExit;
@@ -63,6 +65,9 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenMusic += OpenMusic;
         _viewModel.RequestOpenBmkg += OpenBmkg;
         _viewModel.RequestOpenReminder += OpenReminder;
+        _viewModel.RequestOpenStickyNotesHub += OpenStickyNotesHub;
+        _viewModel.RequestOpenStickyNote += note => Dispatcher.Invoke(() => OpenStickyNote(note));
+        _viewModel.RequestCloseStickyNote += note => Dispatcher.Invoke(() => CloseStickyNote(note));
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
@@ -70,6 +75,7 @@ public partial class MainWindow : Window
             UpdatePrayerWindowState();
             UpdateBmkgWindowState();
             UpdateReminderWindowState();
+            UpdateStickyNotesWindowState();
             UpdateMusicWindowState();
             UpdateBrowserWindowState();
             UpdateRadioWindowState();
@@ -176,6 +182,7 @@ public partial class MainWindow : Window
         UpdatePrayerWindowState();
         UpdateBmkgWindowState();
         UpdateReminderWindowState();
+        UpdateStickyNotesWindowState();
         UpdateMusicWindowState();
 
         if (!_viewModel.ShowComponentIcons)
@@ -202,6 +209,11 @@ public partial class MainWindow : Window
                     _prayerWindow?.Hide();
                     _bmkgWindow?.Hide();
                     _reminderWindow?.Hide();
+                    _stickyNotesHubWindow?.Hide();
+                    foreach (var win in _stickyNoteWindows.Values)
+                    {
+                        win.Hide();
+                    }
                     _musicWindow?.Hide();
                 }
                 else
@@ -227,6 +239,17 @@ public partial class MainWindow : Window
                     if (_viewModel.EnableReminders && _viewModel.IsReminderWindowOpen)
                     {
                         _reminderWindow?.Show();
+                    }
+                    if (_viewModel.EnableStickyNotes && _viewModel.IsStickyNotesHubOpen)
+                    {
+                        _stickyNotesHubWindow?.Show();
+                    }
+                    foreach (var note in _viewModel.StickyNotes)
+                    {
+                        if (!note.IsClosed && _stickyNoteWindows.TryGetValue(note.Id, out var win))
+                        {
+                            win.Show();
+                        }
                     }
                 }
             });
@@ -260,6 +283,7 @@ public partial class MainWindow : Window
         _trayService.OpenLiveTvRequested += () => Dispatcher.Invoke(OpenLiveTv);
         _trayService.OpenBmkgRequested += () => Dispatcher.Invoke(OpenBmkg);
         _trayService.OpenReminderRequested += () => Dispatcher.Invoke(OpenReminder);
+        _trayService.OpenStickyNotesRequested += () => Dispatcher.Invoke(OpenStickyNotesHub);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
@@ -526,6 +550,107 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateStickyNotesWindowState()
+    {
+        if (_viewModel.EnableStickyNotes)
+        {
+            if (_viewModel.IsStickyNotesHubOpen)
+            {
+                OpenStickyNotesHub();
+            }
+            else
+            {
+                _stickyNotesHubWindow?.Hide();
+            }
+
+            foreach (var note in _viewModel.StickyNotes)
+            {
+                if (!note.IsClosed)
+                {
+                    OpenStickyNote(note);
+                }
+                else
+                {
+                    CloseStickyNote(note);
+                }
+            }
+        }
+        else
+        {
+            _stickyNotesHubWindow?.Hide();
+            foreach (var win in _stickyNoteWindows.Values)
+            {
+                win.Hide();
+            }
+        }
+    }
+
+    public void OpenStickyNotesHub()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsStickyNotesHubOpen = true;
+
+            if (_stickyNotesHubWindow == null)
+            {
+                _stickyNotesHubWindow = new StickyNotesHubWindow(_viewModel, _settingsService);
+                _stickyNotesHubWindow.Closed += (s, e) => _stickyNotesHubWindow = null;
+            }
+
+            if (_stickyNotesHubWindow.WindowState == WindowState.Minimized)
+            {
+                _stickyNotesHubWindow.WindowState = WindowState.Normal;
+            }
+
+            _stickyNotesHubWindow.Show();
+            _stickyNotesHubWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Catatan Tempel (Sticky Notes):\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    public void OpenStickyNote(StickyNoteItemViewModel note)
+    {
+        try
+        {
+            if (!_stickyNoteWindows.TryGetValue(note.Id, out var win) || win == null)
+            {
+                win = new StickyNoteWindow(note);
+                win.RequestCreateNewNote += () => _viewModel.CreateNewStickyNote(note.Color);
+                win.Closed += (s, e) => _stickyNoteWindows.Remove(note.Id);
+                _stickyNoteWindows[note.Id] = win;
+            }
+
+            if (win.WindowState == WindowState.Minimized)
+            {
+                win.WindowState = WindowState.Normal;
+            }
+
+            win.Show();
+            win.Activate();
+        }
+        catch { }
+    }
+
+    public void CloseStickyNote(StickyNoteItemViewModel note)
+    {
+        try
+        {
+            if (_stickyNoteWindows.TryGetValue(note.Id, out var win))
+            {
+                win.Hide();
+            }
+        }
+        catch { }
+    }
+
     public void OpenAbout()
     {
         if (_aboutWindow != null && _aboutWindow.IsVisible)
@@ -583,6 +708,7 @@ public partial class MainWindow : Window
         UpdatePrayerWindowState();
         UpdateBmkgWindowState();
         UpdateReminderWindowState();
+        UpdateStickyNotesWindowState();
         UpdateMusicWindowState();
         UpdateBrowserWindowState();
         UpdateRadioWindowState();
@@ -1215,6 +1341,11 @@ public partial class MainWindow : Window
         _viewModel.ReminderService.Dispose();
         _bmkgWindow?.ForceClose();
         _reminderWindow?.ForceClose();
+        _stickyNotesHubWindow?.ForceClose();
+        foreach (var win in _stickyNoteWindows.Values.ToList())
+        {
+            try { win.Close(); } catch { }
+        }
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _aboutWindow?.Close();

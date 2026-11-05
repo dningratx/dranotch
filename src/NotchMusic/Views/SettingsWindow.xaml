@@ -297,8 +297,8 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Sinkronisasi Google Drive (To-Do List)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
-                                <TextBlock Text="Sinkronkan to-do list antar komputer / laptop lewat Google Drive" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
+                                <TextBlock Text="Sinkronisasi Google Drive (To-Do List &amp; Catatan Tempel)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                                <TextBlock Text="Sinkronkan to-do list dan sticky notes antar komputer / laptop lewat Google Drive" FontSize="11" Foreground="#999999" Margin="0,2,0,0"/>
                             </StackPanel>
                             
                             <!-- Status Indicator Badge -->
@@ -377,6 +377,29 @@
                                 <TextBox Text="{Binding GoogleDriveClientSecret, UpdateSourceTrigger=PropertyChanged}" 
                                          Background="#141418" Foreground="#FFFFFF" BorderBrush="#3A3A4A" Padding="5" Margin="0,0,0,6"/>
                             </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4b. Catatan Tempel (Sticky Notes) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="&#x1F4D1; Catatan Tempel (Sticky Notes)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                        <TextBlock Text="Sticky notes melayang di desktop yang tersinkron otomatis ke Google Drive" FontSize="11" Foreground="#999999" Margin="0,2,0,8"/>
+
+                        <CheckBox Content="Aktifkan fitur Catatan Tempel di Notch" IsChecked="{Binding EnableStickyNotes}"/>
+
+                        <StackPanel Visibility="{Binding EnableStickyNotes, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                            <TextBlock Text="Warna Catatan Bawaan Baru:" FontSize="11.5" Foreground="#CCCCCC" Margin="0,4,0,4"/>
+                            <ComboBox SelectedValue="{Binding StickyNotesDefaultColor, Mode=TwoWay}" SelectedValuePath="Tag" Width="180" HorizontalAlignment="Left">
+                                <ComboBoxItem Content="Kuning" Tag="Yellow"/>
+                                <ComboBoxItem Content="Hijau" Tag="Green"/>
+                                <ComboBoxItem Content="Pink" Tag="Pink"/>
+                                <ComboBoxItem Content="Biru" Tag="Blue"/>
+                                <ComboBoxItem Content="Ungu" Tag="Purple"/>
+                                <ComboBoxItem Content="Oranye" Tag="Orange"/>
+                                <ComboBoxItem Content="Gelap" Tag="Dark"/>
+                            </ComboBox>
                         </StackPanel>
                     </StackPanel>
                 </Border>

@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
+Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.8.6)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.9.0)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -271,6 +271,32 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - Tersedia 8 varian audio alarm berkualitas tinggi (.wav): *Digital Pulse*, *Crystal Drop*, *Classic Bell*, *Marimba*, *Morning Breeze*, *Radar*, *Reflection*, dan *Zen Bowl*.
   - Pemilihan jenis nada alarm kustom per pengingat dan tombol pratinjau tes suara di Pengaturan.
 
+### 📑 33. Komponen ke-9: Catatan Tempel (Sticky Notes) & Sinkronisasi Google Drive *(Baru di v1.9.0)*
+- **Jendela Catatan Tempel Melayang di Desktop (`StickyNoteWindow`)**:
+  - Catatan tempel mandiri yang bisa digeser dan ditempatkan bebas di mana saja pada layar desktop.
+  - **Ukuran Proporsional Standar Windows Sticky Notes**: Default ukuran baru `320×320` piksel dengan batas minimal fleksibel (`MinWidth="200"`, `MinHeight="160"`).
+  - **7 Pilihan Warna Pastel & Gelap Elegan**: Kuning (*Yellow*), Hijau (*Green*), Pink (*Pink*), Biru (*Blue*), Ungu (*Purple*), Oranye (*Orange*), dan Gelap (*Dark OLED*).
+  - **Fitur Catatan Lengkap**:
+    - **Ubah Ukuran Bebas 8-Arah (*8-Direction Fluid Resizing*)**: Tarik dan sesuaikan ukuran catatan dari 4 sisi (Kiri, Kanan, Atas, Bawah) maupun 4 sudut (Kiri-Atas, Kanan-Atas, Kiri-Bawah, Kanan-Bawah) dengan perubahan kursor dinamis.
+    - **Pergeseran Catatan Halus (*Fluid Drag & Move*)**: Seluruh bidang header dilengkapi ikon pegangan `⠿` dan kursor `SizeAll` serta bar footer dapat langsung diseret untuk memindahkan catatan.
+    - **Ganti Judul Instan**: Klik dua kali (*double-click*) pada judul catatan di header untuk mengubah nama catatan seketika.
+    - **Area Penulisan Bersih**: Bebas dari teks watermark placeholder sehingga siap digunakan mengetik langsung layaknya Sticky Notes fisik.
+    - **Selalu di Atas (`📌`)**: Fitur *Always on Top* independen per catatan agar tetap tampak di atas jendela aplikasi lain.
+    - **Toolbar Header Minimalis**: Tombol praktis untuk Buat Baru (`➕`), Ubah Warna (`●`), Pin (`📌`), Hapus (`🗑`), dan Tutup/Sembunyikan (`✕`).
+    - **Status Diedit & Indikator Cloud**: Menampilkan waktu terakhir diedit serta jumlah karakter secara real-time.
+- **Hub Koleksi Catatan Tempel (`StickyNotesHubWindow`)**:
+  - Pusat manajemen seluruh catatan dengan **Tata Letak Per Baris (*List Row View*)** memanjang yang bersih dan rapi.
+  - **Indikator Warna & Status Badge**: Garis aksen warna vertikal, judul tebal, cuplikan pratinjau teks (snippet), waktu pembaruan, serta lencana status (`Di Layar` atau `Tersimpan`).
+  - **Pencarian Cepat (*Instant Search*)**: Temukan catatan seketika berdasarkan kata kunci pada judul maupun isi catatan.
+  - **Aksi Cepat & Massal**: Tombol Buka/Fokus dan Hapus per baris, serta tombol buka serentak (`Buka Semua`) atau sembunyikan semua dari layar monitor (`Tutup Semua`).
+  - **Jendela Hub Bebas Ubah Ukuran (*Resizable Hub Window*)**: Jendela Hub dapat diperbesar dan dikecilkan dari seluruh sisi & sudut 8-arah dengan posisi serta ukuran yang tersimpan secara persisten.
+- **Sinkronisasi Otomatis Google Drive 2-Arah**:
+  - Terintegrasi penuh ke Google Drive di folder aman `DRANOTCH/stickynotes.json`.
+  - **Auto-Sync Cerdas**: Setiap perubahan teks, warna, judul, atau penambahan catatan baru otomatis diunggah ke Google Drive di latar belakang.
+  - **Merge & Tombstone Tracking**: Menggabungkan data catatan dari perangkat lain secara pintar dengan resolusi konflik berbasis waktu terbaru (*last-write-wins*), serta pelacakan ID yang dihapus (`deleted_stickynotes.json`) agar catatan yang telah dibuang tidak muncul kembali.
+- **Integrasi Notch & System Tray**:
+  - Ikon Catatan Tempel tersemat di Notch bar sisi kanan, lengkap dengan titik indikator emas saat ada catatan aktif di layar, menu System Tray, serta tombol konfigurasi di Pengaturan.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -299,7 +325,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.6.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.9.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

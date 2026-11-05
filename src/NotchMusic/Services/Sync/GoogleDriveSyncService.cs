@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using Google.Apis.Auth.OAuth2;
@@ -14,6 +14,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 {
     private const string FolderName = "DRANOTCH";
     private const string FileName = "todos.json";
+    private const string StickyNotesFileName = "stickynotes.json";
     private static readonly string[] Scopes = { DriveService.Scope.DriveFile };
 
     // Kredensial Bawaan Aplikasi DRANOTCH
@@ -38,6 +39,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
     private bool _isSyncing;
     private string _syncStatus = "Belum terhubung";
     private DateTimeOffset? _lastKnownRemoteModifiedTime;
+    private DateTimeOffset? _lastKnownRemoteStickyNotesModifiedTime;
 
     public string EffectiveClientId
     {
@@ -93,6 +95,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
 
     public event Action? StatusChanged;
     public event Action<List<TodoItem>>? TodosSynced;
+    public event Action<List<StickyNoteItem>>? StickyNotesSynced;
 
     public GoogleDriveSyncService(ISettingsService settingsService)
     {
@@ -568,6 +571,272 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
         return dict.Values
             .OrderBy(t => t.IsCompleted)
             .ThenByDescending(t => t.CreatedAt)
+            .ToList();
+    }
+
+    private async Task<Google.Apis.Drive.v3.Data.File?> FindStickyNotesFileAsync(DriveService service, string folderId, CancellationToken ct)
+    {
+        var listReq = service.Files.List();
+        listReq.Q = $"'{folderId}' in parents and name = '{StickyNotesFileName}' and trashed = false";
+        listReq.Fields = "files(id, name, modifiedTime)";
+        var result = await listReq.ExecuteAsync(ct);
+        return result.Files?.FirstOrDefault();
+    }
+
+    private async Task<List<StickyNoteItem>?> DownloadStickyNotesInternalAsync(DriveService service, CancellationToken ct)
+    {
+        var folderId = await GetOrCreateFolderAsync(service, ct);
+        var file = await FindStickyNotesFileAsync(service, folderId, ct);
+        if (file == null) return null;
+
+        using var stream = new MemoryStream();
+        await service.Files.Get(file.Id).DownloadAsync(stream, ct);
+        stream.Position = 0;
+
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        var json = await reader.ReadToEndAsync(ct);
+        _lastKnownRemoteStickyNotesModifiedTime = file.ModifiedTimeDateTimeOffset;
+        return JsonSerializer.Deserialize<List<StickyNoteItem>>(json);
+    }
+
+    public async Task<List<StickyNoteItem>?> DownloadStickyNotesAsync(CancellationToken ct = default)
+    {
+        await _syncLock.WaitAsync(ct);
+        try
+        {
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null) return null;
+            return await DownloadStickyNotesInternalAsync(service, ct);
+        }
+        catch (Exception ex)
+        {
+            _syncStatus = $"Gagal unduh catatan dari Google Drive: {ex.Message}";
+            StatusChanged?.Invoke();
+            return null;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public async Task<List<StickyNoteItem>?> CheckForRemoteStickyNotesChangesAsync(CancellationToken ct = default)
+    {
+        if (!IsConnected) return null;
+
+        if (!await _syncLock.WaitAsync(0, ct)) return null;
+
+        try
+        {
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null) return null;
+
+            var folderId = await GetOrCreateFolderAsync(service, ct);
+            var file = await FindStickyNotesFileAsync(service, folderId, ct);
+            if (file == null) return null;
+
+            var remoteModTime = file.ModifiedTimeDateTimeOffset;
+            if (remoteModTime.HasValue && _lastKnownRemoteStickyNotesModifiedTime.HasValue && remoteModTime <= _lastKnownRemoteStickyNotesModifiedTime)
+            {
+                return null;
+            }
+
+            var remoteList = await DownloadStickyNotesInternalAsync(service, ct);
+
+            _lastKnownRemoteStickyNotesModifiedTime = remoteModTime;
+            _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
+            _settingsService.Save();
+
+            _syncStatus = $"Catatan tersinkron otomatis ({DateTime.Now:HH:mm})";
+            StatusChanged?.Invoke();
+
+            if (remoteList != null)
+            {
+                StickyNotesSynced?.Invoke(remoteList);
+            }
+
+            return remoteList;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CheckForRemoteStickyNotesChanges error: {ex.Message}");
+            return null;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    private async Task<bool> UploadStickyNotesInternalAsync(DriveService service, IEnumerable<StickyNoteItem> notes, CancellationToken ct)
+    {
+        var folderId = await GetOrCreateFolderAsync(service, ct);
+        var existingFile = await FindStickyNotesFileAsync(service, folderId, ct);
+
+        var json = JsonSerializer.Serialize(notes, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = Encoding.UTF8.GetBytes(json);
+        using var stream = new MemoryStream(bytes);
+
+        if (existingFile != null)
+        {
+            var updateReq = service.Files.Update(new Google.Apis.Drive.v3.Data.File(), existingFile.Id, stream, "application/json");
+            updateReq.Fields = "id, modifiedTime";
+            var progress = await updateReq.UploadAsync(ct);
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                throw progress.Exception ?? new Exception("Gagal mengunggah catatan ke Google Drive.");
+            }
+            _lastKnownRemoteStickyNotesModifiedTime = updateReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            var metadata = new Google.Apis.Drive.v3.Data.File
+            {
+                Name = StickyNotesFileName,
+                Parents = new List<string> { folderId }
+            };
+            var createReq = service.Files.Create(metadata, stream, "application/json");
+            createReq.Fields = "id, modifiedTime";
+            var progress = await createReq.UploadAsync(ct);
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                throw progress.Exception ?? new Exception("Gagal membuat file catatan di Google Drive.");
+            }
+            _lastKnownRemoteStickyNotesModifiedTime = createReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+        }
+
+        return true;
+    }
+
+    public async Task<bool> UploadStickyNotesAsync(IEnumerable<StickyNoteItem> notes, CancellationToken ct = default)
+    {
+        await _syncLock.WaitAsync(ct);
+        try
+        {
+            IsSyncing = true;
+            _syncStatus = "Menyinkronkan catatan ke Google Drive...";
+            StatusChanged?.Invoke();
+
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null)
+            {
+                IsSyncing = false;
+                return false;
+            }
+
+            bool success = await UploadStickyNotesInternalAsync(service, notes, ct);
+            if (success)
+            {
+                _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
+                _settingsService.Save();
+                _syncStatus = $"Catatan tersinkron ({DateTime.Now:HH:mm})";
+            }
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+            return success;
+        }
+        catch (Exception ex)
+        {
+            _syncStatus = $"Gagal unggah catatan ke Google Drive: {ex.Message}";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+            return false;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public async Task<List<StickyNoteItem>?> SyncStickyNotesAsync(IEnumerable<StickyNoteItem> localNotes, IEnumerable<string>? deletedIds = null, CancellationToken ct = default)
+    {
+        if (!IsConnected) return null;
+
+        await _syncLock.WaitAsync(ct);
+        try
+        {
+            IsSyncing = true;
+            _syncStatus = "Menyinkronkan catatan dengan Google Drive...";
+            StatusChanged?.Invoke();
+
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null)
+            {
+                IsSyncing = false;
+                return null;
+            }
+
+            var remoteNotes = await DownloadStickyNotesInternalAsync(service, ct);
+
+            var merged = MergeStickyNotes(localNotes, remoteNotes ?? new List<StickyNoteItem>(), deletedIds);
+
+            await UploadStickyNotesInternalAsync(service, merged, ct);
+
+            _settingsService.CurrentSettings.GoogleDriveLastSyncTime = DateTime.Now;
+            _settingsService.Save();
+
+            _syncStatus = $"Sinkronisasi catatan berhasil ({DateTime.Now:HH:mm})";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+
+            StickyNotesSynced?.Invoke(merged);
+            return merged;
+        }
+        catch (Exception ex)
+        {
+            _syncStatus = $"Gagal sinkronisasi catatan: {ex.Message}";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+            return null;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public static List<StickyNoteItem> MergeStickyNotes(IEnumerable<StickyNoteItem> local, IEnumerable<StickyNoteItem> remote, IEnumerable<string>? deletedIds = null)
+    {
+        var deletedSet = deletedIds != null ? new HashSet<string>(deletedIds) : new HashSet<string>();
+        var dict = new Dictionary<string, StickyNoteItem>();
+
+        foreach (var item in remote)
+        {
+            if (deletedSet.Contains(item.Id))
+            {
+                continue;
+            }
+            dict[item.Id] = item;
+        }
+
+        foreach (var localItem in local)
+        {
+            if (deletedSet.Contains(localItem.Id))
+            {
+                continue;
+            }
+
+            if (dict.TryGetValue(localItem.Id, out var remoteItem))
+            {
+                // The item with later UpdatedAt wins
+                if (remoteItem.UpdatedAt > localItem.UpdatedAt)
+                {
+                    dict[localItem.Id] = remoteItem;
+                }
+                else
+                {
+                    dict[localItem.Id] = localItem;
+                }
+            }
+            else
+            {
+                dict[localItem.Id] = localItem;
+            }
+        }
+
+        return dict.Values
+            .OrderByDescending(n => n.IsPinned)
+            .ThenByDescending(n => n.UpdatedAt)
             .ToList();
     }
 }

@@ -13,6 +13,7 @@ public interface IGoogleDriveSyncService
 
     event Action? StatusChanged;
     event Action<List<TodoItem>>? TodosSynced;
+    event Action<List<StickyNoteItem>>? StickyNotesSynced;
 
     Task<bool> AuthenticateAsync(CancellationToken ct = default);
     Task DisconnectAsync();
@@ -20,5 +21,9 @@ public interface IGoogleDriveSyncService
     Task<bool> UploadTodosAsync(IEnumerable<TodoItem> todos, CancellationToken ct = default);
     Task<List<TodoItem>?> DownloadTodosAsync(CancellationToken ct = default);
     Task<List<TodoItem>?> CheckForRemoteChangesAsync(CancellationToken ct = default);
+    Task<List<StickyNoteItem>?> SyncStickyNotesAsync(IEnumerable<StickyNoteItem> localNotes, IEnumerable<string>? deletedIds = null, CancellationToken ct = default);
+    Task<bool> UploadStickyNotesAsync(IEnumerable<StickyNoteItem> notes, CancellationToken ct = default);
+    Task<List<StickyNoteItem>?> DownloadStickyNotesAsync(CancellationToken ct = default);
+    Task<List<StickyNoteItem>?> CheckForRemoteStickyNotesChangesAsync(CancellationToken ct = default);
     bool ImportCredentialsFile(string filePath);
 }

@@ -1,0 +1,261 @@
+<Window x:Class="NotchMusic.Views.StickyNoteWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:NotchMusic.Helpers"
+        Title="{Binding DisplayTitle, FallbackValue='Catatan Tempel'}"
+        Width="{Binding Width, Mode=TwoWay}"
+        Height="{Binding Height, Mode=TwoWay}"
+        MinWidth="200" MinHeight="160"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="{Binding IsPinned}"
+        ShowInTaskbar="False"
+        WindowStartupLocation="Manual">
+
+    <Window.Resources>
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+        <helpers:CountToVisibilityConverter x:Key="CountToVis"/>
+        <helpers:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVis"/>
+
+        <ControlTemplate x:Key="TransparentThumbTemplate" TargetType="Thumb">
+            <Border Background="Transparent"/>
+        </ControlTemplate>
+
+        <Style x:Key="NoteHeaderToolButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{Binding SecondaryTextBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Margin" Value="1,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#22000000"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#33000000"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ColorDotButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="12" BorderThickness="1.5" BorderBrush="#33000000">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#88000000"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <!-- Card Container with Shadow -->
+        <Border Margin="8" CornerRadius="12"
+                Background="{Binding CardBackgroundBrush}"
+                BorderBrush="{Binding BorderBrush}"
+                BorderThickness="1.2">
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="14" Direction="270" ShadowDepth="3" Opacity="0.32"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 1. Header Bar (Draggable) -->
+                <Border Grid.Row="0" x:Name="HeaderBorder"
+                        Background="{Binding HeaderBackgroundBrush}"
+                        CornerRadius="11,11,0,0" Padding="8,6,6,6"
+                        MouseDown="Header_MouseDown">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Draggable Title & Inline Rename -->
+                        <Grid Grid.Column="0" Background="Transparent" Cursor="SizeAll" MouseDown="Header_MouseDown">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Drag Grip Indicator -->
+                            <TextBlock Grid.Column="0" Text="&#x283F;" FontSize="13"
+                                       Foreground="{Binding SecondaryTextBrush}" Opacity="0.55"
+                                       VerticalAlignment="Center" Margin="2,0,5,0" Cursor="SizeAll"
+                                       ToolTip="Tahan dan geser untuk memindahkan catatan"/>
+
+                            <!-- Title TextBlock (Draggable, double-click to edit) -->
+                            <TextBlock x:Name="TitleTextBlock" Grid.Column="1"
+                                       Text="{Binding DisplayTitle}"
+                                       Foreground="{Binding TextForegroundBrush}"
+                                       FontWeight="SemiBold" FontSize="12.5"
+                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                       Cursor="SizeAll"
+                                       ToolTip="Tahan dan geser untuk memindahkan, klik 2x untuk ubah judul"
+                                       MouseLeftButtonDown="TitleText_MouseLeftButtonDown"/>
+
+                            <!-- Hidden Edit Box for Double Click Rename -->
+                            <TextBox x:Name="TitleEditBox" Grid.Column="1"
+                                     Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                     Foreground="{Binding TextForegroundBrush}"
+                                     Background="Transparent" BorderThickness="0"
+                                     FontWeight="SemiBold" FontSize="12.5"
+                                     VerticalAlignment="Center" Padding="0"
+                                     MaxLength="60" CaretBrush="{Binding AccentBrush}"
+                                     Visibility="Collapsed"
+                                     LostFocus="TitleEditBox_LostFocus"
+                                     KeyDown="TitleEditBox_KeyDown"/>
+                        </Grid>
+
+                        <!-- Header Action Toolbar -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Add New Sticky Note -->
+                            <Button Style="{StaticResource NoteHeaderToolButton}" Click="AddNote_Click" ToolTip="Buat Catatan Baru (+)">
+                                <TextBlock Text="&#x2795;" FontSize="10"/>
+                            </Button>
+
+                            <!-- Color Picker Button -->
+                            <Button Style="{StaticResource NoteHeaderToolButton}" Click="ColorPalette_Click" ToolTip="Ubah Warna Catatan">
+                                <Ellipse Width="12" Height="12" Fill="{Binding AccentBrush}" Stroke="{Binding BorderBrush}" StrokeThickness="1"/>
+                            </Button>
+
+                            <!-- Color Palette Popup -->
+                            <Popup x:Name="ColorPopup" StaysOpen="False" AllowsTransparency="True" Placement="Bottom">
+                                <Border Background="#FFFFFF" BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="8" Padding="6">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" BlurRadius="10" ShadowDepth="2" Opacity="0.25"/>
+                                    </Border.Effect>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#FFF59D" ToolTip="Kuning" Command="{Binding SetColorCommand}" CommandParameter="Yellow"/>
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#C8E6C9" ToolTip="Hijau" Command="{Binding SetColorCommand}" CommandParameter="Green"/>
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#F8BBD0" ToolTip="Pink" Command="{Binding SetColorCommand}" CommandParameter="Pink"/>
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#BBDEFB" ToolTip="Biru" Command="{Binding SetColorCommand}" CommandParameter="Blue"/>
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#E1BEE7" ToolTip="Ungu" Command="{Binding SetColorCommand}" CommandParameter="Purple"/>
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#FFE0B2" ToolTip="Oranye" Command="{Binding SetColorCommand}" CommandParameter="Orange"/>
+                                        <Button Style="{StaticResource ColorDotButtonStyle}" Background="#2B2B36" ToolTip="Gelap" Command="{Binding SetColorCommand}" CommandParameter="Dark"/>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+
+                            <!-- Pin (Always on top) Toggle -->
+                            <Button Style="{StaticResource NoteHeaderToolButton}" Command="{Binding TogglePinCommand}"
+                                    ToolTip="Selalu di atas (Always on Top)">
+                                <TextBlock Text="&#x1F4CC;" FontSize="11" Opacity="{Binding PinOpacity}"/>
+                            </Button>
+
+                            <!-- Delete Note -->
+                            <Button Style="{StaticResource NoteHeaderToolButton}" Click="DeleteNote_Click" ToolTip="Hapus Catatan">
+                                <TextBlock Text="&#x1F5D1;" FontSize="11"/>
+                            </Button>
+
+                            <!-- Close / Dismiss Note Window -->
+                            <Button Style="{StaticResource NoteHeaderToolButton}" Click="CloseWindow_Click" ToolTip="Sembunyikan dari Layar (Tetap tersimpan di Hub)">
+                                <TextBlock Text="&#x2715;" FontSize="11" FontWeight="Bold"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 2. Note Content Area -->
+                <Grid Grid.Row="1">
+                    <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}"
+                             Foreground="{Binding TextForegroundBrush}"
+                             CaretBrush="{Binding AccentBrush}"
+                             Background="Transparent" BorderThickness="0"
+                             FontSize="13.5" FontFamily="Segoe UI, Calibri"
+                             AcceptsReturn="True" AcceptsTab="True"
+                             TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             Padding="12,10,12,6"/>
+                </Grid>
+
+                <!-- 3. Footer Bar (Draggable) -->
+                <Border Grid.Row="2" Background="Transparent" Padding="10,4,6,6"
+                        MouseDown="Header_MouseDown" Cursor="SizeAll">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Timestamp / Status -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="&#x2601;" FontSize="10" Margin="0,0,4,0" Foreground="{Binding SecondaryTextBrush}" Opacity="0.75" ToolTip="Sinkron Google Drive"/>
+                            <TextBlock Text="{Binding LastEditedText}" FontSize="10" Foreground="{Binding SecondaryTextBrush}" Opacity="0.85"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="1" Text="{Binding CharCountText}" FontSize="9.5"
+                                   Foreground="{Binding SecondaryTextBrush}" Opacity="0.65" Margin="6,0,10,0" VerticalAlignment="Center"/>
+
+                        <!-- Resize Grip Visual -->
+                        <Border Grid.Column="2" Width="14" Height="14" Cursor="SizeNWSE"
+                                Background="Transparent"
+                                ToolTip="Tarik untuk mengubah ukuran catatan" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                            <Path Data="M 10,14 L 14,10 M 6,14 L 14,6 M 2,14 L 14,2"
+                                  Stroke="{Binding SecondaryTextBrush}" StrokeThickness="1.2" Opacity="0.6"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- 8-Direction Resizing Overlay (Edges & Corners) -->
+        <Grid IsHitTestVisible="True">
+            <!-- 4 Edges -->
+            <Thumb x:Name="ResizeLeft" Width="8" HorizontalAlignment="Left" Cursor="SizeWE"
+                   DragDelta="ResizeLeft_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+            <Thumb x:Name="ResizeRight" Width="8" HorizontalAlignment="Right" Cursor="SizeWE"
+                   DragDelta="ResizeRight_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+            <Thumb x:Name="ResizeTop" Height="8" VerticalAlignment="Top" Cursor="SizeNS"
+                   DragDelta="ResizeTop_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+            <Thumb x:Name="ResizeBottom" Height="8" VerticalAlignment="Bottom" Cursor="SizeNS"
+                   DragDelta="ResizeBottom_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+
+            <!-- 4 Corners -->
+            <Thumb x:Name="ResizeTopLeft" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="SizeNWSE"
+                   DragDelta="ResizeTopLeft_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+            <Thumb x:Name="ResizeTopRight" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="SizeNESW"
+                   DragDelta="ResizeTopRight_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+            <Thumb x:Name="ResizeBottomLeft" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="SizeNESW"
+                   DragDelta="ResizeBottomLeft_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+            <Thumb x:Name="ResizeBottomRight" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="SizeNWSE"
+                   DragDelta="ResizeBottomRight_DragDelta" DragCompleted="ResizeThumb_DragCompleted"
+                   Template="{StaticResource TransparentThumbTemplate}"/>
+        </Grid>
+    </Grid>
+</Window>

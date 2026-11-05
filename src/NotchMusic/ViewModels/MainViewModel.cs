@@ -17,6 +17,7 @@ using NotchMusic.Services.Radio;
 using NotchMusic.Services.Reminder;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Sync;
+using NotchMusic.Services.StickyNotes;
 using NotchMusic.Services.Todo;
 using NotchMusic.Services.Update;
 
@@ -36,6 +37,7 @@ public class MainViewModel : ViewModelBase
     private readonly ILiveTvService _liveTvService;
     private readonly IBmkgService _bmkgService;
     private readonly IReminderService _reminderService;
+    private readonly IStickyNoteService _stickyNoteService;
     private readonly DispatcherTimer _interpolationTimer;
 
     private PrayerNotificationEvent? _activePrayerNotification;
@@ -54,6 +56,12 @@ public class MainViewModel : ViewModelBase
     private ReminderType _formReminderType = ReminderType.Interval;
     private int _formReminderIntervalMinutes = 60;
     private string _formReminderDailyTimesText = "08:00, 13:00, 20:00";
+
+    // Catatan Tempel (Sticky Notes) Fields
+    private string _stickyNotesSearchQuery = string.Empty;
+    private readonly object _autoStickyNotesSyncLock = new();
+    private bool _isAutoStickyNotesSyncRunning = false;
+    private bool _hasPendingStickyNotesAutoSync = false;
 
     // BMKG Cuaca & Gempa Bumi Fields (Komponen ke-7)
     private BmkgNotificationEvent? _activeBmkgNotification;
@@ -159,6 +167,9 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenLiveTv;
     public event Action? RequestOpenBmkg;
     public event Action? RequestOpenReminder;
+    public event Action? RequestOpenStickyNotesHub;
+    public event Action<StickyNoteItemViewModel>? RequestOpenStickyNote;
+    public event Action<StickyNoteItemViewModel>? RequestCloseStickyNote;
     public event Action? RequestOpenMusic;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
@@ -2462,6 +2473,16 @@ public ICommand TogglePrayerPanelCommand { get; }
     public ICommand SnoozeActiveReminderNotificationCommand { get; }
     public ICommand CompleteActiveReminderNotificationCommand { get; }
 
+    // Catatan Tempel (Sticky Notes) Commands
+    public ICommand OpenStickyNotesHubCommand { get; }
+    public ICommand ToggleStickyNotesHubCommand { get; }
+    public ICommand CloseStickyNotesHubCommand { get; }
+    public ICommand CreateStickyNoteCommand { get; }
+    public ICommand ShowAllStickyNotesCommand { get; }
+    public ICommand HideAllStickyNotesCommand { get; }
+    public ICommand SyncStickyNotesCommand { get; }
+    public ICommand ClearStickyNotesSearchCommand { get; }
+
     public ICommand WakeFromIdleCommand { get; }
     public ICommand ToggleMiniModeCommand { get; }
     public ICommand ToggleVocalRemoverCommand { get; }
@@ -2483,7 +2504,8 @@ public ICommand TogglePrayerPanelCommand { get; }
         IRadioService? radioService = null,
         ILiveTvService? liveTvService = null,
         IBmkgService? bmkgService = null,
-        IReminderService? reminderService = null)
+        IReminderService? reminderService = null,
+        IStickyNoteService? stickyNoteService = null)
     {
         _mediaService = mediaService;
         _lyricsService = lyricsService;
@@ -2502,6 +2524,7 @@ public ICommand TogglePrayerPanelCommand { get; }
         _liveTvService = liveTvService ?? new LiveTvService(settingsService);
         _bmkgService = bmkgService ?? new BmkgService(settingsService);
         _reminderService = reminderService ?? new ReminderService(settingsService);
+        _stickyNoteService = stickyNoteService ?? new StickyNoteService(settingsService);
 
         foreach (var r in _reminderService.Reminders)
         {
@@ -2603,6 +2626,15 @@ public ICommand TogglePrayerPanelCommand { get; }
             }
         };
         _googleDriveSyncService.TodosSynced += OnTodosSyncedFromCloud;
+        _googleDriveSyncService.StickyNotesSynced += OnStickyNotesSyncedFromCloud;
+
+        var loadedNotes = _stickyNoteService.LoadNotes();
+        foreach (var note in loadedNotes)
+        {
+            var vm = CreateStickyNoteViewModel(note);
+            StickyNotes.Add(vm);
+        }
+        UpdateStickyNotesFilteredView();
 
         _filteredTodos = CollectionViewSource.GetDefaultView(Todos);
         _filteredTodos.Filter = FilterTodoItem;
@@ -3436,6 +3468,53 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
             ActiveReminderNotification = null;
         });
 
+        // Catatan Tempel (Sticky Notes) Commands
+        OpenStickyNotesHubCommand = new RelayCommand(() =>
+        {
+            IsStickyNotesHubOpen = true;
+            IsComponentsMenuOpen = false;
+            RequestOpenStickyNotesHub?.Invoke();
+        });
+        ToggleStickyNotesHubCommand = new RelayCommand(() =>
+        {
+            IsStickyNotesHubOpen = !IsStickyNotesHubOpen;
+            IsComponentsMenuOpen = false;
+            if (IsStickyNotesHubOpen)
+            {
+                RequestOpenStickyNotesHub?.Invoke();
+            }
+        });
+        CloseStickyNotesHubCommand = new RelayCommand(() =>
+        {
+            IsStickyNotesHubOpen = false;
+            IsComponentsMenuOpen = false;
+        });
+        CreateStickyNoteCommand = new RelayCommand(() => CreateNewStickyNote());
+        ShowAllStickyNotesCommand = new RelayCommand(() =>
+        {
+            foreach (var n in StickyNotes)
+            {
+                n.IsClosed = false;
+                RequestOpenStickyNote?.Invoke(n);
+            }
+            _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+            OnPropertyChanged(nameof(HasActiveStickyNotes));
+            ScheduleStickyNotesAutoSync();
+        });
+        HideAllStickyNotesCommand = new RelayCommand(() =>
+        {
+            foreach (var n in StickyNotes)
+            {
+                n.IsClosed = true;
+                RequestCloseStickyNote?.Invoke(n);
+            }
+            _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+            OnPropertyChanged(nameof(HasActiveStickyNotes));
+            ScheduleStickyNotesAutoSync();
+        });
+        SyncStickyNotesCommand = new RelayCommand(async () => await SyncStickyNotesWithGoogleDriveAsync());
+        ClearStickyNotesSearchCommand = new RelayCommand(() => StickyNotesSearchQuery = string.Empty);
+
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
         _mediaService.SessionsChanged += (s, list) =>
@@ -3563,6 +3642,7 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
                 if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync && !_googleDriveSyncService.IsSyncing)
                 {
                     await _googleDriveSyncService.CheckForRemoteChangesAsync();
+                    await _googleDriveSyncService.CheckForRemoteStickyNotesChangesAsync();
                 }
             }
             catch { }
@@ -3633,6 +3713,11 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         OnPropertyChanged(nameof(ShowHoverReminderPill));
         OnPropertyChanged(nameof(IsReminderWindowOpen));
         OnPropertyChanged(nameof(HasActiveReminderNotification));
+        OnPropertyChanged(nameof(EnableStickyNotes));
+        OnPropertyChanged(nameof(IsStickyNotesHubOpen));
+        OnPropertyChanged(nameof(StickyNotesCountText));
+        OnPropertyChanged(nameof(HasActiveStickyNotes));
+        OnPropertyChanged(nameof(StickyNotesNotchTooltip));
         RefreshAdhanSettings();
         _prayerReminderService.RefreshSchedule();
         if (EnableBmkg)
@@ -5343,6 +5428,8 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         {
             OnTodosSyncedFromCloud(merged);
         }
+
+        await SyncStickyNotesWithGoogleDriveAsync();
     }
 
     private void OnTodosSyncedFromCloud(List<TodoItem> syncedList)
@@ -5693,6 +5780,7 @@ public void ExpandAllCategories()
         if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync && !_googleDriveSyncService.IsSyncing)
         {
             _ = _googleDriveSyncService.CheckForRemoteChangesAsync();
+            _ = _googleDriveSyncService.CheckForRemoteStickyNotesChangesAsync();
         }
 
         // Fitur On Hover dinonaktifkan: panel tidak lagi terbuka otomatis saat kursor diarahkan
@@ -5755,4 +5843,277 @@ public void ExpandAllCategories()
             delayTimer.Start();
         }
     }
+
+    #region Sticky Notes (Catatan Tempel) & Cloud Sync
+    public ObservableCollection<StickyNoteItemViewModel> StickyNotes { get; } = new();
+    public ObservableCollection<StickyNoteItemViewModel> FilteredStickyNotes { get; } = new();
+
+    public bool EnableStickyNotes
+    {
+        get => Settings.EnableStickyNotes;
+        set
+        {
+            if (Settings.EnableStickyNotes != value)
+            {
+                Settings.EnableStickyNotes = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(EnableStickyNotes));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool IsStickyNotesHubOpen
+    {
+        get => Settings.IsStickyNotesHubOpen;
+        set
+        {
+            if (Settings.IsStickyNotesHubOpen != value)
+            {
+                Settings.IsStickyNotesHubOpen = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsStickyNotesHubOpen));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public string StickyNotesCountText => StickyNotes.Count == 0 ? "0 Catatan" : $"{StickyNotes.Count} Catatan";
+    public bool HasActiveStickyNotes => StickyNotes.Any(n => !n.IsClosed);
+    public string StickyNotesNotchTooltip => $"Catatan Tempel (Sticky Notes) - {StickyNotes.Count} catatan (Klik untuk buka Hub)";
+
+    public string StickyNotesSearchQuery
+    {
+        get => _stickyNotesSearchQuery;
+        set
+        {
+            if (SetProperty(ref _stickyNotesSearchQuery, value))
+            {
+                UpdateStickyNotesFilteredView();
+            }
+        }
+    }
+
+    public void UpdateStickyNotesFilteredView()
+    {
+        FilteredStickyNotes.Clear();
+        var q = _stickyNotesSearchQuery?.Trim();
+        foreach (var note in StickyNotes)
+        {
+            if (string.IsNullOrWhiteSpace(q) ||
+                (note.Title != null && note.Title.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (note.Content != null && note.Content.Contains(q, StringComparison.OrdinalIgnoreCase)))
+            {
+                FilteredStickyNotes.Add(note);
+            }
+        }
+    }
+
+    public StickyNoteItemViewModel CreateNewStickyNote(string? initialColor = null)
+    {
+        var color = initialColor ?? Settings.StickyNotesDefaultColor;
+        if (string.IsNullOrWhiteSpace(color)) color = "Yellow";
+
+        var model = new StickyNoteItem
+        {
+            Title = "Catatan Baru",
+            Color = color,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now,
+            IsClosed = false
+        };
+
+        var vm = CreateStickyNoteViewModel(model);
+        StickyNotes.Insert(0, vm);
+        _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+        UpdateStickyNotesFilteredView();
+        OnPropertyChanged(nameof(StickyNotesCountText));
+        OnPropertyChanged(nameof(HasActiveStickyNotes));
+        OnPropertyChanged(nameof(StickyNotesNotchTooltip));
+        ScheduleStickyNotesAutoSync();
+
+        RequestOpenStickyNote?.Invoke(vm);
+        return vm;
+    }
+
+    private StickyNoteItemViewModel CreateStickyNoteViewModel(StickyNoteItem model)
+    {
+        var vm = new StickyNoteItemViewModel(model);
+        vm.Changed += () =>
+        {
+            _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+            UpdateStickyNotesFilteredView();
+            OnPropertyChanged(nameof(StickyNotesCountText));
+            OnPropertyChanged(nameof(HasActiveStickyNotes));
+            OnPropertyChanged(nameof(StickyNotesNotchTooltip));
+            ScheduleStickyNotesAutoSync();
+        };
+        vm.DeleteRequested += item => DeleteStickyNote(item);
+        vm.CloseRequested += item => CloseStickyNote(item);
+        vm.OpenRequested += item => OpenStickyNote(item);
+        return vm;
+    }
+
+    public void DeleteStickyNote(StickyNoteItemViewModel vm)
+    {
+        if (vm == null) return;
+        vm.IsClosed = true;
+        RequestCloseStickyNote?.Invoke(vm);
+        StickyNotes.Remove(vm);
+        _stickyNoteService.MarkDeleted(vm.Id);
+        _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+        UpdateStickyNotesFilteredView();
+        OnPropertyChanged(nameof(StickyNotesCountText));
+        OnPropertyChanged(nameof(HasActiveStickyNotes));
+        OnPropertyChanged(nameof(StickyNotesNotchTooltip));
+        ScheduleStickyNotesAutoSync();
+    }
+
+    public void OpenStickyNote(StickyNoteItemViewModel vm)
+    {
+        if (vm == null) return;
+        vm.IsClosed = false;
+        _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+        OnPropertyChanged(nameof(HasActiveStickyNotes));
+        RequestOpenStickyNote?.Invoke(vm);
+    }
+
+    public void CloseStickyNote(StickyNoteItemViewModel vm)
+    {
+        if (vm == null) return;
+        vm.IsClosed = true;
+        _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+        OnPropertyChanged(nameof(HasActiveStickyNotes));
+        RequestCloseStickyNote?.Invoke(vm);
+    }
+
+    private void ScheduleStickyNotesAutoSync()
+    {
+        if (!_googleDriveSyncService.IsConnected || !Settings.GoogleDriveAutoSync) return;
+
+        lock (_autoStickyNotesSyncLock)
+        {
+            if (_isAutoStickyNotesSyncRunning)
+            {
+                _hasPendingStickyNotesAutoSync = true;
+                return;
+            }
+            _isAutoStickyNotesSyncRunning = true;
+            _hasPendingStickyNotesAutoSync = false;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(2000);
+
+                List<StickyNoteItem>? snapshot = null;
+                if (System.Windows.Application.Current?.Dispatcher != null)
+                {
+                    snapshot = await System.Windows.Application.Current.Dispatcher.InvokeAsync(
+                        () => StickyNotes.Select(n => n.ToModel()).ToList());
+                }
+                else
+                {
+                    snapshot = StickyNotes.Select(n => n.ToModel()).ToList();
+                }
+
+                if (snapshot != null && _googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync)
+                {
+                    await _googleDriveSyncService.UploadStickyNotesAsync(snapshot);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"StickyNotes AutoSync error: {ex.Message}");
+            }
+            finally
+            {
+                lock (_autoStickyNotesSyncLock)
+                {
+                    if (_hasPendingStickyNotesAutoSync)
+                    {
+                        _hasPendingStickyNotesAutoSync = false;
+                        _ = Task.Run(ScheduleStickyNotesAutoSync);
+                    }
+                    _isAutoStickyNotesSyncRunning = false;
+                }
+            }
+        });
+    }
+
+    public async Task SyncStickyNotesWithGoogleDriveAsync()
+    {
+        if (!_googleDriveSyncService.IsConnected)
+        {
+            await HandleGoogleDriveClickAsync();
+            return;
+        }
+
+        var deletedIds = _stickyNoteService.GetDeletedIds();
+        var merged = await _googleDriveSyncService.SyncStickyNotesAsync(StickyNotes.Select(n => n.ToModel()), deletedIds);
+        if (merged != null)
+        {
+            OnStickyNotesSyncedFromCloud(merged);
+        }
+    }
+
+    private void OnStickyNotesSyncedFromCloud(List<StickyNoteItem> syncedList)
+    {
+        Action apply = () =>
+        {
+            var existingDict = StickyNotes.ToDictionary(n => n.Id);
+            foreach (var item in syncedList)
+            {
+                if (existingDict.TryGetValue(item.Id, out var existingVm))
+                {
+                    if (item.UpdatedAt > existingVm.UpdatedAt)
+                    {
+                        existingVm.Title = item.Title;
+                        existingVm.Content = item.Content;
+                        existingVm.Color = item.Color;
+                        existingVm.IsPinned = item.IsPinned;
+                        existingVm.IsLocked = item.IsLocked;
+                        existingVm.IsCollapsed = item.IsCollapsed;
+                        existingVm.IsClosed = item.IsClosed;
+                        existingVm.UpdatedAt = item.UpdatedAt;
+                    }
+                }
+                else
+                {
+                    var newVm = CreateStickyNoteViewModel(item);
+                    StickyNotes.Add(newVm);
+                }
+            }
+
+            var syncedIds = syncedList.Select(s => s.Id).ToHashSet();
+            var toRemove = StickyNotes.Where(n => !syncedIds.Contains(n.Id)).ToList();
+            foreach (var r in toRemove)
+            {
+                r.IsClosed = true;
+                RequestCloseStickyNote?.Invoke(r);
+                StickyNotes.Remove(r);
+            }
+
+            _stickyNoteService.SaveNotes(StickyNotes.Select(n => n.ToModel()));
+            UpdateStickyNotesFilteredView();
+            OnPropertyChanged(nameof(StickyNotesCountText));
+            OnPropertyChanged(nameof(HasActiveStickyNotes));
+            OnPropertyChanged(nameof(StickyNotesNotchTooltip));
+        };
+
+        if (System.Windows.Application.Current?.Dispatcher != null &&
+            !System.Windows.Application.Current.Dispatcher.CheckAccess())
+        {
+            System.Windows.Application.Current.Dispatcher.InvokeAsync(apply);
+        }
+        else
+        {
+            apply();
+        }
+    }
+    #endregion
 }

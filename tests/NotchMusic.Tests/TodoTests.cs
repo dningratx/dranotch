@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.Media;
@@ -423,6 +423,11 @@ public class TodoTests
             list.Add(new TodoItem { Title = "Cloud Synced Task", IsCompleted = false });
             return Task.FromResult<List<TodoItem>?>(list);
         }
+        public event Action<List<StickyNoteItem>>? StickyNotesSynced;
+        public Task<bool> UploadStickyNotesAsync(IEnumerable<StickyNoteItem> notes, CancellationToken ct = default) => Task.FromResult(true);
+        public Task<List<StickyNoteItem>?> DownloadStickyNotesAsync(CancellationToken ct = default) => Task.FromResult<List<StickyNoteItem>?>(new List<StickyNoteItem>());
+        public Task<List<StickyNoteItem>?> CheckForRemoteStickyNotesChangesAsync(CancellationToken ct = default) => Task.FromResult<List<StickyNoteItem>?>(null);
+        public Task<List<StickyNoteItem>?> SyncStickyNotesAsync(IEnumerable<StickyNoteItem> localNotes, IEnumerable<string>? deletedIds = null, CancellationToken ct = default) => Task.FromResult<List<StickyNoteItem>?>(localNotes.ToList());
         public bool ImportCredentialsFile(string filePath) => true;
     }
 

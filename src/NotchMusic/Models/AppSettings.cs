@@ -178,4 +178,13 @@ public class AppSettings
     public string SelectedReminderSound { get; set; } = "reflection"; // "reflection", "radar", "marimba", "digital_pulse", "crystal_drop", "morning_breeze", "zen_bowl", "classic_bell", "custom"
     public string CustomReminderSoundPath { get; set; } = string.Empty;
     public double ReminderVolume { get; set; } = 0.85;
+
+    // Catatan Tempel (Sticky Notes)
+    public bool EnableStickyNotes { get; set; } = true;
+    public bool IsStickyNotesHubOpen { get; set; } = false;
+    public double StickyNotesHubLeft { get; set; } = -1;
+    public double StickyNotesHubTop { get; set; } = -1;
+    public double StickyNotesHubWidth { get; set; } = 640;
+    public double StickyNotesHubHeight { get; set; } = 520;
+    public string StickyNotesDefaultColor { get; set; } = "Yellow";
 }
