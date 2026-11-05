@@ -542,6 +542,9 @@
                 CornerRadius="0,0,22,22"
                 Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}"
                 MouseDown="Island_MouseDown">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="MainIslandTransform" Y="0"/>
+            </Border.RenderTransform>
 
 
 
@@ -583,8 +586,11 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- SISI KIRI: KOMPONEN 1 (MUSIK LENGKAP DI PALING KIRI) & KOMPONEN 2 (RADIO ONLINE) (Muncul saat Hover) -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    >
+                        <StackPanel x:Name="LeftComponentPanel" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}">
+                            <StackPanel.RenderTransform>
+                                <TranslateTransform x:Name="LeftComponentTransform" X="0"/>
+                            </StackPanel.RenderTransform>
                             <!-- 1. Pemutar Musik Lengkap (Di Paling Kiri: Album Art, Judul & Artis, Lirik Standby, Play/Pause, & Tombol YT Music) -->
                             <Border Style="{StaticResource NotchPrayerPillStyle}" Height="44" Margin="2,0,6,0" Padding="6,3,8,3"
                                     Visibility="{Binding ShowMusicPillInNotch, Converter={StaticResource BoolToVis}}"
@@ -717,12 +723,12 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- TENGAH: LOGO DRANOTCH (Selalu Tampil; Saat Idle Hanya Ini yang Terlihat) -->
+                        <!-- TENGAH: LOGO DRANOTCH (Selalu Tampil; Saat Standby Hanya Ini yang Terlihat) -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Width="44" Height="44" Style="{StaticResource NotchIconBadgeStyle}" Margin="2,0,2,0" Cursor="Hand"
-                                ToolTip="DRANOTCH (Klik untuk melihat info tentang DRANOTCH)">
+                                ToolTip="{Binding DranotchLogoTooltip}">
                             <Border.InputBindings>
-                                <MouseBinding MouseAction="LeftClick" Command="{Binding OpenAboutCommand}"/>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding DranotchLogoClickCommand}"/>
                             </Border.InputBindings>
                             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" 
@@ -734,8 +740,10 @@
                         </StackPanel>
 
                         <!-- SISI KANAN: KOMPONEN 4 (BROWSER), KOMPONEN BMKG, & KOMPONEN 5 (TO-DO LIST LENGKAP DI PALING KANAN) (Muncul saat Hover) -->
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}"
-                                    >
+                        <StackPanel x:Name="RightComponentPanel" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}">
+                            <StackPanel.RenderTransform>
+                                <TranslateTransform x:Name="RightComponentTransform" X="0"/>
+                            </StackPanel.RenderTransform>
                             <!-- 4. Browser Mengambang (Di sebelah kanan Logo DRANOTCH) -->
                             <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="6,0,2,0" Cursor="Hand"
                                     ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)">
@@ -857,9 +865,12 @@
                     </Grid>
 
                     <!-- BARIS 1: SEJAJAR WAKTU SHOLAT (Sebelah Kiri: Pengaturan | Tengah: Waktu Sholat | Sebelah Kanan: Versi) -->
-                    <Grid Grid.Row="1" Grid.IsSharedSizeScope="True" Margin="0,6,0,2"
+                    <Grid x:Name="BottomComponentPanel" Grid.Row="1" Grid.IsSharedSizeScope="True" Margin="0,6,0,2"
                           HorizontalAlignment="Center" VerticalAlignment="Center"
                           Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}">
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="BottomComponentTransform" Y="0"/>
+                        </Grid.RenderTransform>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
@@ -2667,6 +2678,9 @@
                 HorizontalAlignment="Center"
                 Panel.ZIndex="10"
                 Cursor="Hand">
+            <Button.RenderTransform>
+                <TranslateTransform x:Name="BezelToggleTransform" Y="0"/>
+            </Button.RenderTransform>
             <Button.ContextMenu>
                 <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
                     <MenuItem Header="{Binding BezelMinimizeMenuText}" Command="{Binding ToggleBezelMinimizeCommand}" Foreground="#FFFFFF"/>

@@ -481,3 +481,15 @@ public class ReminderIconOption
     public string BadgeBackground => ReminderItem.GetBadgeBackgroundForKey(Key);
     public string BadgeBorder => ReminderItem.GetBadgeBorderForKey(Key);
 }
+
+public class AlarmSoundOption
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string ShortName { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Icon { get; set; } = "🔔";
+    public string FileName { get; set; } = string.Empty;
+
+    public string DisplayTitle => $"{Icon} {Name}";
+}

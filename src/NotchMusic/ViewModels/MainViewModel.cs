@@ -119,6 +119,11 @@ public class MainViewModel : ViewModelBase
     private int _activeLyricIndex = -1;
     private bool _isPinned;
     private bool _isBezelMinimized;
+    private bool _isNotchExpanded;
+    private bool _visualExpanded;
+    private DateTime _lastManualUnminimizeTime = DateTime.MinValue;
+    private DispatcherTimer? _windowMonitorTimer;
+    private DispatcherTimer? _autoCollapseStandbyTimer;
     private bool _isIdleMiniMode;
     private DispatcherTimer? _idleTimer;
     private bool _isClickThrough;
@@ -157,6 +162,10 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenMusic;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
+    public event Action? RequestAnimateExpand;
+    public event Action? RequestAnimateCollapse;
+    public event Action? RequestAnimateBezelMinimize;
+    public event Action? RequestAnimateBezelRestore;
 
     public PanelMode CurrentMode
     {
@@ -241,6 +250,16 @@ public class MainViewModel : ViewModelBase
                     OnPropertyChanged(nameof(IsExpandedMode));
                     OnPropertyChanged(nameof(IsLyricsMode));
                 }
+
+                if (value)
+                {
+                    RequestAnimateBezelMinimize?.Invoke();
+                }
+                else
+                {
+                    RequestAnimateBezelRestore?.Invoke();
+                }
+
                 OnPropertyChanged(nameof(IsNotBezelMinimized));
                 OnPropertyChanged(nameof(ShowCompactView));
                 OnPropertyChanged(nameof(ShowComponentIcons));
@@ -268,7 +287,64 @@ public class MainViewModel : ViewModelBase
         ? "▼ Buka Kembali Notch dari Bezel"
         : "▲ Minimize Notch ke Bezel Atas";
 
-    public bool ShowComponentIcons => IsCompactMode && !_isBezelMinimized && (_isHovering || IsPinned);
+    public bool VisualExpanded
+    {
+        get => _visualExpanded;
+        private set
+        {
+            if (SetProperty(ref _visualExpanded, value))
+            {
+                OnPropertyChanged(nameof(ShowComponentIcons));
+                OnPropertyChanged(nameof(ShowMusicInNotch));
+                OnPropertyChanged(nameof(ShowMusicPillInNotch));
+                OnPropertyChanged(nameof(ShowMusicIconInNotch));
+                OnPropertyChanged(nameof(ShowHoverWeatherPill));
+                OnPropertyChanged(nameof(DranotchLogoTooltip));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool IsNotchExpanded
+    {
+        get => _isNotchExpanded;
+        set
+        {
+            if (SetProperty(ref _isNotchExpanded, value))
+            {
+                if (value)
+                {
+                    VisualExpanded = true;
+                    RequestAnimateExpand?.Invoke();
+                }
+                else
+                {
+                    if (RequestAnimateCollapse != null)
+                    {
+                        RequestAnimateCollapse.Invoke();
+                    }
+                    else
+                    {
+                        FinishCollapse();
+                    }
+                }
+                OnPropertyChanged(nameof(DranotchLogoTooltip));
+                OnPropertyChanged(nameof(IsNotchActive));
+            }
+        }
+    }
+
+    public void FinishCollapse()
+    {
+        VisualExpanded = false;
+    }
+
+    public bool ShowComponentIcons => IsCompactMode && !_isBezelMinimized && (VisualExpanded || IsPinned);
+
+    public string DranotchLogoTooltip => ShowComponentIcons
+        ? "DRANOTCH (Klik untuk melihat info tentang DRANOTCH)"
+        : "DRANOTCH (Klik untuk memperluas notch)";
     public bool ShowMusicInNotch => ShowComponentIcons;
     public bool ShowMusicPillInNotch => ShowMusicInNotch && !IsMusicWindowOpen;
     public bool ShowMusicIconInNotch => ShowMusicInNotch && IsMusicWindowOpen;
@@ -1370,6 +1446,114 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _formReminderDailyTimesText, value ?? "08:00");
     }
 
+    // Pilihan Suara Alarm Pengingat Pintar & To-Do
+    public IReadOnlyList<AlarmSoundOption> AvailableAlarmSounds => PrayerAudioHelper.AvailableAlarmSounds;
+
+    public string SelectedReminderSound
+    {
+        get => string.IsNullOrWhiteSpace(Settings.SelectedReminderSound) ? "reflection" : Settings.SelectedReminderSound;
+        set
+        {
+            if (Settings.SelectedReminderSound != value && !string.IsNullOrWhiteSpace(value))
+            {
+                Settings.SelectedReminderSound = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(SelectedReminderSound));
+                OnPropertyChanged(nameof(SelectedReminderSoundOption));
+                OnPropertyChanged(nameof(SelectedReminderSoundName));
+                OnPropertyChanged(nameof(SelectedReminderSoundDescription));
+                OnPropertyChanged(nameof(IsCustomReminderSoundSelected));
+            }
+        }
+    }
+
+    public AlarmSoundOption? SelectedReminderSoundOption
+    {
+        get => AvailableAlarmSounds.FirstOrDefault(s => string.Equals(s.Id, SelectedReminderSound, StringComparison.OrdinalIgnoreCase))
+               ?? AvailableAlarmSounds[0];
+        set
+        {
+            if (value != null && !string.IsNullOrWhiteSpace(value.Id))
+            {
+                SelectedReminderSound = value.Id;
+            }
+        }
+    }
+
+    public bool IsCustomReminderSoundSelected => string.Equals(SelectedReminderSound, "custom", StringComparison.OrdinalIgnoreCase);
+
+    public string CustomReminderSoundPath
+    {
+        get => Settings.CustomReminderSoundPath;
+        set
+        {
+            if (Settings.CustomReminderSoundPath != value)
+            {
+                Settings.CustomReminderSoundPath = value ?? string.Empty;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(CustomReminderSoundPath));
+                OnPropertyChanged(nameof(SelectedReminderSoundName));
+            }
+        }
+    }
+
+    public double ReminderVolume
+    {
+        get => Settings.ReminderVolume;
+        set
+        {
+            double clamped = Math.Clamp(value, 0.0, 1.0);
+            if (Math.Abs(Settings.ReminderVolume - clamped) > 0.01)
+            {
+                Settings.ReminderVolume = clamped;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(ReminderVolume));
+                OnPropertyChanged(nameof(ReminderVolumePercentText));
+            }
+        }
+    }
+
+    public string ReminderVolumePercentText => $"{(int)Math.Round(ReminderVolume * 100)}%";
+
+    public string SelectedReminderSoundName
+    {
+        get
+        {
+            if (IsCustomReminderSoundSelected)
+            {
+                string customFile = !string.IsNullOrWhiteSpace(Settings.CustomReminderSoundPath)
+                    ? System.IO.Path.GetFileName(Settings.CustomReminderSoundPath)
+                    : "Pilih File Audio";
+                return $"📁 Kustom: {customFile}";
+            }
+            var opt = SelectedReminderSoundOption;
+            return opt != null ? $"{opt.Icon} {opt.ShortName}" : "✨ Reflection";
+        }
+    }
+
+    public string SelectedReminderSoundDescription => SelectedReminderSoundOption?.Description ?? string.Empty;
+
+    private bool _isAlarmPlaying;
+    public bool IsAlarmPlaying
+    {
+        get => _isAlarmPlaying;
+        set
+        {
+            if (SetProperty(ref _isAlarmPlaying, value))
+            {
+                OnPropertyChanged(nameof(AlarmPlayButtonIcon));
+                OnPropertyChanged(nameof(AlarmPlayButtonText));
+                OnPropertyChanged(nameof(AlarmPlayButtonTooltip));
+            }
+        }
+    }
+
+    public string AlarmPlayButtonIcon => IsAlarmPlaying ? "⏹" : "▶";
+    public string AlarmPlayButtonText => IsAlarmPlaying ? "⏹ Stop" : "▶ Tes Suara";
+    public string AlarmPlayButtonTooltip => IsAlarmPlaying
+        ? "Hentikan pemutaran pratinjau suara alarm"
+        : "Dengarkan pratinjau suara alarm yang dipilih";
+
     public bool HasActiveReminderNotification => EnableReminders && _activeReminderNotification != null;
     public ReminderNotificationEvent? ActiveReminderNotification
     {
@@ -2131,6 +2315,7 @@ public class MainViewModel : ViewModelBase
     public ICommand ToggleBezelMinimizeCommand { get; }
     public ICommand OpenSettingsCommand { get; }
     public ICommand OpenAboutCommand { get; }
+    public ICommand DranotchLogoClickCommand { get; }
     public ICommand OpenYouTubeMusicCommand { get; }
     public ICommand OpenSpotifyCommand { get; }
     public ICommand OpenTodoCommand { get; }
@@ -2270,6 +2455,9 @@ public ICommand TogglePrayerPanelCommand { get; }
     public ICommand CompleteReminderItemCommand { get; }
     public ICommand ResetReminderTimerCommand { get; }
     public ICommand TestReminderAlertCommand { get; }
+    public ICommand PlayAlarmPreviewCommand { get; }
+    public ICommand StopAlarmPreviewCommand { get; }
+    public ICommand BrowseCustomAlarmCommand { get; }
     public ICommand DismissReminderNotificationCommand { get; }
     public ICommand SnoozeActiveReminderNotificationCommand { get; }
     public ICommand CompleteActiveReminderNotificationCommand { get; }
@@ -2300,8 +2488,11 @@ public ICommand TogglePrayerPanelCommand { get; }
         _mediaService = mediaService;
         _lyricsService = lyricsService;
         _settingsService = settingsService;
-        _isPinned = _settingsService.CurrentSettings.IsPinned;
-        _isBezelMinimized = _settingsService.CurrentSettings.IsBezelMinimized;
+        _isPinned = false;
+        _isBezelMinimized = false;
+        _isNotchExpanded = false;
+        _settingsService.CurrentSettings.IsPinned = false;
+        _settingsService.CurrentSettings.IsBezelMinimized = false;
         _todoService = todoService ?? new TodoService(settingsService);
         _googleDriveSyncService = googleDriveSyncService ?? new GoogleDriveSyncService(settingsService);
         _updateService = updateService ?? new UpdateService(settingsService);
@@ -2443,11 +2634,13 @@ public ICommand TogglePrayerPanelCommand { get; }
         });
         DismissTodoNotificationCommand = new RelayCommand(() =>
         {
+            PrayerAudioHelper.StopAlarmAudio();
             _todoNotificationDismissTimer?.Stop();
             ActiveTodoNotification = null;
         });
         CompleteTodoNotificationCommand = new RelayCommand(() =>
         {
+            PrayerAudioHelper.StopAlarmAudio();
             if (ActiveTodoNotification != null)
             {
                 var target = Todos.FirstOrDefault(t => t.Id == ActiveTodoNotification.TodoId);
@@ -2528,11 +2721,24 @@ public ICommand TogglePrayerPanelCommand { get; }
         });
 
         TogglePinCommand = new RelayCommand(() => IsPinned = !IsPinned);
-        ToggleBezelMinimizeCommand = new RelayCommand(() => IsBezelMinimized = !IsBezelMinimized);
+        ToggleBezelMinimizeCommand = new RelayCommand(() =>
+        {
+            if (IsBezelMinimized)
+            {
+                _lastManualUnminimizeTime = DateTime.Now;
+                IsBezelMinimized = false;
+                IsNotchExpanded = false;
+            }
+            else
+            {
+                IsBezelMinimized = true;
+            }
+        });
         WakeFromIdleCommand = new RelayCommand(WakeFromIdle);
         ToggleMiniModeCommand = new RelayCommand(ToggleMiniMode);
         OpenSettingsCommand = new RelayCommand(() => RequestOpenSettings?.Invoke());
         OpenAboutCommand = new RelayCommand(() => RequestOpenAbout?.Invoke());
+        DranotchLogoClickCommand = new RelayCommand(HandleDranotchLogoClick);
         OpenYouTubeMusicCommand = new RelayCommand(() => RequestOpenYouTubeMusic?.Invoke());
         OpenSpotifyCommand = new RelayCommand(() => RequestOpenSpotify?.Invoke());
         ToggleVocalRemoverCommand = new RelayCommand(() => IsVocalRemoverEnabled = !IsVocalRemoverEnabled);
@@ -3158,13 +3364,58 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         {
             _reminderService.TriggerTestNotification(itemObj as ReminderItem);
         });
+        PlayAlarmPreviewCommand = new RelayCommand(() =>
+        {
+            if (IsAlarmPlaying)
+            {
+                PrayerAudioHelper.StopAlarmAudio();
+                IsAlarmPlaying = false;
+            }
+            else
+            {
+                IsAlarmPlaying = true;
+                PrayerAudioHelper.PlayAlarmPreview(SelectedReminderSound, Settings.CustomReminderSoundPath, Settings.ReminderVolume, () =>
+                {
+                    IsAlarmPlaying = false;
+                });
+            }
+        });
+        StopAlarmPreviewCommand = new RelayCommand(() =>
+        {
+            PrayerAudioHelper.StopAlarmAudio();
+            IsAlarmPlaying = false;
+        });
+        BrowseCustomAlarmCommand = new RelayCommand(() =>
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Pilih File Suara Alarm (.mp3 / .wav)",
+                Filter = "File Audio (*.mp3;*.wav)|*.mp3;*.wav|Semua File (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                CustomReminderSoundPath = dlg.FileName;
+                SelectedReminderSound = "custom";
+                IsAlarmPlaying = true;
+                PrayerAudioHelper.PlayAlarmPreview("custom", CustomReminderSoundPath, Settings.ReminderVolume, () =>
+                {
+                    IsAlarmPlaying = false;
+                });
+            }
+        });
+        PrayerAudioHelper.AlarmPlaybackStateChanged += () =>
+        {
+            IsAlarmPlaying = PrayerAudioHelper.IsAlarmPlaying;
+        };
         DismissReminderNotificationCommand = new RelayCommand(() =>
         {
+            PrayerAudioHelper.StopAlarmAudio();
             _reminderNotificationDismissTimer?.Stop();
             ActiveReminderNotification = null;
         });
         SnoozeActiveReminderNotificationCommand = new RelayCommand((minObj) =>
         {
+            PrayerAudioHelper.StopAlarmAudio();
             int mins = 10;
             if (minObj is string s && int.TryParse(s, out int parsed)) mins = parsed;
             if (ActiveReminderNotification != null && !string.IsNullOrEmpty(ActiveReminderNotification.ReminderId))
@@ -3176,6 +3427,7 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         });
         CompleteActiveReminderNotificationCommand = new RelayCommand(() =>
         {
+            PrayerAudioHelper.StopAlarmAudio();
             if (ActiveReminderNotification != null && !string.IsNullOrEmpty(ActiveReminderNotification.ReminderId))
             {
                 _reminderService.CompleteReminderOccurrence(ActiveReminderNotification.ReminderId);
@@ -3204,6 +3456,85 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         _interpolationTimer.Start();
 
         StartCloudSyncPollingTimer();
+        StartWindowMonitorTimer();
+    }
+
+    private void HandleDranotchLogoClick()
+    {
+        if (!ShowComponentIcons)
+        {
+            IsNotchExpanded = true;
+        }
+        else
+        {
+            RequestOpenAbout?.Invoke();
+        }
+    }
+
+    private void StartWindowMonitorTimer()
+    {
+        if (System.Windows.Application.Current?.Dispatcher == null) return;
+        _windowMonitorTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
+        _windowMonitorTimer.Tick += (s, e) => CheckOtherWindowsCount();
+        _windowMonitorTimer.Start();
+
+        // Cek langsung saat aplikasi berjalan
+        CheckOtherWindowsCount();
+    }
+
+    private void CheckOtherWindowsCount()
+    {
+        if (!Settings.AutoMinimizeOnMultipleWindows) return;
+
+        // Jangan minimize otomatis jika user sedang mengarahkan kursor ke notch
+        if (_isHoveringWindow) return;
+
+        // Jangan minimize otomatis jika user baru saja unminimize manual dalam 12 detik terakhir (cooldown)
+        if ((DateTime.Now - _lastManualUnminimizeTime).TotalSeconds < 12) return;
+
+        try
+        {
+            int otherWindows = WindowMonitorHelper.CountOtherOpenWindows();
+
+            // 1. Jika jendela aplikasi lain lebih dari 1 (yaitu 2 atau lebih):
+            if (otherWindows >= 2)
+            {
+                if (!IsBezelMinimized)
+                {
+                    IsBezelMinimized = true;
+                }
+            }
+            // 2. Jika kondisi aplikasi lain cuma 1 yang terbuka:
+            else if (otherWindows == 1)
+            {
+                if (IsBezelMinimized)
+                {
+                    IsBezelMinimized = false;
+                }
+                // Mode Standby (hanya logo D di tengah)
+                if (IsNotchExpanded && !IsPinned)
+                {
+                    IsNotchExpanded = false;
+                }
+            }
+            // 3. Jika TIDAK ADA jendela lain yang terbuka (cuma di desktop, otherWindows == 0):
+            else
+            {
+                if (IsBezelMinimized)
+                {
+                    IsBezelMinimized = false;
+                }
+                // Mode Expand langsung terbuka!
+                if (!IsNotchExpanded)
+                {
+                    IsNotchExpanded = true;
+                }
+            }
+        }
+        catch
+        {
+            // Abaikan error transisi window sementara
+        }
     }
 
     public void NotifyYouTubeMusicPlaying()
@@ -4837,7 +5168,7 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
                 hasChanges = true;
 
                 // 1. Play alert chime sound
-                PrayerAudioHelper.PlayDeadlineAlert();
+                PrayerAudioHelper.PlayReminderAlarm(Settings);
 
                 // 2. Windows tray notification balloon
                 RequestShowTrayNotification?.Invoke("⏰ Batas Waktu To-Do!", $"Tugas '{vm.TaskText}' telah mencapai batas waktu.");
@@ -5303,6 +5634,10 @@ public void ExpandAllCategories()
         }
 
         IsIdleMiniMode = true;
+        if (!_isHoveringWindow && !IsPinned)
+        {
+            IsNotchExpanded = false;
+        }
     }
 
     public void WakeFromIdle()
@@ -5349,6 +5684,7 @@ public void ExpandAllCategories()
     {
         _isHoveringWindow = true;
         IsHovering = true;
+        _autoCollapseStandbyTimer?.Stop();
         _expandHoverTimer?.Stop();
         _idleTimer?.Stop();
         OnPropertyChanged(nameof(IsNotchActive));
@@ -5384,6 +5720,24 @@ public void ExpandAllCategories()
         if (!IsPinned)
         {
             ResetIdleTimer();
+            if (_isNotchExpanded)
+            {
+                _autoCollapseStandbyTimer?.Stop();
+                _autoCollapseStandbyTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(3000) };
+                _autoCollapseStandbyTimer.Tick += (s, e) =>
+                {
+                    _autoCollapseStandbyTimer?.Stop();
+                    if (!_isHoveringWindow && !IsPinned && _isNotchExpanded && !IsComponentsMenuOpen)
+                    {
+                        // Hanya collapse ke standby jika ada jendela aplikasi lain yang terbuka
+                        if (WindowMonitorHelper.CountOtherOpenWindows() > 0)
+                        {
+                            IsNotchExpanded = false;
+                        }
+                    }
+                };
+                _autoCollapseStandbyTimer.Start();
+            }
         }
 
         // Fitur On Hover dinonaktifkan: panel tidak lagi tertutup otomatis saat kursor keluar

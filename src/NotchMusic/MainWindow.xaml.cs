@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using NotchMusic.Helpers;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
@@ -74,6 +76,7 @@ public partial class MainWindow : Window
             UpdateLiveTvWindowState();
         });
         _viewModel.RequestShowTrayNotification += (title, msg) => Dispatcher.Invoke(() => _trayService.ShowNotification(title, msg));
+        SetupAnimations();
 
         _viewModel.PropertyChanged += (s, ev) =>
         {
@@ -81,6 +84,8 @@ public partial class MainWindow : Window
                 ev.PropertyName == nameof(MainViewModel.IsCompactMode) ||
                 ev.PropertyName == nameof(MainViewModel.IsBezelMinimized) ||
                 ev.PropertyName == nameof(MainViewModel.ShowCompactView) ||
+                ev.PropertyName == nameof(MainViewModel.IsNotchExpanded) ||
+                ev.PropertyName == nameof(MainViewModel.ShowComponentIcons) ||
                 ev.PropertyName == nameof(MainViewModel.IsIdleMiniMode) ||
                 ev.PropertyName == nameof(MainViewModel.ShowIdleMiniView) ||
                 ev.PropertyName == nameof(MainViewModel.IsMusicWindowOpen) ||
@@ -172,6 +177,13 @@ public partial class MainWindow : Window
         UpdateBmkgWindowState();
         UpdateReminderWindowState();
         UpdateMusicWindowState();
+
+        if (!_viewModel.ShowComponentIcons)
+        {
+            if (LeftComponentPanel != null) LeftComponentPanel.Visibility = Visibility.Collapsed;
+            if (RightComponentPanel != null) RightComponentPanel.Visibility = Visibility.Collapsed;
+            if (BottomComponentPanel != null) BottomComponentPanel.Visibility = Visibility.Collapsed;
+        }
 
         await _viewModel.InitializeAsync();
     }
@@ -1004,6 +1016,176 @@ public partial class MainWindow : Window
     {
         _viewModel.IsClickThrough = !_viewModel.IsClickThrough;
         WindowHelper.SetClickThrough(this, _viewModel.IsClickThrough);
+    }
+
+    private void SetupAnimations()
+    {
+        _viewModel.RequestAnimateExpand += AnimateExpand;
+        _viewModel.RequestAnimateCollapse += AnimateCollapse;
+        _viewModel.RequestAnimateBezelMinimize += AnimateBezelMinimize;
+        _viewModel.RequestAnimateBezelRestore += AnimateBezelRestore;
+    }
+
+    private void AnimateExpand()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            var easeOut = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+            // Panel Komponen Kiri: meluncur keluar dari logo tengah & memudar masuk
+            if (LeftComponentPanel != null && LeftComponentTransform != null)
+            {
+                LeftComponentPanel.Visibility = Visibility.Visible;
+                var leftSlide = new DoubleAnimation(30, 0, TimeSpan.FromMilliseconds(340)) { EasingFunction = easeOut };
+                var leftFade = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(320)) { EasingFunction = easeOut };
+                LeftComponentTransform.BeginAnimation(TranslateTransform.XProperty, leftSlide);
+                LeftComponentPanel.BeginAnimation(UIElement.OpacityProperty, leftFade);
+            }
+
+            // Panel Komponen Kanan: meluncur keluar dari logo tengah & memudar masuk
+            if (RightComponentPanel != null && RightComponentTransform != null)
+            {
+                RightComponentPanel.Visibility = Visibility.Visible;
+                var rightSlide = new DoubleAnimation(-30, 0, TimeSpan.FromMilliseconds(340)) { EasingFunction = easeOut };
+                var rightFade = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(320)) { EasingFunction = easeOut };
+                RightComponentTransform.BeginAnimation(TranslateTransform.XProperty, rightSlide);
+                RightComponentPanel.BeginAnimation(UIElement.OpacityProperty, rightFade);
+            }
+
+            // Panel Komponen Bawah: meluncur turun dari atas & memudar masuk
+            if (BottomComponentPanel != null && BottomComponentTransform != null)
+            {
+                BottomComponentPanel.Visibility = Visibility.Visible;
+                var bottomSlide = new DoubleAnimation(-14, 0, TimeSpan.FromMilliseconds(360)) { EasingFunction = easeOut };
+                var bottomFade = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(340)) { EasingFunction = easeOut };
+                BottomComponentTransform.BeginAnimation(TranslateTransform.YProperty, bottomSlide);
+                BottomComponentPanel.BeginAnimation(UIElement.OpacityProperty, bottomFade);
+            }
+
+            Dispatcher.BeginInvoke(new Action(() => WindowHelper.CenterAtTopBezel(this)),
+                System.Windows.Threading.DispatcherPriority.Loaded);
+        });
+    }
+
+    private void AnimateCollapse()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            var easeIn = new QuadraticEase { EasingMode = EasingMode.EaseIn };
+            int pending = 3;
+            Action checkDone = () =>
+            {
+                pending--;
+                if (pending <= 0)
+                {
+                    if (LeftComponentPanel != null)
+                    {
+                        LeftComponentPanel.BeginAnimation(UIElement.OpacityProperty, null);
+                        LeftComponentPanel.Visibility = Visibility.Collapsed;
+                    }
+                    if (RightComponentPanel != null)
+                    {
+                        RightComponentPanel.BeginAnimation(UIElement.OpacityProperty, null);
+                        RightComponentPanel.Visibility = Visibility.Collapsed;
+                    }
+                    if (BottomComponentPanel != null)
+                    {
+                        BottomComponentPanel.BeginAnimation(UIElement.OpacityProperty, null);
+                        BottomComponentPanel.Visibility = Visibility.Collapsed;
+                    }
+
+                    _viewModel.FinishCollapse();
+                    Dispatcher.BeginInvoke(new Action(() => WindowHelper.CenterAtTopBezel(this)),
+                        System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+            };
+
+            // Panel Komponen Kiri: meluncur merapat ke tengah & memudar keluar
+            if (LeftComponentPanel != null && LeftComponentTransform != null)
+            {
+                var leftSlide = new DoubleAnimation(0, 20, TimeSpan.FromMilliseconds(250)) { EasingFunction = easeIn };
+                var leftFade = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(230)) { EasingFunction = easeIn };
+                leftFade.Completed += (s, e) => checkDone();
+                LeftComponentTransform.BeginAnimation(TranslateTransform.XProperty, leftSlide);
+                LeftComponentPanel.BeginAnimation(UIElement.OpacityProperty, leftFade);
+            }
+            else { checkDone(); }
+
+            // Panel Komponen Kanan: meluncur merapat ke tengah & memudar keluar
+            if (RightComponentPanel != null && RightComponentTransform != null)
+            {
+                var rightSlide = new DoubleAnimation(0, -20, TimeSpan.FromMilliseconds(250)) { EasingFunction = easeIn };
+                var rightFade = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(230)) { EasingFunction = easeIn };
+                rightFade.Completed += (s, e) => checkDone();
+                RightComponentTransform.BeginAnimation(TranslateTransform.XProperty, rightSlide);
+                RightComponentPanel.BeginAnimation(UIElement.OpacityProperty, rightFade);
+            }
+            else { checkDone(); }
+
+            // Panel Komponen Bawah: meluncur naik & memudar keluar
+            if (BottomComponentPanel != null && BottomComponentTransform != null)
+            {
+                var bottomSlide = new DoubleAnimation(0, -10, TimeSpan.FromMilliseconds(230)) { EasingFunction = easeIn };
+                var bottomFade = new DoubleAnimation(1.0, 0.0, TimeSpan.FromMilliseconds(210)) { EasingFunction = easeIn };
+                bottomFade.Completed += (s, e) => checkDone();
+                BottomComponentTransform.BeginAnimation(TranslateTransform.YProperty, bottomSlide);
+                BottomComponentPanel.BeginAnimation(UIElement.OpacityProperty, bottomFade);
+            }
+            else { checkDone(); }
+        });
+    }
+
+    private void AnimateBezelMinimize()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (MainIslandBorder == null || MainIslandTransform == null) return;
+
+            var easeIn = new CubicEase { EasingMode = EasingMode.EaseIn };
+            var slideUp = new DoubleAnimation(MainIslandTransform.Y, -70, TimeSpan.FromMilliseconds(320)) { EasingFunction = easeIn };
+            var fadeOut = new DoubleAnimation(MainIslandBorder.Opacity, 0.0, TimeSpan.FromMilliseconds(280)) { EasingFunction = easeIn };
+
+            slideUp.Completed += (s, e) =>
+            {
+                MainIslandBorder.Visibility = Visibility.Collapsed;
+                WindowHelper.CenterAtTopBezel(this);
+            };
+
+            MainIslandTransform.BeginAnimation(TranslateTransform.YProperty, slideUp);
+            MainIslandBorder.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+
+            if (BezelMinimizeToggleButton != null && BezelToggleTransform != null)
+            {
+                var toggleSlide = new DoubleAnimation(-8, 0, TimeSpan.FromMilliseconds(240)) { EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } };
+                var toggleFade = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(220));
+                BezelToggleTransform.BeginAnimation(TranslateTransform.YProperty, toggleSlide);
+                BezelMinimizeToggleButton.BeginAnimation(UIElement.OpacityProperty, toggleFade);
+            }
+        });
+    }
+
+    private void AnimateBezelRestore()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (MainIslandBorder == null || MainIslandTransform == null) return;
+
+            MainIslandBorder.Visibility = Visibility.Visible;
+            MainIslandBorder.Opacity = 0.0;
+            MainIslandTransform.Y = -70;
+
+            var easeOut = new CubicEase { EasingMode = EasingMode.EaseOut };
+            var slideDown = new DoubleAnimation(-70, 0, TimeSpan.FromMilliseconds(380)) { EasingFunction = easeOut };
+            var fadeIn = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(340)) { EasingFunction = easeOut };
+
+            slideDown.Completed += (s, e) =>
+            {
+                WindowHelper.CenterAtTopBezel(this);
+            };
+
+            MainIslandTransform.BeginAnimation(TranslateTransform.YProperty, slideDown);
+            MainIslandBorder.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+        });
     }
 
     public void ExitApplication()

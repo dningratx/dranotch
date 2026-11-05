@@ -287,7 +287,7 @@ public class ReminderService : IReminderService
         var settings = _settingsService.CurrentSettings;
         if (settings.ReminderSoundAlert)
         {
-            PrayerAudioHelper.PlayDeadlineAlert();
+            PrayerAudioHelper.PlayReminderAlarm(settings);
         }
 
         string msg = !string.IsNullOrWhiteSpace(item.Notes)

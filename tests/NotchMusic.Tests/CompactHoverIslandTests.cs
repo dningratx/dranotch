@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,17 +74,39 @@ public class CompactHoverIslandTests
     }
 
     [Fact]
-    public void CompactHoverIsland_WhenHovered_Shows5ComponentIcons()
+    public void CompactHoverIsland_WhenLogoClicked_ExpandsToComponentIcons()
     {
         var vm = new MainViewModel(new FakeMediaSessionService(), new FakeLyricsService(), new FakeSettingsService());
         vm.CurrentMode = PanelMode.Compact;
 
-        // Hover over the notch / logo
-        vm.OnMouseEnter();
+        // Default startup is Standby mode (only DRANOTCH logo visible)
+        Assert.False(vm.ShowComponentIcons);
+        Assert.False(vm.IsNotchExpanded);
 
-        // 5 component icons should become visible
+        // Clicking the DRANOTCH logo expands the notch to show all component icons
+        vm.DranotchLogoClickCommand.Execute(null);
         Assert.True(vm.ShowComponentIcons);
-        Assert.True(vm.IsHovering);
+        Assert.True(vm.IsNotchExpanded);
+    }
+
+    [Fact]
+    public void CompactHoverIsland_LogoClick_InStandbyExpands_InExpandOpensAbout()
+    {
+        var vm = new MainViewModel(new FakeMediaSessionService(), new FakeLyricsService(), new FakeSettingsService());
+        vm.CurrentMode = PanelMode.Compact;
+
+        bool aboutOpened = false;
+        vm.RequestOpenAbout += () => aboutOpened = true;
+
+        // 1. In standby mode: clicking logo must NOT open About, but must expand the notch
+        vm.DranotchLogoClickCommand.Execute(null);
+        Assert.False(aboutOpened);
+        Assert.True(vm.ShowComponentIcons);
+        Assert.True(vm.IsNotchExpanded);
+
+        // 2. In expanded mode: clicking logo MUST open About dialog
+        vm.DranotchLogoClickCommand.Execute(null);
+        Assert.True(aboutOpened);
     }
 
     [Fact]
@@ -277,10 +299,14 @@ public class CompactHoverIslandTests
         vmIdleMusic.OnMouseEnter();
         Assert.False(vmIdleMusic.ShowComponentIcons);
 
-        // Clicking the bezel arrow button again restores the notch
+        // Clicking the bezel arrow button again restores the notch to standby mode
         vmIdleMusic.ToggleBezelMinimizeCommand.Execute(null);
         Assert.False(vmIdleMusic.IsBezelMinimized);
         Assert.True(vmIdleMusic.ShowCompactView);
+        Assert.False(vmIdleMusic.ShowComponentIcons);
+
+        // Clicking the logo expands the notch
+        vmIdleMusic.DranotchLogoClickCommand.Execute(null);
         Assert.True(vmIdleMusic.ShowComponentIcons);
     }
 }

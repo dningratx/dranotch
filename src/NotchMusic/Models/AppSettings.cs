@@ -16,6 +16,7 @@ public class AppSettings
     public bool ExpandOnHover { get; set; } = false;
     public bool IsPinned { get; set; } = false;
     public bool IsBezelMinimized { get; set; } = false;
+    public bool AutoMinimizeOnMultipleWindows { get; set; } = true;
     public string PreferredSessionId { get; set; } = string.Empty;
     public bool AutoSearchLyrics { get; set; } = true;
     public bool ClickThroughInLyricsMode { get; set; } = false;
@@ -174,4 +175,7 @@ public class AppSettings
     public bool IsReminderWindowCompact { get; set; } = false;
     public bool ShowReminderInCompactNotch { get; set; } = true;
     public bool ReminderSoundAlert { get; set; } = true;
+    public string SelectedReminderSound { get; set; } = "reflection"; // "reflection", "radar", "marimba", "digital_pulse", "crystal_drop", "morning_breeze", "zen_bowl", "classic_bell", "custom"
+    public string CustomReminderSoundPath { get; set; } = string.Empty;
+    public double ReminderVolume { get; set; } = 0.85;
 }

@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.8.5)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v1.8.6)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -256,6 +256,21 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Banner Notifikasi Melayang Dynamic Island & Suara Pengingat**:
   - Menampilkan kartu notifikasi melayang otomatis beserta suara pengingat saat jadwal tiba, dilengkapi aksi cepat **`✓ Sudah`** dan **`💤 +10m`** langsung dari notch.
 
+### 🌟 32. Mode Cerdas Auto-Window, Animasi Transisi Halus & Koleksi Suara Alarm Baru *(Baru di v1.8.6)*
+- **Mode Pintar Deteksi Jendela Aktif (Auto-Window)**:
+  - **0 Jendela (Desktop Bersih)**: Notch secara otomatis membuka **Mode Expand** menampilkan seluruh tombol media, radio, TV, browser, BMKG, pengingat, to-do, dan info bar sholat/cuaca mekar penuh.
+  - **1 Jendela Terbuka**: Notch otomatis beralih ke **Mode Standby** ringkas (hanya kapsul elegan logo DRANOTCH "D" di tengah atas).
+  - **≥ 2 Jendela Terbuka**: Notch otomatis beralih ke **Mode Minimize** (panah kecil `v` di atas bezel layar) agar tidak menutupi area multitasking pengguna.
+- **Animasi Transisi Halus (*Smooth Transitions*)**:
+  - Seluruh transisi perbesaran notch (*Expand*), pengecilan (*Standby*), dan penyembunyian ke bezel (*Minimize*) menggunakan akselerasi kurva halus (*Cubic Ease-In-Out*).
+  - Panel samping dan baris bawah otomatis di-*collapse* secara instan saat animasi selesai, menghilangkan glitch ruang kosong hitam.
+- **Interaksi Logo DRANOTCH Cerdas**:
+  - Di Mode Standby, klik logo DRANOTCH untuk langsung melebarkan notch ke Mode Expand.
+  - Di Mode Expand, klik logo DRANOTCH untuk membuka jendela informasi About DRANOTCH.
+- **8 Pilihan Suara Alarm Pengingat Bawaan (Bebas Royalti)**:
+  - Tersedia 8 varian audio alarm berkualitas tinggi (.wav): *Digital Pulse*, *Crystal Drop*, *Classic Bell*, *Marimba*, *Morning Breeze*, *Radar*, *Reflection*, dan *Zen Bowl*.
+  - Pemilihan jenis nada alarm kustom per pengingat dan tombol pratinjau tes suara di Pengaturan.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -284,7 +299,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.5.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.8.6.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

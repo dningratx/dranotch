@@ -12,6 +12,9 @@ public static class PrayerAudioHelper
     private static byte[]? _cachedChimeWav;
     private static byte[]? _cachedDeadlineWav;
     private static MediaPlayer? _mediaPlayer;
+    private static MediaPlayer? _alarmMediaPlayer;
+    private static bool _isAlarmPlaying;
+    private static Action? _currentAlarmOnEnded;
     private static System.Windows.Threading.DispatcherTimer? _positionTimer;
     private static double _targetStartSeconds;
     private static double _targetEndSeconds;
@@ -21,6 +24,7 @@ public static class PrayerAudioHelper
 
     public static bool IsPlaying => _isPlaying;
     public static bool IsPaused => _isPaused;
+    public static bool IsAlarmPlaying => _isAlarmPlaying;
     public static double CurrentPositionSeconds { get; private set; }
     public static double TotalDurationSeconds { get; private set; }
     public static double TargetStartSeconds => _targetStartSeconds;
@@ -35,6 +39,11 @@ public static class PrayerAudioHelper
     /// Event yang dipicu saat status playback berubah (Play, Pause, Stop).
     /// </summary>
     public static event Action? PlaybackStateChanged;
+
+    /// <summary>
+    /// Event yang dipicu saat status pemutaran alarm Pengingat Pintar berubah.
+    /// </summary>
+    public static event Action? AlarmPlaybackStateChanged;
 
     public static readonly IReadOnlyList<AdhanSoundOption> AvailableSounds = new List<AdhanSoundOption>
     {
@@ -123,6 +132,91 @@ public static class PrayerAudioHelper
             Id = "custom",
             Name = "File Audio Kustom (.mp3 / .wav)",
             Description = "Gunakan file suara adzan atau audio pilihan Anda sendiri dari komputer.",
+            Icon = "📁",
+            FileName = ""
+        }
+    };
+
+    public static readonly IReadOnlyList<AlarmSoundOption> AvailableAlarmSounds = new List<AlarmSoundOption>
+    {
+        new()
+        {
+            Id = "reflection",
+            Name = "Reflection (iOS Modern Arpeggio)",
+            ShortName = "Reflection",
+            Description = "Harmoni celesta & marimba kristal bergaya iOS Reflection yang hangat, modern, dan elegan.",
+            Icon = "✨",
+            FileName = "alarm_reflection.wav"
+        },
+        new()
+        {
+            Id = "radar",
+            Name = "Radar (iOS Crisp Pulse)",
+            ShortName = "Radar Pulse",
+            Description = "Nada pulsa modern ikonik bergaya iOS Radar yang bersih, ritmis, dan jelas membangunkan fokus.",
+            Icon = "📡",
+            FileName = "alarm_radar.wav"
+        },
+        new()
+        {
+            Id = "marimba",
+            Name = "Soft Marimba (Warm Wooden Melody)",
+            ShortName = "Soft Marimba",
+            Description = "Melodi kayu marimba akustik yang hangat, ceria, dan ramah di telinga.",
+            Icon = "🪵",
+            FileName = "alarm_marimba.wav"
+        },
+        new()
+        {
+            Id = "digital_pulse",
+            Name = "Digital Pulse (Minimalist Synth)",
+            ShortName = "Digital Pulse",
+            Description = "Ketukan synth elektronik minimalis modern bergaya Apple Watch / Teenage Engineering.",
+            Icon = "⚡",
+            FileName = "alarm_digital_pulse.wav"
+        },
+        new()
+        {
+            Id = "crystal_drop",
+            Name = "Aqua Crystal (Water & Glass Bell)",
+            ShortName = "Aqua Crystal",
+            Description = "Tetesan air segar berpadu lonceng kristal — sangat cocok untuk pengingat minum air & mata.",
+            Icon = "💧",
+            FileName = "alarm_crystal_drop.wav"
+        },
+        new()
+        {
+            Id = "morning_breeze",
+            Name = "Daybreak Piano (Ambient Rhodes)",
+            ShortName = "Daybreak Piano",
+            Description = "Progresi chord piano elektrik Rhodes yang lembut dan menenangkan seperti pagi hari.",
+            Icon = "🌅",
+            FileName = "alarm_morning_breeze.wav"
+        },
+        new()
+        {
+            Id = "zen_bowl",
+            Name = "Zen Singing Bowl (432Hz Mindful)",
+            ShortName = "Zen Bowl",
+            Description = "Resonansi lonceng meditasi 432Hz yang damai untuk istirahat mata & peregangan.",
+            Icon = "🧘",
+            FileName = "alarm_zen_bowl.wav"
+        },
+        new()
+        {
+            Id = "classic_bell",
+            Name = "Classic Twin Bell (Tegas & Nyaring)",
+            ShortName = "Classic Bell",
+            Description = "Dering beker mekanik kembar yang nyaring untuk pengingat penting (obat / deadline).",
+            Icon = "⏰",
+            FileName = "alarm_classic_bell.wav"
+        },
+        new()
+        {
+            Id = "custom",
+            Name = "File Audio Kustom (.mp3 / .wav)",
+            ShortName = "Audio Kustom",
+            Description = "Gunakan file suara alarm (.mp3 / .wav) pilihan Anda sendiri dari komputer.",
             Icon = "📁",
             FileName = ""
         }
@@ -502,6 +596,13 @@ public static class PrayerAudioHelper
     {
         try
         {
+            string? defaultAlarmPath = ResolveAlarmFilePath("reflection", null);
+            if (!string.IsNullOrEmpty(defaultAlarmPath) && File.Exists(defaultAlarmPath))
+            {
+                PlayAlarmPreview("reflection", null, 0.85);
+                return;
+            }
+
             _cachedDeadlineWav ??= GenerateDeadlineAlertWav();
 
             using var ms = new MemoryStream(_cachedDeadlineWav);
@@ -516,6 +617,166 @@ public static class PrayerAudioHelper
             }
             catch { }
         }
+    }
+
+    public static void PlayReminderAlarm(AppSettings? settings = null, string? overrideSoundId = null, Action? onEnded = null)
+    {
+        if (settings != null && !settings.ReminderSoundAlert)
+        {
+            onEnded?.Invoke();
+            return;
+        }
+
+        string soundId = !string.IsNullOrWhiteSpace(overrideSoundId)
+            ? overrideSoundId
+            : (settings?.SelectedReminderSound ?? "reflection");
+        string? customPath = settings?.CustomReminderSoundPath;
+        double volume = settings?.ReminderVolume ?? 0.85;
+
+        PlayAlarmPreview(soundId, customPath, volume, onEnded);
+    }
+
+    public static void PlayAlarmPreview(string? soundId, string? customPath = null, double volume = 0.85, Action? onEnded = null)
+    {
+        soundId ??= "reflection";
+        string? resolvedPath = ResolveAlarmFilePath(soundId, customPath);
+
+        if (string.IsNullOrEmpty(resolvedPath) || !File.Exists(resolvedPath))
+        {
+            try
+            {
+                _cachedDeadlineWav ??= GenerateDeadlineAlertWav();
+                using var ms = new MemoryStream(_cachedDeadlineWav);
+                using var player = new SoundPlayer(ms);
+                player.Play();
+            }
+            catch { }
+            onEnded?.Invoke();
+            return;
+        }
+
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            try
+            {
+                StopAlarmAudio();
+
+                _currentAlarmOnEnded = onEnded;
+                _alarmMediaPlayer ??= new MediaPlayer();
+                _alarmMediaPlayer.MediaEnded -= AlarmMediaPlayer_MediaEnded;
+                _alarmMediaPlayer.MediaFailed -= AlarmMediaPlayer_MediaFailed;
+                _alarmMediaPlayer.MediaEnded += AlarmMediaPlayer_MediaEnded;
+                _alarmMediaPlayer.MediaFailed += AlarmMediaPlayer_MediaFailed;
+
+                _alarmMediaPlayer.Volume = Math.Clamp(volume, 0.0, 1.0);
+                _alarmMediaPlayer.Open(new Uri(resolvedPath, UriKind.Absolute));
+                _alarmMediaPlayer.Play();
+                _isAlarmPlaying = true;
+                AlarmPlaybackStateChanged?.Invoke();
+            }
+            catch
+            {
+                _isAlarmPlaying = false;
+                AlarmPlaybackStateChanged?.Invoke();
+                onEnded?.Invoke();
+            }
+        });
+    }
+
+    public static void StopAlarmAudio()
+    {
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+        {
+            try
+            {
+                if (_alarmMediaPlayer != null)
+                {
+                    _alarmMediaPlayer.Stop();
+                    _alarmMediaPlayer.Close();
+                }
+            }
+            catch { }
+            _isAlarmPlaying = false;
+            AlarmPlaybackStateChanged?.Invoke();
+            _currentAlarmOnEnded?.Invoke();
+            _currentAlarmOnEnded = null;
+        });
+    }
+
+    private static void AlarmMediaPlayer_MediaEnded(object? sender, EventArgs e)
+    {
+        _isAlarmPlaying = false;
+        AlarmPlaybackStateChanged?.Invoke();
+        _currentAlarmOnEnded?.Invoke();
+        _currentAlarmOnEnded = null;
+    }
+
+    private static void AlarmMediaPlayer_MediaFailed(object? sender, ExceptionEventArgs e)
+    {
+        _isAlarmPlaying = false;
+        AlarmPlaybackStateChanged?.Invoke();
+        _currentAlarmOnEnded?.Invoke();
+        _currentAlarmOnEnded = null;
+    }
+
+    private static string? ResolveAlarmFilePath(string soundId, string? customPath)
+    {
+        if (string.Equals(soundId, "custom", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
+            {
+                return customPath;
+            }
+            soundId = "reflection";
+        }
+
+        string fileName = soundId switch
+        {
+            "reflection" => "alarm_reflection.wav",
+            "radar" => "alarm_radar.wav",
+            "marimba" => "alarm_marimba.wav",
+            "digital_pulse" => "alarm_digital_pulse.wav",
+            "crystal_drop" => "alarm_crystal_drop.wav",
+            "morning_breeze" => "alarm_morning_breeze.wav",
+            "zen_bowl" => "alarm_zen_bowl.wav",
+            "classic_bell" => "alarm_classic_bell.wav",
+            _ => "alarm_reflection.wav"
+        };
+
+        // 1. Cek di AppContext.BaseDirectory / Assets / Alarms
+        string p1 = Path.Combine(AppContext.BaseDirectory, "Assets", "Alarms", fileName);
+        if (File.Exists(p1)) return p1;
+
+        // 2. Cek di %LOCALAPPDATA%\DRANOTCH\Alarms
+        string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string appDataAlarms = Path.Combine(localAppData, "DRANOTCH", "Alarms");
+        string p2 = Path.Combine(appDataAlarms, fileName);
+        if (File.Exists(p2)) return p2;
+
+        // 3. Cek di source code workspace (development fallback)
+        try
+        {
+            string cur = AppDomain.CurrentDomain.BaseDirectory;
+            var dirInfo = new DirectoryInfo(cur);
+            while (dirInfo != null)
+            {
+                string devPath = Path.Combine(dirInfo.FullName, "src", "NotchMusic", "Assets", "Alarms", fileName);
+                if (File.Exists(devPath))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(appDataAlarms);
+                        File.Copy(devPath, p2, true);
+                    }
+                    catch { }
+                    return devPath;
+                }
+                dirInfo = dirInfo.Parent;
+            }
+        }
+        catch { }
+
+        return null;
     }
 
     private static byte[] GenerateChimeWav()

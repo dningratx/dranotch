@@ -62,6 +62,20 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    public bool AutoMinimizeOnMultipleWindows
+    {
+        get => Settings.AutoMinimizeOnMultipleWindows;
+        set
+        {
+            if (Settings.AutoMinimizeOnMultipleWindows != value)
+            {
+                Settings.AutoMinimizeOnMultipleWindows = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public string ComponentDisplayMode
     {
         get => Settings.ComponentDisplayMode ?? "Both";
@@ -971,6 +985,89 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    public IReadOnlyList<AlarmSoundOption> AvailableAlarmSounds => PrayerAudioHelper.AvailableAlarmSounds;
+
+    public AlarmSoundOption? SelectedReminderSoundOption
+    {
+        get => AvailableAlarmSounds.FirstOrDefault(s => string.Equals(s.Id, SelectedReminderSound, StringComparison.OrdinalIgnoreCase))
+               ?? AvailableAlarmSounds[0];
+        set
+        {
+            if (value != null && !string.IsNullOrWhiteSpace(value.Id))
+            {
+                SelectedReminderSound = value.Id;
+            }
+        }
+    }
+
+    public string SelectedReminderSound
+    {
+        get => string.IsNullOrWhiteSpace(Settings.SelectedReminderSound) ? "reflection" : Settings.SelectedReminderSound;
+        set
+        {
+            if (Settings.SelectedReminderSound != value && !string.IsNullOrWhiteSpace(value))
+            {
+                Settings.SelectedReminderSound = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedReminderSoundOption));
+                OnPropertyChanged(nameof(SelectedReminderSoundDescription));
+                OnPropertyChanged(nameof(IsCustomReminderSoundSelected));
+            }
+        }
+    }
+
+    public string SelectedReminderSoundDescription => SelectedReminderSoundOption?.Description ?? string.Empty;
+
+    public bool IsCustomReminderSoundSelected => string.Equals(SelectedReminderSound, "custom", StringComparison.OrdinalIgnoreCase);
+
+    public string CustomReminderSoundPath
+    {
+        get => Settings.CustomReminderSoundPath;
+        set
+        {
+            if (Settings.CustomReminderSoundPath != value)
+            {
+                Settings.CustomReminderSoundPath = value ?? string.Empty;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public double ReminderVolume
+    {
+        get => Settings.ReminderVolume;
+        set
+        {
+            double clamped = Math.Clamp(value, 0.0, 1.0);
+            if (Math.Abs(Settings.ReminderVolume - clamped) > 0.01)
+            {
+                Settings.ReminderVolume = clamped;
+                _settingsService.Save();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ReminderVolumePercentText));
+            }
+        }
+    }
+
+    public string ReminderVolumePercentText => $"{(int)Math.Round(ReminderVolume * 100)}%";
+
+    private bool _isAlarmPlaying;
+    public bool IsAlarmPlaying
+    {
+        get => _isAlarmPlaying;
+        set
+        {
+            if (SetProperty(ref _isAlarmPlaying, value))
+            {
+                OnPropertyChanged(nameof(AlarmPlayButtonText));
+            }
+        }
+    }
+
+    public string AlarmPlayButtonText => IsAlarmPlaying ? "⏹ Hentikan Suara Alarm" : "▶ Tes Putar Suara Alarm";
+
     public PrayerSchedule TodayPrayerSchedule => _prayerService.GetTodaySchedule();
 
     private bool _isDetectingLocation;
@@ -1016,6 +1113,9 @@ public class SettingsViewModel : ViewModelBase
     public ICommand SetAdhanPreset30sCommand { get; }
     public ICommand SetAdhanPreset1mCommand { get; }
     public ICommand SetAdhanPreset2mCommand { get; }
+    public ICommand PlayAlarmPreviewCommand { get; }
+    public ICommand StopAlarmPreviewCommand { get; }
+    public ICommand BrowseCustomAlarmCommand { get; }
     public ICommand ExitApplicationCommand { get; }
 
     public SettingsViewModel(
@@ -1203,6 +1303,52 @@ public class SettingsViewModel : ViewModelBase
 
         PrayerAudioHelper.PlaybackProgressChanged += OnPrayerAudioProgressChanged;
         PrayerAudioHelper.PlaybackStateChanged += OnPrayerAudioStateChanged;
+        PrayerAudioHelper.AlarmPlaybackStateChanged += () =>
+        {
+            IsAlarmPlaying = PrayerAudioHelper.IsAlarmPlaying;
+        };
+
+        PlayAlarmPreviewCommand = new RelayCommand(() =>
+        {
+            if (IsAlarmPlaying)
+            {
+                PrayerAudioHelper.StopAlarmAudio();
+                IsAlarmPlaying = false;
+            }
+            else
+            {
+                IsAlarmPlaying = true;
+                PrayerAudioHelper.PlayAlarmPreview(SelectedReminderSound, CustomReminderSoundPath, ReminderVolume, () =>
+                {
+                    IsAlarmPlaying = false;
+                });
+            }
+        });
+
+        StopAlarmPreviewCommand = new RelayCommand(() =>
+        {
+            PrayerAudioHelper.StopAlarmAudio();
+            IsAlarmPlaying = false;
+        });
+
+        BrowseCustomAlarmCommand = new RelayCommand(() =>
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Pilih File Suara Alarm (.mp3 / .wav)",
+                Filter = "File Audio (*.mp3;*.wav)|*.mp3;*.wav|Semua File (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() == true)
+            {
+                CustomReminderSoundPath = dlg.FileName;
+                SelectedReminderSound = "custom";
+                IsAlarmPlaying = true;
+                PrayerAudioHelper.PlayAlarmPreview("custom", CustomReminderSoundPath, ReminderVolume, () =>
+                {
+                    IsAlarmPlaying = false;
+                });
+            }
+        });
 
         ToggleCustomCredentialsCommand = new RelayCommand(() => ShowCustomCredentials = !ShowCustomCredentials);
         ToggleCustomUpdateUrlCommand = new RelayCommand(() => ShowCustomUpdateUrl = !ShowCustomUpdateUrl);

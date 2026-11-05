@@ -248,6 +248,8 @@
                     <StackPanel>
                         <TextBlock Text="Tampilan &amp; Perilaku" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,8"/>
                         <CheckBox Content="Jalankan otomatis saat login Windows" IsChecked="{Binding StartWithWindows}"/>
+                        <CheckBox Content="Otomatis minimize notch ke bezel atas saat jendela aplikasi lain banyak dibuka (lebih dari 1)" 
+                                  IsChecked="{Binding AutoMinimizeOnMultipleWindows}" Margin="0,8,0,0"/>
                     </StackPanel>
                 </Border>
 
@@ -821,6 +823,76 @@
                                               IsChecked="{Binding ShowReminderInCompactNotch}"/>
                                     <CheckBox Content="Bunyikan nada dering peringatan saat waktu pengingat tiba" 
                                               IsChecked="{Binding ReminderSoundAlert}"/>
+
+                                    <!-- Pilihan Nada Suara Alarm Modern & Minimalis -->
+                                    <Border Background="#101016" BorderBrush="#262636" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,6,0,4"
+                                            Visibility="{Binding ReminderSoundAlert, Converter={StaticResource BoolToVis}}">
+                                        <StackPanel>
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Pilihan Suara Alarm (Modern &amp; Minimalis):" FontWeight="SemiBold" Foreground="#FFFFFF" FontSize="11.5"/>
+                                                    <TextBlock Text="Digunakan untuk Pengingat Pintar (Air/Obat/Fokus) dan Batas Waktu To-Do." Foreground="#777788" FontSize="10.5"/>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1" Command="{Binding PlayAlarmPreviewCommand}"
+                                                        Background="#252534" Foreground="#38BDF8" BorderBrush="#38BDF8" BorderThickness="1"
+                                                        Padding="10,4" Cursor="Hand" FontSize="11" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding AlarmPlayButtonText}" FontWeight="SemiBold"/>
+                                                </Button>
+                                            </Grid>
+
+                                            <ComboBox ItemsSource="{Binding AvailableAlarmSounds}"
+                                                      SelectedValue="{Binding SelectedReminderSound, Mode=TwoWay}"
+                                                      SelectedValuePath="Id"
+                                                      Padding="8,5" Margin="0,0,0,6">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Margin="0,2">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding Icon}" Margin="0,0,6,0" FontSize="12"/>
+                                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="11.5" Foreground="#FFFFFF"/>
+                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Description}" FontSize="10" Foreground="#888899" Margin="20,1,0,0" TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+
+                                            <TextBlock Text="{Binding SelectedReminderSoundDescription}" Foreground="#9EA8C2" FontSize="10.5" Margin="2,0,0,6" TextWrapping="Wrap"/>
+
+                                            <!-- Opsi File Audio Alarm Kustom -->
+                                            <Grid Visibility="{Binding IsCustomReminderSoundSelected, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding CustomReminderSoundPath, Mode=TwoWay}"
+                                                         Background="#0F0F14" Foreground="#CCCCCC" BorderBrush="#2F2F3D" Padding="6,4"
+                                                         FontSize="11" IsReadOnly="True" VerticalAlignment="Center"/>
+                                                <Button Grid.Column="1" Command="{Binding BrowseCustomAlarmCommand}"
+                                                        Content="📁 Telusuri..." Background="#282836" Foreground="#FFFFFF"
+                                                        BorderThickness="0" Padding="10,4" Margin="6,0,0,0" Cursor="Hand" FontSize="11"/>
+                                            </Grid>
+
+                                            <!-- Volume Suara Alarm -->
+                                            <Grid Margin="0,2,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="40"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="Volume Alarm:" Foreground="#CCCCCC" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                <Slider Grid.Column="1" Minimum="0.1" Maximum="1.0" Value="{Binding ReminderVolume, Mode=TwoWay}"
+                                                        TickFrequency="0.05" IsSnapToTickEnabled="True" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding ReminderVolumePercentText}" Foreground="#38BDF8" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
                                     <TextBlock Text="Tips: Klik ikon tetesan air (&#x1F4A7;) di Dynamic Island atau menu klik kanan Tray untuk mengelola daftar pengingat, preset cepat, dan tunda (Snooze)."
                                                FontSize="10" Foreground="#777788" Margin="0,6,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>

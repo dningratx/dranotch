@@ -9,7 +9,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>1.8.5</Version>
+    <Version>1.8.6</Version>
     <AssemblyTitle>DRANOTCH</AssemblyTitle>
     <Product>DRANOTCH</Product>
     <Company>DRANOTCH</Company>
@@ -19,6 +19,9 @@
     <Resource Include="Assets\app.ico" />
     <Resource Include="Assets\app.png" />
     <Content Include="Assets\Adhans\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Alarms\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
