@@ -15,6 +15,7 @@ using NotchMusic.Services.Media;
 using NotchMusic.Services.Prayer;
 using NotchMusic.Services.Radio;
 using NotchMusic.Services.Reminder;
+using NotchMusic.Services.Screenshot;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Sync;
 using NotchMusic.Services.StickyNotes;
@@ -38,6 +39,8 @@ public class MainViewModel : ViewModelBase
     private readonly IBmkgService _bmkgService;
     private readonly IReminderService _reminderService;
     private readonly IStickyNoteService _stickyNoteService;
+    private readonly IScreenshotService _screenshotService;
+    private int _screenshotCount;
     private readonly DispatcherTimer _interpolationTimer;
 
     private PrayerNotificationEvent? _activePrayerNotification;
@@ -170,6 +173,12 @@ public class MainViewModel : ViewModelBase
     public event Action? RequestOpenStickyNotesHub;
     public event Action<StickyNoteItemViewModel>? RequestOpenStickyNote;
     public event Action<StickyNoteItemViewModel>? RequestCloseStickyNote;
+    public event Action? RequestOpenScreenshotHub;
+    public event Action<SnipMode>? RequestStartSnipping;
+    public event Action? RequestCaptureFullScreen;
+    public event Action? RequestCaptureActiveWindow;
+    public event Action<ScreenshotItem>? RequestPinScreenshot;
+    public event Action? RequestOpenScreenshotFolder;
     public event Action? RequestOpenMusic;
     public event Action? RequestComponentLayoutChanged;
     public event Action<string, string>? RequestShowTrayNotification;
@@ -283,12 +292,17 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowMusicIconInNotch));
                 OnPropertyChanged(nameof(BezelMinimizeButtonTooltip));
                 OnPropertyChanged(nameof(BezelMinimizeMenuText));
+                OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+                OnPropertyChanged(nameof(ShowBezelUpArrow));
             }
         }
     }
 
     public bool IsNotBezelMinimized => !_isBezelMinimized;
     public bool ShowCompactView => IsCompactMode && !_isBezelMinimized;
+
+    public bool ShowBezelMinimizeButton => IsBezelMinimized || (!IsIdleMiniMode && (VisualExpanded || _isHoveringWindow || _isNotchExpanded || IsPinned));
+    public bool ShowBezelUpArrow => IsNotBezelMinimized && !IsIdleMiniMode && (VisualExpanded || _isHoveringWindow || _isNotchExpanded || IsPinned);
 
     public string BezelMinimizeButtonTooltip => IsBezelMinimized
         ? "Buka kembali Notch DRANOTCH"
@@ -312,6 +326,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowHoverWeatherPill));
                 OnPropertyChanged(nameof(DranotchLogoTooltip));
                 OnPropertyChanged(nameof(IsNotchActive));
+                OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+                OnPropertyChanged(nameof(ShowBezelUpArrow));
                 RequestComponentLayoutChanged?.Invoke();
             }
         }
@@ -342,6 +358,8 @@ public class MainViewModel : ViewModelBase
                 }
                 OnPropertyChanged(nameof(DranotchLogoTooltip));
                 OnPropertyChanged(nameof(IsNotchActive));
+                OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+                OnPropertyChanged(nameof(ShowBezelUpArrow));
             }
         }
     }
@@ -399,6 +417,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(ShowFullBrowserInCompact));
                 OnPropertyChanged(nameof(MiniModeButtonTooltip));
                 OnPropertyChanged(nameof(IsExpandedMode));
+                OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+                OnPropertyChanged(nameof(ShowBezelUpArrow));
             }
         }
     }
@@ -1797,6 +1817,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsExpandedMode));
                 OnPropertyChanged(nameof(PinButtonTooltip));
                 OnPropertyChanged(nameof(PinMenuText));
+                OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+                OnPropertyChanged(nameof(ShowBezelUpArrow));
             }
         }
     }
@@ -2483,6 +2505,13 @@ public ICommand TogglePrayerPanelCommand { get; }
     public ICommand SyncStickyNotesCommand { get; }
     public ICommand ClearStickyNotesSearchCommand { get; }
 
+    public ICommand OpenScreenshotHubCommand { get; }
+    public ICommand StartSnippingCommand { get; }
+    public ICommand CaptureFullScreenCommand { get; }
+    public ICommand CaptureActiveWindowCommand { get; }
+    public ICommand OpenScreenshotFolderCommand { get; }
+    public ICommand SyncScreenshotGoogleDriveCommand { get; }
+
     public ICommand WakeFromIdleCommand { get; }
     public ICommand ToggleMiniModeCommand { get; }
     public ICommand ToggleVocalRemoverCommand { get; }
@@ -2505,7 +2534,8 @@ public ICommand TogglePrayerPanelCommand { get; }
         ILiveTvService? liveTvService = null,
         IBmkgService? bmkgService = null,
         IReminderService? reminderService = null,
-        IStickyNoteService? stickyNoteService = null)
+        IStickyNoteService? stickyNoteService = null,
+        IScreenshotService? screenshotService = null)
     {
         _mediaService = mediaService;
         _lyricsService = lyricsService;
@@ -2525,6 +2555,24 @@ public ICommand TogglePrayerPanelCommand { get; }
         _bmkgService = bmkgService ?? new BmkgService(settingsService);
         _reminderService = reminderService ?? new ReminderService(settingsService);
         _stickyNoteService = stickyNoteService ?? new StickyNoteService(settingsService);
+        _screenshotService = screenshotService ?? new ScreenshotService(settingsService);
+        _screenshotCount = _screenshotService.LoadScreenshots().Count;
+        _screenshotService.ScreenshotCaptured += _ => ScheduleScreenshotAutoSync();
+        _screenshotService.ScreenshotsChanged += () =>
+        {
+            ScheduleScreenshotAutoSync();
+            if (System.Windows.Application.Current?.Dispatcher != null && !System.Windows.Application.Current.Dispatcher.CheckAccess())
+            {
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    ScreenshotCount = _screenshotService.LoadScreenshots().Count;
+                });
+            }
+            else
+            {
+                ScreenshotCount = _screenshotService.LoadScreenshots().Count;
+            }
+        };
 
         foreach (var r in _reminderService.Reminders)
         {
@@ -2627,6 +2675,7 @@ public ICommand TogglePrayerPanelCommand { get; }
         };
         _googleDriveSyncService.TodosSynced += OnTodosSyncedFromCloud;
         _googleDriveSyncService.StickyNotesSynced += OnStickyNotesSyncedFromCloud;
+        _googleDriveSyncService.ScreenshotsSynced += OnScreenshotsSyncedFromCloud;
 
         var loadedNotes = _stickyNoteService.LoadNotes();
         foreach (var note in loadedNotes)
@@ -3515,6 +3564,13 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         SyncStickyNotesCommand = new RelayCommand(async () => await SyncStickyNotesWithGoogleDriveAsync());
         ClearStickyNotesSearchCommand = new RelayCommand(() => StickyNotesSearchQuery = string.Empty);
 
+        OpenScreenshotHubCommand = new RelayCommand(OpenScreenshotHub);
+        StartSnippingCommand = new RelayCommand(() => StartSnipping());
+        CaptureFullScreenCommand = new RelayCommand(CaptureFullScreen);
+        CaptureActiveWindowCommand = new RelayCommand(CaptureActiveWindow);
+        OpenScreenshotFolderCommand = new RelayCommand(OpenScreenshotFolder);
+        SyncScreenshotGoogleDriveCommand = new RelayCommand(async () => await SyncScreenshotsWithGoogleDriveAsync());
+
         _mediaService.TrackChanged += OnTrackChanged;
         _mediaService.TimelineUpdated += OnTimelineUpdated;
         _mediaService.SessionsChanged += (s, list) =>
@@ -3583,30 +3639,21 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
                     IsBezelMinimized = true;
                 }
             }
-            // 2. Jika kondisi aplikasi lain cuma 1 yang terbuka:
-            else if (otherWindows == 1)
-            {
-                if (IsBezelMinimized)
-                {
-                    IsBezelMinimized = false;
-                }
-                // Mode Standby (hanya logo D di tengah)
-                if (IsNotchExpanded && !IsPinned)
-                {
-                    IsNotchExpanded = false;
-                }
-            }
-            // 3. Jika TIDAK ADA jendela lain yang terbuka (cuma di desktop, otherWindows == 0):
+            // 2. Jika windows cuma 1 atau hanya desktop saja (otherWindows <= 1):
+            // Tampilkan tetap dalam mode idle (kapsul ringkas logo di tengah)
             else
             {
                 if (IsBezelMinimized)
                 {
                     IsBezelMinimized = false;
                 }
-                // Mode Expand langsung terbuka!
-                if (!IsNotchExpanded)
+                if (IsNotchExpanded && !IsPinned)
                 {
-                    IsNotchExpanded = true;
+                    IsNotchExpanded = false;
+                }
+                if (!IsIdleMiniMode && !IsPinned)
+                {
+                    EnterIdleMiniMode();
                 }
             }
         }
@@ -5430,6 +5477,10 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         }
 
         await SyncStickyNotesWithGoogleDriveAsync();
+        if (Settings.GoogleDriveScreenshotSync)
+        {
+            await SyncScreenshotsWithGoogleDriveAsync();
+        }
     }
 
     private void OnTodosSyncedFromCloud(List<TodoItem> syncedList)
@@ -5715,7 +5766,7 @@ public void ExpandAllCategories()
 
     public void EnterIdleMiniMode()
     {
-        if (IsPinned || IsLyricsMode || IsComponentsMenuOpen || HasActivePrayerNotification || HasActiveBmkgNotification || HasActiveReminderNotification)
+        if (IsPinned || IsLyricsMode || IsComponentsMenuOpen)
         {
             return;
         }
@@ -5725,6 +5776,8 @@ public void ExpandAllCategories()
         {
             IsNotchExpanded = false;
         }
+        OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+        OnPropertyChanged(nameof(ShowBezelUpArrow));
     }
 
     public void WakeFromIdle()
@@ -5739,6 +5792,8 @@ public void ExpandAllCategories()
         {
             ResetIdleTimer();
         }
+        OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+        OnPropertyChanged(nameof(ShowBezelUpArrow));
     }
 
     public void ResetIdleTimer()
@@ -5758,7 +5813,7 @@ public void ExpandAllCategories()
         _idleTimer.Tick += (s, e) =>
         {
             _idleTimer?.Stop();
-            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen && !HasActivePrayerNotification && !HasActiveBmkgNotification && !HasActiveReminderNotification)
+            if (!_isHoveringWindow && !IsPinned && !IsLyricsMode && !IsComponentsMenuOpen)
             {
                 IsHovering = false;
                 EnterIdleMiniMode();
@@ -5775,12 +5830,21 @@ public void ExpandAllCategories()
         _expandHoverTimer?.Stop();
         _idleTimer?.Stop();
         OnPropertyChanged(nameof(IsNotchActive));
+        OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+        OnPropertyChanged(nameof(ShowBezelUpArrow));
 
         // Check for any cloud changes immediately when approaching the notch
-        if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveAutoSync && !_googleDriveSyncService.IsSyncing)
+        if (_googleDriveSyncService.IsConnected && !_googleDriveSyncService.IsSyncing)
         {
-            _ = _googleDriveSyncService.CheckForRemoteChangesAsync();
-            _ = _googleDriveSyncService.CheckForRemoteStickyNotesChangesAsync();
+            if (Settings.GoogleDriveAutoSync)
+            {
+                _ = _googleDriveSyncService.CheckForRemoteChangesAsync();
+                _ = _googleDriveSyncService.CheckForRemoteStickyNotesChangesAsync();
+            }
+            if (Settings.GoogleDriveScreenshotSync)
+            {
+                _ = _googleDriveSyncService.CheckForRemoteScreenshotsChangesAsync(_screenshotService.GetScreenshotsFolder());
+            }
         }
 
         // Fitur On Hover dinonaktifkan: panel tidak lagi terbuka otomatis saat kursor diarahkan
@@ -5804,6 +5868,8 @@ public void ExpandAllCategories()
         _isHoveringWindow = false;
         _expandHoverTimer?.Stop();
         OnPropertyChanged(nameof(IsNotchActive));
+        OnPropertyChanged(nameof(ShowBezelMinimizeButton));
+        OnPropertyChanged(nameof(ShowBezelUpArrow));
 
         if (!IsPinned)
         {
@@ -5817,11 +5883,8 @@ public void ExpandAllCategories()
                     _autoCollapseStandbyTimer?.Stop();
                     if (!_isHoveringWindow && !IsPinned && _isNotchExpanded && !IsComponentsMenuOpen)
                     {
-                        // Hanya collapse ke standby jika ada jendela aplikasi lain yang terbuka
-                        if (WindowMonitorHelper.CountOtherOpenWindows() > 0)
-                        {
-                            IsNotchExpanded = false;
-                        }
+                        IsNotchExpanded = false;
+                        EnterIdleMiniMode();
                     }
                 };
                 _autoCollapseStandbyTimer.Start();
@@ -6115,5 +6178,207 @@ public void ExpandAllCategories()
             apply();
         }
     }
+    #endregion
+
+    #region Tangkapan Layar & Snipping Tool
+    public IScreenshotService ScreenshotService => _screenshotService;
+
+    public bool EnableScreenshotTool
+    {
+        get => Settings.EnableScreenshotTool;
+        set
+        {
+            if (Settings.EnableScreenshotTool != value)
+            {
+                Settings.EnableScreenshotTool = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(EnableScreenshotTool));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public bool IsScreenshotHubOpen
+    {
+        get => Settings.IsScreenshotHubOpen;
+        set
+        {
+            if (Settings.IsScreenshotHubOpen != value)
+            {
+                Settings.IsScreenshotHubOpen = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(IsScreenshotHubOpen));
+                OnPropertyChanged(nameof(IsNotchActive));
+                RequestComponentLayoutChanged?.Invoke();
+            }
+        }
+    }
+
+    public int ScreenshotCount
+    {
+        get => _screenshotCount;
+        set
+        {
+            if (SetProperty(ref _screenshotCount, value))
+            {
+                OnPropertyChanged(nameof(HasScreenshots));
+                OnPropertyChanged(nameof(ScreenshotNotchTooltip));
+            }
+        }
+    }
+
+    public bool HasScreenshots => ScreenshotCount > 0;
+
+    public string ScreenshotNotchTooltip => $"Tangkapan Layar (Snipping Tool) - {ScreenshotCount} Gambar Tersimpan\nKlik kiri untuk buka Galeri, klik kanan untuk menu cepat";
+
+    public void OpenScreenshotHub()
+    {
+        IsScreenshotHubOpen = true;
+        RequestOpenScreenshotHub?.Invoke();
+    }
+
+    public void StartSnipping(SnipMode mode = SnipMode.Rectangular)
+    {
+        RequestStartSnipping?.Invoke(mode);
+    }
+
+    public void CaptureFullScreen()
+    {
+        RequestCaptureFullScreen?.Invoke();
+        StartSnipping(SnipMode.FullScreen);
+    }
+
+    public void CaptureActiveWindow()
+    {
+        RequestCaptureActiveWindow?.Invoke();
+        StartSnipping(SnipMode.Window);
+    }
+
+    public void PinScreenshot(ScreenshotItem item)
+    {
+        RequestPinScreenshot?.Invoke(item);
+    }
+
+    public void OpenScreenshotFolder()
+    {
+        RequestOpenScreenshotFolder?.Invoke();
+    }
+
+    #region Screenshot Google Drive Sync
+    private readonly object _autoScreenshotSyncLock = new();
+    private bool _isAutoScreenshotSyncRunning;
+    private bool _hasPendingScreenshotAutoSync;
+
+    public event Action<List<ScreenshotItem>>? ScreenshotsSyncedFromCloud;
+
+    public bool GoogleDriveScreenshotSync
+    {
+        get => Settings.GoogleDriveScreenshotSync;
+        set
+        {
+            if (Settings.GoogleDriveScreenshotSync != value)
+            {
+                Settings.GoogleDriveScreenshotSync = value;
+                _settingsService.Save();
+                OnPropertyChanged(nameof(GoogleDriveScreenshotSync));
+                if (value && _googleDriveSyncService.IsConnected)
+                {
+                    _ = SyncScreenshotsWithGoogleDriveAsync();
+                }
+            }
+        }
+    }
+
+    public string GoogleDriveScreenshotLastSyncText => Settings.GoogleDriveScreenshotLastSyncTime.HasValue
+        ? $"Tersinkron {Settings.GoogleDriveScreenshotLastSyncTime.Value:dd/MM/yyyy HH:mm}"
+        : "Belum pernah disinkronkan";
+
+    public void ScheduleScreenshotAutoSync()
+    {
+        if (!_googleDriveSyncService.IsConnected || !Settings.GoogleDriveScreenshotSync) return;
+
+        lock (_autoScreenshotSyncLock)
+        {
+            if (_isAutoScreenshotSyncRunning)
+            {
+                _hasPendingScreenshotAutoSync = true;
+                return;
+            }
+            _isAutoScreenshotSyncRunning = true;
+            _hasPendingScreenshotAutoSync = false;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(3000); // 3-second debounce
+
+                if (_googleDriveSyncService.IsConnected && Settings.GoogleDriveScreenshotSync)
+                {
+                    await SyncScreenshotsWithGoogleDriveAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Screenshots AutoSync error: {ex.Message}");
+            }
+            finally
+            {
+                lock (_autoScreenshotSyncLock)
+                {
+                    if (_hasPendingScreenshotAutoSync)
+                    {
+                        _hasPendingScreenshotAutoSync = false;
+                        _ = Task.Run(ScheduleScreenshotAutoSync);
+                    }
+                    _isAutoScreenshotSyncRunning = false;
+                }
+            }
+        });
+    }
+
+    public async Task SyncScreenshotsWithGoogleDriveAsync()
+    {
+        if (!_googleDriveSyncService.IsConnected)
+        {
+            await HandleGoogleDriveClickAsync();
+            return;
+        }
+
+        var deletedIds = _screenshotService.GetDeletedIds();
+        var localScreenshots = _screenshotService.LoadScreenshots();
+        var localFolder = _screenshotService.GetScreenshotsFolder();
+
+        var merged = await _googleDriveSyncService.SyncScreenshotsAsync(localScreenshots, deletedIds, localFolder);
+        if (merged != null)
+        {
+            _screenshotService.ClearDeletedIds(deletedIds);
+            OnScreenshotsSyncedFromCloud(merged);
+        }
+    }
+
+    private void OnScreenshotsSyncedFromCloud(List<ScreenshotItem> syncedList)
+    {
+        Action apply = () =>
+        {
+            _screenshotService.SetScreenshots(syncedList);
+            ScreenshotCount = syncedList.Count;
+            OnPropertyChanged(nameof(GoogleDriveScreenshotLastSyncText));
+            ScreenshotsSyncedFromCloud?.Invoke(syncedList);
+        };
+
+        if (System.Windows.Application.Current?.Dispatcher != null &&
+            !System.Windows.Application.Current.Dispatcher.CheckAccess())
+        {
+            System.Windows.Application.Current.Dispatcher.InvokeAsync(apply);
+        }
+        else
+        {
+            apply();
+        }
+    }
+    #endregion
     #endregion
 }

@@ -335,7 +335,8 @@
                             <TextBlock Text="{Binding GoogleDriveUserEmail, StringFormat='Akun Google: {0}'}" FontWeight="Medium" Foreground="#FFFFFF" Margin="0,0,0,4"/>
                             <TextBlock Text="{Binding GoogleDriveLastSyncFormatted, StringFormat='Terakhir sinkron: {0}'}" FontSize="11" Foreground="#888899" Margin="0,0,0,10"/>
 
-                            <CheckBox Content="Otomatis sinkronkan saat ada perubahan tugas" IsChecked="{Binding GoogleDriveAutoSync}"/>
+                            <CheckBox Content="Otomatis sinkronkan saat ada perubahan tugas &amp; catatan" IsChecked="{Binding GoogleDriveAutoSync}"/>
+                            <CheckBox Content="Otomatis sinkronkan tangkapan layar (Screenshots) 2 arah" IsChecked="{Binding GoogleDriveScreenshotSync}" Margin="0,4,0,0"/>
 
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <Button Content="Sinkronkan Sekarang" Command="{Binding SyncGoogleDriveNowCommand}"
@@ -400,6 +401,57 @@
                                 <ComboBoxItem Content="Oranye" Tag="Orange"/>
                                 <ComboBoxItem Content="Gelap" Tag="Dark"/>
                             </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 4c. Tangkapan Layar &amp; Snipping Tool (Multi-Capture Hub) -->
+                <Border Background="#202026" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="✂️ Tangkapan Layar &amp; Snipping Tool (Multi-Screenshot)" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                        <TextBlock Text="Ambil cuplikan layar kotak, penuh, atau jendela aktif serta simpan banyak screenshot otomatis ke Galeri" FontSize="11" Foreground="#999999" Margin="0,2,0,8"/>
+
+                        <CheckBox Content="Aktifkan fitur Tangkapan Layar di Notch" IsChecked="{Binding EnableScreenshotTool}"/>
+
+                        <StackPanel Visibility="{Binding EnableScreenshotTool, Converter={StaticResource BoolToVis}}" Margin="0,8,0,0">
+                            <!-- Shortcut Key -->
+                            <TextBlock Text="Tombol Cepat (Hotkey Snipping Tool):" FontSize="11.5" Foreground="#CCCCCC" Margin="0,4,0,4"/>
+                            <TextBox Text="{Binding ScreenshotHotkey, UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Left" Margin="0,0,0,8"/>
+
+                            <!-- Options -->
+                            <CheckBox Content="Salin otomatis ke Clipboard setelah snip diambil" IsChecked="{Binding ScreenshotAutoCopyToClipboard}" Margin="0,2,0,4"/>
+                            <CheckBox Content="Putar suara efek kamera saat mengambil tangkapan layar" IsChecked="{Binding ScreenshotPlaySound}" Margin="0,2,0,8"/>
+
+                            <!-- Google Drive 2-Way Sync -->
+                            <Border Background="#16161D" CornerRadius="6" Padding="10" Margin="0,0,0,8" BorderBrush="#2A2A38" BorderThickness="1">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <CheckBox Content="☁️ Auto-Sync 2 Arah ke Google Drive (DRANOTCH/Screenshots)" IsChecked="{Binding GoogleDriveScreenshotSync}" FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding GoogleDriveScreenshotLastSyncFormatted, StringFormat='Terakhir sinkron: {0}'}" FontSize="10.5" Foreground="#7A7A8C" Margin="22,2,0,0"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Content="🔄 Sinkronkan Sekarang" Command="{Binding SyncScreenshotGoogleDriveNowCommand}"
+                                                Style="{StaticResource ModernButton}" FontSize="11" Padding="10,4" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Save Folder -->
+                            <TextBlock Text="Folder Penyimpanan Tangkapan Layar:" FontSize="11.5" Foreground="#CCCCCC" Margin="0,4,0,4"/>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Text="{Binding ScreenshotSaveDirectory, Mode=OneWay}" IsReadOnly="True" Margin="0,0,8,0"/>
+                                <Button Grid.Column="1" Content="Ubah Folder..." Command="{Binding SelectScreenshotDirectoryCommand}" Style="{StaticResource ModernButton}" Margin="0,0,4,0"/>
+                                <Button Grid.Column="2" Content="Buka Folder" Command="{Binding OpenScreenshotDirectoryCommand}" Style="{StaticResource ModernButton}"/>
+                            </Grid>
                         </StackPanel>
                     </StackPanel>
                 </Border>

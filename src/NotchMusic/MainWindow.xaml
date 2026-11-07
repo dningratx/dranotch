@@ -115,6 +115,9 @@
         <!-- 6e. Catatan Tempel / Sticky Notes (Komponen ke-9): Luxury Note Sheet & Fold -->
         <Geometry x:Key="LuxuryStickyNotesIconGeometry">M 4,3 H 16 L 20,7 V 20 A 1,1 0 0 1 19,21 H 4 A 1,1 0 0 1 3,20 V 4 A 1,1 0 0 1 4,3 Z M 15,3 V 7 H 19 M 6,8 H 12 M 6,12 H 16 M 6,16 H 14</Geometry>
 
+        <!-- 6f. Tangkapan Layar & Snipping Tool (Komponen ke-10): Luxury Crop Viewfinder & Reticle -->
+        <Geometry x:Key="LuxurySnippingIconGeometry">M 4,4 H 9 V 6 H 6 V 9 H 4 V 4 Z M 15,4 H 20 V 9 H 18 V 6 H 15 V 4 Z M 4,15 H 6 V 18 H 9 V 20 H 4 V 15 Z M 18,15 H 20 V 20 H 15 V 18 H 18 V 15 Z M 9,11 H 15 V 13 H 9 Z M 11,9 H 13 V 15 H 11 Z</Geometry>
+
         <!-- 7. Spotify Icon Geometry (24x24 ViewBox) -->
         <Geometry x:Key="SpotifyIconGeometry">M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 16.59,16.59 C 16.35,16.97 15.85,17.09 15.47,16.85 C 12.66,15.13 9.36,14.77 5.48,15.66 C 5.05,15.76 4.61,15.48 4.51,15.05 C 4.41,14.61 4.68,14.17 5.12,14.07 C 9.36,13.1 13.02,13.52 16.16,15.44 C 16.54,15.67 16.66,16.17 16.42,16.56 Z M 17.92,13.44 C 17.66,13.88 17.09,14.02 16.66,13.75 C 13.62,11.88 9.01,11.34 5.41,12.44 C 4.91,12.59 4.38,12.31 4.22,11.81 C 4.06,11.31 4.34,10.78 4.84,10.62 C 8.95,9.38 14.05,9.98 17.52,12.11 C 17.95,12.38 18.09,12.94 17.83,13.38 Z M 18.06,10.23 C 14.41,8.06 8.38,7.86 4.88,8.92 C 4.31,9.09 3.72,8.78 3.55,8.22 C 3.38,7.66 3.69,7.06 4.25,6.89 C 8.28,5.66 14.94,5.9 19.14,8.39 C 19.64,8.69 19.81,9.33 19.52,9.83 C 19.22,10.33 18.58,10.5 18.08,10.2 Z</Geometry>
 
@@ -559,6 +562,7 @@
                               Foreground="#FFFFFF" Visibility="{Binding IsExpandedMode, Converter={StaticResource BoolToVis}}"/>
                     <MenuItem Header="{Binding PinMenuText}" Command="{Binding TogglePinCommand}" Foreground="#FFFFFF"/>
                     <MenuItem Header="{Binding BezelMinimizeMenuText}" Command="{Binding ToggleBezelMinimizeCommand}" Foreground="#FFFFFF"/>
+                    <MenuItem Header="Tangkapan Layar (Snipping Tool)" Command="{Binding OpenScreenshotHubCommand}" Foreground="#FFFFFF"/>
                     <MenuItem Header="Pengaturan" Command="{Binding OpenSettingsCommand}" Foreground="#FFFFFF"/>
                     <Separator Background="#282834"/>
                     <MenuItem Header="Tutup / Keluar Aplikasi" Command="{Binding ExitApplicationCommand}" Foreground="#FF6666"/>
@@ -724,6 +728,22 @@
                                              Visibility="{Binding IsLiveTvActiveOrOpen, Converter={StaticResource BoolToVis}}"/>
                                 </Grid>
                             </Border>
+
+                            <!-- 4. Browser Mengambang (Di sebelah kiri Logo DRANOTCH) -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="0,0,6,0" Cursor="Hand"
+                                    ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFloatingBrowserCommand}"/>
+                                </Border.InputBindings>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
+                                          StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Indikator Hijau saat Browser sedang Terbuka -->
+                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                                             Visibility="{Binding IsBrowserWindowOpen, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </Border>
                         </StackPanel>
 
                         <!-- TENGAH: LOGO DRANOTCH (Selalu Tampil; Saat Standby Hanya Ini yang Terlihat) -->
@@ -742,29 +762,13 @@
                         </Border>
                         </StackPanel>
 
-                        <!-- SISI KANAN: KOMPONEN 4 (BROWSER), KOMPONEN BMKG, & KOMPONEN 5 (TO-DO LIST LENGKAP DI PALING KANAN) (Muncul saat Hover) -->
+                        <!-- SISI KANAN: KOMPONEN BMKG, PENGINGAT, STICKY NOTES, SNIPPING, & TO-DO (Muncul saat Hover) -->
                         <StackPanel x:Name="RightComponentPanel" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="{Binding ShowComponentIcons, Converter={StaticResource BoolToVis}}">
                             <StackPanel.RenderTransform>
                                 <TranslateTransform x:Name="RightComponentTransform" X="0"/>
                             </StackPanel.RenderTransform>
-                            <!-- 4. Browser Mengambang (Di sebelah kanan Logo DRANOTCH) -->
-                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="6,0,2,0" Cursor="Hand"
-                                    ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)">
-                                <Border.InputBindings>
-                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenFloatingBrowserCommand}"/>
-                                </Border.InputBindings>
-                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
-                                          StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    <!-- Indikator Hijau saat Browser sedang Terbuka -->
-                                    <Ellipse Width="6" Height="6" Fill="#30D158" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
-                                             Visibility="{Binding IsBrowserWindowOpen, Converter={StaticResource BoolToVis}}"/>
-                                </Grid>
-                            </Border>
-
                             <!-- 4b. Cuaca & Gempa Bumi BMKG (Komponen ke-7) -->
-                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="4,0,2,0" Cursor="Hand"
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="6,0,2,0" Cursor="Hand"
                                     Visibility="{Binding EnableBmkg, Converter={StaticResource BoolToVis}}"
                                     ToolTip="{Binding BmkgNotchTooltip}">
                                 <Border.InputBindings>
@@ -809,6 +813,32 @@
                                     <!-- Indikator Kuning saat Catatan Tempel Aktif di Layar -->
                                     <Ellipse Width="6" Height="6" Fill="#F59E0B" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
                                              Visibility="{Binding HasActiveStickyNotes, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 4e. Tangkapan Layar & Snipping Tool (Komponen ke-10) -->
+                            <Border Width="42" Height="42" Style="{StaticResource NotchIconBadgeStyle}" Margin="4,0,2,0" Cursor="Hand"
+                                    Visibility="{Binding EnableScreenshotTool, Converter={StaticResource BoolToVis}}"
+                                    ToolTip="{Binding ScreenshotNotchTooltip}">
+                                <Border.InputBindings>
+                                    <MouseBinding MouseAction="LeftClick" Command="{Binding OpenScreenshotHubCommand}"/>
+                                </Border.InputBindings>
+                                <Border.ContextMenu>
+                                    <ContextMenu Background="#141418" BorderBrush="#282834" BorderThickness="1.2">
+                                        <MenuItem Header="Ambil Snip Kotak (Area)..." Command="{Binding StartSnippingCommand}" Foreground="#00D2FF"/>
+                                        <MenuItem Header="Tangkap Seluruh Layar" Command="{Binding CaptureFullScreenCommand}" Foreground="#FFFFFF"/>
+                                        <MenuItem Header="Tangkap Jendela Aktif" Command="{Binding CaptureActiveWindowCommand}" Foreground="#FFFFFF"/>
+                                        <Separator Background="#282834"/>
+                                        <MenuItem Header="Buka Galeri Tangkapan Layar" Command="{Binding OpenScreenshotHubCommand}" Foreground="#FFFFFF"/>
+                                        <MenuItem Header="Buka Folder Penyimpanan" Command="{Binding OpenScreenshotFolderCommand}" Foreground="#FFFFFF"/>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxurySnippingIconGeometry}" Fill="{StaticResource MetallicSilverBrush}"
+                                          Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Indikator Cyan saat ada screenshot yang tersimpan -->
+                                    <Ellipse Width="6" Height="6" Fill="#00D2FF" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                                             Visibility="{Binding HasScreenshots, Converter={StaticResource BoolToVis}}"/>
                                 </Grid>
                             </Border>
 
@@ -1055,12 +1085,23 @@
                         <Grid Grid.Row="0" Margin="0,0,6,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
+                            <!-- 4. Browser Mengambang (Di sebelah kiri Logo DRANOTCH) -->
+                            <Button Grid.Column="0" Style="{StaticResource SmallPillButton}" Command="{Binding OpenFloatingBrowserCommand}"
+                                    ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)" Padding="8,5" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
+                                          StrokeThickness="1.8" Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <TextBlock Text="Browser" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
                             <!-- Album art / Icon DRANOTCH (Luxury Mac Squircle) -->
-                            <Border Grid.Column="0" Width="50" Height="50" CornerRadius="13" ClipToBounds="True" Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1.2" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <Border Grid.Column="1" Width="50" Height="50" CornerRadius="13" ClipToBounds="True" Background="#14141C" BorderBrush="#36FFFFFF" BorderThickness="1.2" Margin="0,0,12,0" VerticalAlignment="Center">
                                 <Grid>
                                     <Image Source="pack://application:,,,/NotchMusic;component/Assets/app.png" Width="28" Height="28" Stretch="Uniform"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -1071,7 +1112,7 @@
                             </Border>
 
                             <!-- Track Title, Artist, Session -->
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
                                 <TextBlock Text="{Binding CurrentTrack.Title, FallbackValue='Tidak ada lagu'}" 
                                            Foreground="#FFFFFF" FontSize="15.5" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                                 <TextBlock Text="{Binding CurrentTrack.Artist, FallbackValue='-'}" 
@@ -1442,21 +1483,7 @@
                                     </StackPanel>
                                 </Button>
                                 <Button Style="{StaticResource SmallPillButton}" Command="{Binding SetModeCommand}" CommandParameter="Compact" Content="&#x25B4;" ToolTip="Tutup ke Compact" Margin="0,0,3,0"/>
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseTodoCommand}" Content="&#x2715;" ToolTip="Tutup To-Do List" Margin="0"/>
-
-                                <!-- Pembatas Garis: To-Do List | Browser -->
-                                <Border Width="1.2" Height="20" Background="#2C2C3A" Margin="7,0" VerticalAlignment="Center"
-                                        ToolTip="Batas modular komponen To-Do List &amp; Browser"/>
-
-                                <!-- Komponen Browser Mengambang -->
-                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding OpenFloatingBrowserCommand}"
-                                        ToolTip="Buka Browser Mengambang (YouTube, Streaming Film, Web Bebas)" Padding="8,4" Margin="0,0,5,0">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <Path Data="{StaticResource LuxuryBrowserIconGeometry}" Stroke="{StaticResource MetallicSilverBrush}"
-                                              StrokeThickness="1.8" Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                        <TextBlock Text="Browser" FontSize="11" FontWeight="SemiBold" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
+                                <Button Style="{StaticResource SmallPillButton}" Command="{Binding CloseTodoCommand}" Content="&#x2715;" ToolTip="Tutup To-Do List" Margin="0,0,4,0"/>
 
                                 <!-- Tombol Close Aplikasi di ujung sebelah kanan -->
                                 <Button Style="{StaticResource CloseAppButtonStyle}" Command="{Binding ExitApplicationCommand}"
@@ -2479,213 +2506,6 @@
                         </StackPanel>
                     </Grid>
                 </Grid>
-
-                <!-- ================= FLOATING ISLAND TODO DEADLINE NOTIFICATION BANNER ================= -->
-                <Border Grid.Row="0" Visibility="{Binding HasActiveTodoNotification, Converter={StaticResource BoolToVis}}"
-                        Background="#161017" BorderBrush="#FF4D6D" BorderThickness="1.5" CornerRadius="22"
-                        Padding="12,6" Margin="4,2" VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#301520" Margin="0,0,10,0">
-                            <Path Data="M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 12,20 C 7.59,20 4,16.41 4,12 C 4,7.59 7.59,4 12,4 C 16.41,4 20,7.59 20,12 C 20,16.41 16.41,20 12,20 Z M 11.25,6.5 L 11.25,12.5 L 15.5,15 L 16.25,13.75 L 12.75,11.75 L 12.75,6.5 Z"
-                                  Width="16" Height="16" Stretch="Uniform" Fill="#FF6B8B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-
-                        <!-- Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                            <TextBlock Text="{Binding ActiveTodoNotification.Title}" Foreground="#FF6B8B" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding ActiveTodoNotification.Message}" Foreground="#EAEAEA" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                        </StackPanel>
-
-                        <!-- Selesai Button -->
-                        <Button Grid.Column="2" Command="{Binding CompleteTodoNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="Selesai" ToolTip="Tandai tugas selesai"
-                                Background="#1A3820" Foreground="#4CD964" BorderBrush="#2A5C32"
-                                Height="24" Padding="8,0" Margin="0,0,6,0" VerticalAlignment="Center"/>
-
-                        <!-- Dismiss button -->
-                        <Button Grid.Column="3" Command="{Binding DismissTodoNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Notifikasi"
-                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
-
-                <!-- ================= FLOATING ISLAND PRAYER NOTIFICATION BANNER ================= -->
-                <!-- ================= FLOATING ISLAND TODO DEADLINE NOTIFICATION BANNER ================= -->
-                <Border Grid.Row="0" Visibility="{Binding HasActiveTodoNotification, Converter={StaticResource BoolToVis}}"
-                        Background="#161017" BorderBrush="#FF4D6D" BorderThickness="1.5" CornerRadius="22"
-                        Padding="12,6" Margin="4,2" VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#301520" Margin="0,0,10,0">
-                            <Path Data="M 12,2 C 6.48,2 2,6.48 2,12 C 2,17.52 6.48,22 12,22 C 17.52,22 22,17.52 22,12 C 22,6.48 17.52,2 12,2 Z M 12,20 C 7.59,20 4,16.41 4,12 C 4,7.59 7.59,4 12,4 C 16.41,4 20,7.59 20,12 C 20,16.41 16.41,20 12,20 Z M 11.25,6.5 L 11.25,12.5 L 15.5,15 L 16.25,13.75 L 12.75,11.75 L 12.75,6.5 Z"
-                                  Width="16" Height="16" Stretch="Uniform" Fill="#FF6B8B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-
-                        <!-- Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                            <TextBlock Text="{Binding ActiveTodoNotification.Title}" Foreground="#FF6B8B" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding ActiveTodoNotification.Message}" Foreground="#EAEAEA" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                        </StackPanel>
-
-                        <!-- Selesai Button -->
-                        <Button Grid.Column="2" Command="{Binding CompleteTodoNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="Selesai" ToolTip="Tandai tugas selesai"
-                                Background="#1A3820" Foreground="#4CD964" BorderBrush="#2A5C32"
-                                Height="24" Padding="8,0" Margin="0,0,6,0" VerticalAlignment="Center"/>
-
-                        <!-- Dismiss button -->
-                        <Button Grid.Column="3" Command="{Binding DismissTodoNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Notifikasi"
-                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
-
-                <!-- ================= FLOATING ISLAND PRAYER NOTIFICATION BANNER ================= -->
-                <Border Grid.Row="0" Visibility="{Binding HasActivePrayerNotification, Converter={StaticResource BoolToVis}}"
-                        Background="#0D0D11" BorderBrush="#343444" BorderThickness="1.5" CornerRadius="22"
-                        Padding="12,6" Margin="4,2" VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#1C1C26" Margin="0,0,10,0">
-                            <Path Data="{StaticResource LuxuryPrayerIconGeometry}" Fill="#FFD43B"
-                                  Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-
-                        <!-- Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                            <DockPanel LastChildFill="True">
-                                <Border DockPanel.Dock="Right" Background="#242434" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding ActivePrayerNotification.PrayerTimeFormatted}" Foreground="#FFFFFF" FontSize="10" FontWeight="Bold"/>
-                                </Border>
-                                <TextBlock Text="{Binding ActivePrayerNotification.Title}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis"/>
-                            </DockPanel>
-                            <TextBlock Text="{Binding ActivePrayerNotification.Message}" Foreground="#CCCCCC" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                        </StackPanel>
-
-                        <!-- Dismiss button -->
-                        <Button Grid.Column="2" Command="{Binding DismissPrayerNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Notifikasi"
-                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
-
-                <!-- ================= FLOATING ISLAND BMKG EARTHQUAKE & WEATHER ALERT BANNER ================= -->
-                <Border Grid.Row="0" Visibility="{Binding HasActiveBmkgNotification, Converter={StaticResource BoolToVis}}"
-                        Background="#1A1014" BorderBrush="#FF6B8B" BorderThickness="1.5" CornerRadius="22"
-                        Padding="12,6" Margin="4,2" VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#361822" BorderBrush="#5A2838" BorderThickness="1" Margin="0,0,10,0">
-                            <Path Data="{StaticResource LuxuryBmkgIconGeometry}" Stroke="#FF6B8B" StrokeThickness="2"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                                  Width="17" Height="17" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-
-                        <!-- Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                            <DockPanel LastChildFill="True">
-                                <Border DockPanel.Dock="Right" Background="#3B1A24" BorderBrush="#FF6B8B" BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding ActiveBmkgNotification.MagnitudeBadge}" Foreground="#FFB74D" FontSize="10" FontWeight="Bold"/>
-                                </Border>
-                                <TextBlock Text="{Binding ActiveBmkgNotification.Title}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis"/>
-                            </DockPanel>
-                            <TextBlock Text="{Binding ActiveBmkgNotification.Message}" Foreground="#E2E2EC" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                        </StackPanel>
-
-                        <!-- Lihat Detail Button -->
-                        <Button Grid.Column="2" Command="{Binding OpenBmkgNotificationDetailCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="Lihat Detail" ToolTip="Buka detail gempa &amp; peta guncangan (Shakemap) BMKG"
-                                Background="#2D1C28" Foreground="#FFB74D" BorderBrush="#5C3448"
-                                Height="24" Padding="8,0" Margin="0,0,6,0" VerticalAlignment="Center"/>
-
-                        <!-- Dismiss button -->
-                        <Button Grid.Column="3" Command="{Binding DismissBmkgNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Peringatan BMKG"
-                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
-
-                <!-- ================= FLOATING ISLAND SMART REMINDER (MINUM AIR / OBAT) BANNER ================= -->
-                <Border Grid.Row="0" Visibility="{Binding HasActiveReminderNotification, Converter={StaticResource BoolToVis}}"
-                        Background="#0E1824" BorderBrush="#38BDF8" BorderThickness="1.5" CornerRadius="22"
-                        Padding="12,6" Margin="4,2" VerticalAlignment="Center">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17"
-                                Background="{Binding ActiveReminderNotification.BadgeBackground, FallbackValue=#16283C}"
-                                BorderBrush="{Binding ActiveReminderNotification.BadgeBorder, FallbackValue=#284A6E}"
-                                BorderThickness="1" Margin="0,0,10,0">
-                            <Path Data="{Binding ActiveReminderNotification.IconGeometry}"
-                                  Fill="{Binding ActiveReminderNotification.AccentColor, FallbackValue=#38BDF8}"
-                                  Width="17" Height="17" Stretch="Uniform"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-
-                        <!-- Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                            <DockPanel LastChildFill="True">
-                                <Border DockPanel.Dock="Right" Background="#1A2C42" BorderBrush="#2E4E74" BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding ActiveReminderNotification.TimeFormatted}" Foreground="#7CC4FA" FontSize="10" FontWeight="Bold"/>
-                                </Border>
-                                <TextBlock Text="{Binding ActiveReminderNotification.Title}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" TextTrimming="CharacterEllipsis"/>
-                            </DockPanel>
-                            <TextBlock Text="{Binding ActiveReminderNotification.Message}" Foreground="#D4E4F4" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
-                        </StackPanel>
-
-                        <!-- Sudah / Selesai Button -->
-                        <Button Grid.Column="2" Command="{Binding CompleteActiveReminderNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="✓ Sudah" ToolTip="Tandai pengingat ini sudah dilakukan"
-                                Background="#143624" Foreground="#4CD964" BorderBrush="#265E3E"
-                                Height="24" Padding="9,0" Margin="0,0,5,0" VerticalAlignment="Center"/>
-
-                        <!-- Tunda 10m Button -->
-                        <Button Grid.Column="3" Command="{Binding SnoozeActiveReminderNotificationCommand}" CommandParameter="10"
-                                Style="{StaticResource SmallPillButton}" Content="💤 +10m" ToolTip="Tunda pengingat ini 10 menit"
-                                Background="#1C2838" Foreground="#98C0E8" BorderBrush="#2E4460"
-                                Height="24" Padding="8,0" Margin="0,0,5,0" VerticalAlignment="Center"/>
-
-                        <!-- Dismiss button -->
-                        <Button Grid.Column="4" Command="{Binding DismissReminderNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Notifikasi"
-                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
             </Grid>
         </Border>
 
@@ -2695,6 +2515,7 @@
                 Command="{Binding ToggleBezelMinimizeCommand}"
                 ToolTip="{Binding BezelMinimizeButtonTooltip}"
                 HorizontalAlignment="Center"
+                Visibility="{Binding ShowBezelMinimizeButton, Converter={StaticResource BoolToVis}}"
                 Panel.ZIndex="10"
                 Cursor="Hand">
             <Button.RenderTransform>
@@ -2722,7 +2543,7 @@
                                         CornerRadius="6"
                                         Padding="10,1.5">
                                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <!-- Panah ke Atas (&#x25B2;) saat Notch Terbuka / Idle (Klik untuk minimize ke bezel) -->
+                                        <!-- Panah ke Atas (&#x25B2;) saat Notch Terbuka / Aktif (Klik untuk minimize ke bezel) -->
                                         <Path Data="M 1,5.2 L 5,1.2 L 9,5.2"
                                               Stroke="{StaticResource MetallicSilverBrush}"
                                               StrokeThickness="1.7"
@@ -2731,7 +2552,7 @@
                                               StrokeLineJoin="Round"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center"
-                                              Visibility="{Binding IsNotBezelMinimized, Converter={StaticResource BoolToVis}}"/>
+                                              Visibility="{Binding ShowBezelUpArrow, Converter={StaticResource BoolToVis}}"/>
                                         <!-- Panah ke Bawah (&#x25BC;) saat Notch Diminimize ke Bezel (Klik untuk membuka kembali notch) -->
                                         <Path Data="M 1,1.2 L 5,5.2 L 9,1.2"
                                               Stroke="{StaticResource MetallicSilverBrush}"

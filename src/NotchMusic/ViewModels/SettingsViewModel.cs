@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Input;
 using Microsoft.Win32;
 using NotchMusic.Helpers;
 using NotchMusic.Models;
 using NotchMusic.Services.Prayer;
+using NotchMusic.Services.Screenshot;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Sync;
 using NotchMusic.Services.Todo;
@@ -237,6 +239,79 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    // Tangkapan Layar & Snipping Tool Properties
+    public bool EnableScreenshotTool
+    {
+        get => Settings.EnableScreenshotTool;
+        set
+        {
+            if (Settings.EnableScreenshotTool != value)
+            {
+                Settings.EnableScreenshotTool = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string ScreenshotHotkey
+    {
+        get => Settings.ScreenshotHotkey;
+        set
+        {
+            if (Settings.ScreenshotHotkey != value)
+            {
+                Settings.ScreenshotHotkey = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string ScreenshotSaveDirectory
+    {
+        get => string.IsNullOrWhiteSpace(Settings.ScreenshotSaveDirectory)
+            ? Path.Combine(_settingsService.GetAppDataPath(), "Screenshots")
+            : Settings.ScreenshotSaveDirectory;
+        set
+        {
+            if (Settings.ScreenshotSaveDirectory != value)
+            {
+                Settings.ScreenshotSaveDirectory = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ScreenshotAutoCopyToClipboard
+    {
+        get => Settings.ScreenshotAutoCopyToClipboard;
+        set
+        {
+            if (Settings.ScreenshotAutoCopyToClipboard != value)
+            {
+                Settings.ScreenshotAutoCopyToClipboard = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ScreenshotPlaySound
+    {
+        get => Settings.ScreenshotPlaySound;
+        set
+        {
+            if (Settings.ScreenshotPlaySound != value)
+            {
+                Settings.ScreenshotPlaySound = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     // Google Drive Sync Properties
     public string GoogleDriveClientId
     {
@@ -282,6 +357,20 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    public bool GoogleDriveScreenshotSync
+    {
+        get => Settings.GoogleDriveScreenshotSync;
+        set
+        {
+            if (Settings.GoogleDriveScreenshotSync != value)
+            {
+                Settings.GoogleDriveScreenshotSync = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public bool IsGoogleDriveConnected => _syncService.IsConnected;
     public bool IsGoogleDriveConfigured => _syncService.IsConfigured;
     public bool IsGoogleDriveSyncing => _syncService.IsSyncing;
@@ -290,6 +379,11 @@ public class SettingsViewModel : ViewModelBase
     public string GoogleDriveLastSyncFormatted =>
         Settings.GoogleDriveLastSyncTime.HasValue
             ? Settings.GoogleDriveLastSyncTime.Value.ToString("dd MMM yyyy, HH:mm")
+            : "Belum pernah";
+
+    public string GoogleDriveScreenshotLastSyncFormatted =>
+        Settings.GoogleDriveScreenshotLastSyncTime.HasValue
+            ? Settings.GoogleDriveScreenshotLastSyncTime.Value.ToString("dd MMM yyyy, HH:mm")
             : "Belum pernah";
 
     private bool _showCustomCredentials;
@@ -1145,6 +1239,10 @@ public class SettingsViewModel : ViewModelBase
     public ICommand PlayAlarmPreviewCommand { get; }
     public ICommand StopAlarmPreviewCommand { get; }
     public ICommand BrowseCustomAlarmCommand { get; }
+    public ICommand SelectScreenshotDirectoryCommand { get; }
+    public ICommand ResetScreenshotDirectoryCommand { get; }
+    public ICommand OpenScreenshotDirectoryCommand { get; }
+    public ICommand SyncScreenshotGoogleDriveNowCommand { get; }
     public ICommand ExitApplicationCommand { get; }
 
     public SettingsViewModel(
@@ -1472,6 +1570,7 @@ public class SettingsViewModel : ViewModelBase
             OnPropertyChanged(nameof(GoogleDriveUserEmail));
             OnPropertyChanged(nameof(GoogleDriveSyncStatus));
             OnPropertyChanged(nameof(GoogleDriveLastSyncFormatted));
+            OnPropertyChanged(nameof(GoogleDriveScreenshotLastSyncFormatted));
         };
 
         ClearCacheCommand = new RelayCommand(() =>
@@ -1529,12 +1628,92 @@ public class SettingsViewModel : ViewModelBase
             if (merged != null)
             {
                 todoService.SaveTodos(merged);
+            }
+
+            if (GoogleDriveScreenshotSync)
+            {
+                var screenshotService = new ScreenshotService(_settingsService);
+                var localScreenshots = screenshotService.LoadScreenshots();
+                var sDeletedIds = screenshotService.GetDeletedIds();
+                var folder = screenshotService.GetScreenshotsFolder();
+                var sMerged = await _syncService.SyncScreenshotsAsync(localScreenshots, sDeletedIds, folder);
+                if (sMerged != null)
+                {
+                    screenshotService.ClearDeletedIds(sDeletedIds);
+                    screenshotService.SetScreenshots(sMerged);
+                    OnPropertyChanged(nameof(GoogleDriveScreenshotLastSyncFormatted));
+                }
+            }
+
+            if (merged != null)
+            {
                 StatusMessage = "Sinkronisasi Google Drive berhasil!";
             }
             else
             {
-                StatusMessage = $"Sinkronisasi gagal: {_syncService.SyncStatus}";
+                StatusMessage = $"Sinkronisasi selesai: {_syncService.SyncStatus}";
             }
+        });
+
+        SyncScreenshotGoogleDriveNowCommand = new RelayCommand(async () =>
+        {
+            if (!_syncService.IsConnected)
+            {
+                StatusMessage = "Google Drive belum terhubung. Silakan hubungkan akun Google terlebih dahulu.";
+                return;
+            }
+
+            StatusMessage = "Menyinkronkan tangkapan layar dengan Google Drive...";
+            var screenshotService = new ScreenshotService(_settingsService);
+            var localScreenshots = screenshotService.LoadScreenshots();
+            var sDeletedIds = screenshotService.GetDeletedIds();
+            var folder = screenshotService.GetScreenshotsFolder();
+
+            var sMerged = await _syncService.SyncScreenshotsAsync(localScreenshots, sDeletedIds, folder);
+            if (sMerged != null)
+            {
+                screenshotService.ClearDeletedIds(sDeletedIds);
+                screenshotService.SetScreenshots(sMerged);
+                StatusMessage = $"Sinkronisasi tangkapan layar berhasil! ({sMerged.Count} gambar)";
+                OnPropertyChanged(nameof(GoogleDriveScreenshotLastSyncFormatted));
+            }
+            else
+            {
+                StatusMessage = $"Gagal sinkronisasi tangkapan layar: {_syncService.SyncStatus}";
+            }
+        });
+
+        SelectScreenshotDirectoryCommand = new RelayCommand(() =>
+        {
+            using var fbd = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Pilih folder untuk menyimpan tangkapan layar",
+                UseDescriptionForTitle = true
+            };
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+            {
+                ScreenshotSaveDirectory = fbd.SelectedPath;
+            }
+        });
+
+        ResetScreenshotDirectoryCommand = new RelayCommand(() =>
+        {
+            ScreenshotSaveDirectory = string.Empty;
+        });
+
+        OpenScreenshotDirectoryCommand = new RelayCommand(() =>
+        {
+            try
+            {
+                var dir = ScreenshotSaveDirectory;
+                Directory.CreateDirectory(dir);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = dir,
+                    UseShellExecute = true
+                });
+            }
+            catch { }
         });
 
         ExitApplicationCommand = new RelayCommand(() =>

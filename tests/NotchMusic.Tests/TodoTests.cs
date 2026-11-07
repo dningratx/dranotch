@@ -428,6 +428,12 @@ public class TodoTests
         public Task<List<StickyNoteItem>?> DownloadStickyNotesAsync(CancellationToken ct = default) => Task.FromResult<List<StickyNoteItem>?>(new List<StickyNoteItem>());
         public Task<List<StickyNoteItem>?> CheckForRemoteStickyNotesChangesAsync(CancellationToken ct = default) => Task.FromResult<List<StickyNoteItem>?>(null);
         public Task<List<StickyNoteItem>?> SyncStickyNotesAsync(IEnumerable<StickyNoteItem> localNotes, IEnumerable<string>? deletedIds = null, CancellationToken ct = default) => Task.FromResult<List<StickyNoteItem>?>(localNotes.ToList());
+
+        public event Action<List<ScreenshotItem>>? ScreenshotsSynced;
+        public Task<List<ScreenshotItem>?> SyncScreenshotsAsync(IEnumerable<ScreenshotItem> localScreenshots, IEnumerable<string>? deletedIds = null, string localFolder = "", CancellationToken ct = default) => Task.FromResult<List<ScreenshotItem>?>(localScreenshots.ToList());
+        public Task<bool> UploadScreenshotsMetadataAsync(IEnumerable<ScreenshotItem> screenshots, CancellationToken ct = default) => Task.FromResult(true);
+        public Task<List<ScreenshotItem>?> DownloadScreenshotsMetadataAsync(CancellationToken ct = default) => Task.FromResult<List<ScreenshotItem>?>(new List<ScreenshotItem>());
+        public Task<List<ScreenshotItem>?> CheckForRemoteScreenshotsChangesAsync(string localFolder = "", CancellationToken ct = default) => Task.FromResult<List<ScreenshotItem>?>(null);
         public bool ImportCredentialsFile(string filePath) => true;
     }
 

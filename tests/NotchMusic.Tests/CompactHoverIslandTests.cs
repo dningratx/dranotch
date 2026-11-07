@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -308,5 +308,50 @@ public class CompactHoverIslandTests
         // Clicking the logo expands the notch
         vmIdleMusic.DranotchLogoClickCommand.Execute(null);
         Assert.True(vmIdleMusic.ShowComponentIcons);
+    }
+
+    [Fact]
+    public void BezelArrowButton_HiddenInIdleMode_VisibleWhenHoveredOrExpandedOrMinimized()
+    {
+        var vm = new MainViewModel(new FakeMediaSessionService(), new FakeLyricsService(), new FakeSettingsService());
+        vm.CurrentMode = PanelMode.Compact;
+
+        // 1. In Idle Mode: Up-arrow button MUST be hidden
+        vm.EnterIdleMiniMode();
+        Assert.True(vm.IsIdleMiniMode);
+        Assert.False(vm.IsBezelMinimized);
+        Assert.False(vm.ShowBezelMinimizeButton);
+        Assert.False(vm.ShowBezelUpArrow);
+
+        // 2. When hovering the notch: Notch wakes up and up-arrow button is visible
+        vm.OnMouseEnter();
+        vm.WakeFromIdle();
+        Assert.False(vm.IsIdleMiniMode);
+        Assert.True(vm.ShowBezelMinimizeButton);
+        Assert.True(vm.ShowBezelUpArrow);
+
+        // 3. When notch is expanded: Up-arrow button is visible
+        vm.OnMouseLeave();
+        vm.IsNotchExpanded = true;
+        Assert.True(vm.ShowBezelMinimizeButton);
+        Assert.True(vm.ShowBezelUpArrow);
+
+        // 4. When minimized to bezel: Button is visible (showing down arrow), but up arrow is false
+        vm.ToggleBezelMinimizeCommand.Execute(null);
+        Assert.True(vm.IsBezelMinimized);
+        Assert.True(vm.ShowBezelMinimizeButton);
+        Assert.False(vm.ShowBezelUpArrow);
+    }
+
+    [Fact]
+    public void WindowCount_SingleOrDesktop_KeepsInIdleMode()
+    {
+        var vm = new MainViewModel(new FakeMediaSessionService(), new FakeLyricsService(), new FakeSettingsService());
+        vm.CurrentMode = PanelMode.Compact;
+
+        // Ensure notch stays idle when on single window or desktop
+        vm.EnterIdleMiniMode();
+        Assert.False(vm.IsNotchExpanded);
+        Assert.True(vm.IsIdleMiniMode);
     }
 }

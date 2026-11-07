@@ -14,6 +14,7 @@ public interface IGoogleDriveSyncService
     event Action? StatusChanged;
     event Action<List<TodoItem>>? TodosSynced;
     event Action<List<StickyNoteItem>>? StickyNotesSynced;
+    event Action<List<ScreenshotItem>>? ScreenshotsSynced;
 
     Task<bool> AuthenticateAsync(CancellationToken ct = default);
     Task DisconnectAsync();
@@ -25,5 +26,9 @@ public interface IGoogleDriveSyncService
     Task<bool> UploadStickyNotesAsync(IEnumerable<StickyNoteItem> notes, CancellationToken ct = default);
     Task<List<StickyNoteItem>?> DownloadStickyNotesAsync(CancellationToken ct = default);
     Task<List<StickyNoteItem>?> CheckForRemoteStickyNotesChangesAsync(CancellationToken ct = default);
+    Task<List<ScreenshotItem>?> SyncScreenshotsAsync(IEnumerable<ScreenshotItem> localScreenshots, IEnumerable<string>? deletedIds = null, string localFolder = "", CancellationToken ct = default);
+    Task<bool> UploadScreenshotsMetadataAsync(IEnumerable<ScreenshotItem> screenshots, CancellationToken ct = default);
+    Task<List<ScreenshotItem>?> DownloadScreenshotsMetadataAsync(CancellationToken ct = default);
+    Task<List<ScreenshotItem>?> CheckForRemoteScreenshotsChangesAsync(string localFolder = "", CancellationToken ct = default);
     bool ImportCredentialsFile(string filePath);
 }

@@ -187,4 +187,19 @@ public class AppSettings
     public double StickyNotesHubWidth { get; set; } = 640;
     public double StickyNotesHubHeight { get; set; } = 520;
     public string StickyNotesDefaultColor { get; set; } = "Yellow";
+
+    // Tangkapan Layar & Snipping Tool (Multi-Screenshot Hub)
+    public bool EnableScreenshotTool { get; set; } = true;
+    public bool IsScreenshotHubOpen { get; set; } = false;
+    public double ScreenshotHubLeft { get; set; } = -1;
+    public double ScreenshotHubTop { get; set; } = -1;
+    public double ScreenshotHubWidth { get; set; } = 920;
+    public double ScreenshotHubHeight { get; set; } = 620;
+    public string ScreenshotHotkey { get; set; } = "Ctrl+Alt+S";
+    public string ScreenshotSaveDirectory { get; set; } = string.Empty;
+    public bool ScreenshotAutoCopyToClipboard { get; set; } = true;
+    public bool ScreenshotPlaySound { get; set; } = true;
+    public bool ScreenshotMultiSnipDefault { get; set; } = false;
+    public bool GoogleDriveScreenshotSync { get; set; } = false;
+    public DateTime? GoogleDriveScreenshotLastSyncTime { get; set; }
 }

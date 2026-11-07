@@ -15,6 +15,8 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
     private const string FolderName = "DRANOTCH";
     private const string FileName = "todos.json";
     private const string StickyNotesFileName = "stickynotes.json";
+    private const string ScreenshotsFolderName = "Screenshots";
+    private const string ScreenshotsMetadataFileName = "screenshots.json";
     private static readonly string[] Scopes = { DriveService.Scope.DriveFile };
 
     // Kredensial Bawaan Aplikasi DRANOTCH
@@ -40,6 +42,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
     private string _syncStatus = "Belum terhubung";
     private DateTimeOffset? _lastKnownRemoteModifiedTime;
     private DateTimeOffset? _lastKnownRemoteStickyNotesModifiedTime;
+    private DateTimeOffset? _lastKnownRemoteScreenshotsModifiedTime;
 
     public string EffectiveClientId
     {
@@ -96,6 +99,7 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
     public event Action? StatusChanged;
     public event Action<List<TodoItem>>? TodosSynced;
     public event Action<List<StickyNoteItem>>? StickyNotesSynced;
+    public event Action<List<ScreenshotItem>>? ScreenshotsSynced;
 
     public GoogleDriveSyncService(ISettingsService settingsService)
     {
@@ -839,4 +843,436 @@ public class GoogleDriveSyncService : IGoogleDriveSyncService
             .ThenByDescending(n => n.UpdatedAt)
             .ToList();
     }
+
+    #region Screenshot 2-Way Sync
+    private async Task<string> GetOrCreateScreenshotsFolderAsync(DriveService service, CancellationToken ct)
+    {
+        var parentFolderId = await GetOrCreateFolderAsync(service, ct);
+
+        var listReq = service.Files.List();
+        listReq.Q = $"'{parentFolderId}' in parents and name = '{ScreenshotsFolderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
+        listReq.Fields = "files(id, name)";
+        var result = await listReq.ExecuteAsync(ct);
+
+        var folder = result.Files?.FirstOrDefault();
+        if (folder != null)
+        {
+            return folder.Id;
+        }
+
+        var folderMetadata = new Google.Apis.Drive.v3.Data.File
+        {
+            Name = ScreenshotsFolderName,
+            MimeType = "application/vnd.google-apps.folder",
+            Parents = new List<string> { parentFolderId }
+        };
+
+        var createReq = service.Files.Create(folderMetadata);
+        createReq.Fields = "id";
+        var created = await createReq.ExecuteAsync(ct);
+        return created.Id;
+    }
+
+    private async Task<Google.Apis.Drive.v3.Data.File?> FindScreenshotsMetadataFileAsync(DriveService service, string folderId, CancellationToken ct)
+    {
+        var listReq = service.Files.List();
+        listReq.Q = $"'{folderId}' in parents and name = '{ScreenshotsMetadataFileName}' and trashed = false";
+        listReq.Fields = "files(id, name, modifiedTime)";
+        var result = await listReq.ExecuteAsync(ct);
+        return result.Files?.FirstOrDefault();
+    }
+
+    private async Task<List<Google.Apis.Drive.v3.Data.File>> ListScreenshotsFolderFilesAsync(DriveService service, string folderId, CancellationToken ct)
+    {
+        var allFiles = new List<Google.Apis.Drive.v3.Data.File>();
+        string? pageToken = null;
+        do
+        {
+            var listReq = service.Files.List();
+            listReq.Q = $"'{folderId}' in parents and trashed = false";
+            listReq.Fields = "nextPageToken, files(id, name, modifiedTime, size)";
+            listReq.PageToken = pageToken;
+            listReq.PageSize = 100;
+
+            var result = await listReq.ExecuteAsync(ct);
+            if (result.Files != null && result.Files.Count > 0)
+            {
+                allFiles.AddRange(result.Files);
+            }
+            pageToken = result.NextPageToken;
+        } while (!string.IsNullOrEmpty(pageToken));
+
+        return allFiles;
+    }
+
+    private async Task<List<ScreenshotItem>?> DownloadScreenshotsMetadataInternalAsync(DriveService service, CancellationToken ct)
+    {
+        var folderId = await GetOrCreateScreenshotsFolderAsync(service, ct);
+        var file = await FindScreenshotsMetadataFileAsync(service, folderId, ct);
+        if (file == null) return null;
+
+        using var stream = new MemoryStream();
+        await service.Files.Get(file.Id).DownloadAsync(stream, ct);
+        stream.Position = 0;
+
+        using var reader = new StreamReader(stream, Encoding.UTF8);
+        var json = await reader.ReadToEndAsync(ct);
+        _lastKnownRemoteScreenshotsModifiedTime = file.ModifiedTimeDateTimeOffset;
+        return JsonSerializer.Deserialize<List<ScreenshotItem>>(json);
+    }
+
+    private async Task<bool> UploadScreenshotsMetadataInternalAsync(DriveService service, IEnumerable<ScreenshotItem> screenshots, CancellationToken ct)
+    {
+        var folderId = await GetOrCreateScreenshotsFolderAsync(service, ct);
+        var existingFile = await FindScreenshotsMetadataFileAsync(service, folderId, ct);
+
+        var json = JsonSerializer.Serialize(screenshots, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = Encoding.UTF8.GetBytes(json);
+        using var stream = new MemoryStream(bytes);
+
+        if (existingFile != null)
+        {
+            var updateReq = service.Files.Update(new Google.Apis.Drive.v3.Data.File(), existingFile.Id, stream, "application/json");
+            updateReq.Fields = "id, modifiedTime";
+            var progress = await updateReq.UploadAsync(ct);
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                throw progress.Exception ?? new Exception("Gagal mengunggah metadata screenshot ke Google Drive.");
+            }
+            _lastKnownRemoteScreenshotsModifiedTime = updateReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            var metadata = new Google.Apis.Drive.v3.Data.File
+            {
+                Name = ScreenshotsMetadataFileName,
+                Parents = new List<string> { folderId }
+            };
+            var createReq = service.Files.Create(metadata, stream, "application/json");
+            createReq.Fields = "id, modifiedTime";
+            var progress = await createReq.UploadAsync(ct);
+            if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+            {
+                throw progress.Exception ?? new Exception("Gagal membuat metadata screenshot di Google Drive.");
+            }
+            _lastKnownRemoteScreenshotsModifiedTime = createReq.ResponseBody?.ModifiedTimeDateTimeOffset ?? DateTimeOffset.UtcNow;
+        }
+
+        return true;
+    }
+
+    private async Task UploadSingleImageFileAsync(DriveService service, string folderId, string localFilePath, string fileName, CancellationToken ct)
+    {
+        if (!File.Exists(localFilePath)) return;
+
+        using var fileStream = new FileStream(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var metadata = new Google.Apis.Drive.v3.Data.File
+        {
+            Name = fileName,
+            Parents = new List<string> { folderId }
+        };
+
+        var createReq = service.Files.Create(metadata, fileStream, "image/png");
+        createReq.Fields = "id, name";
+        var progress = await createReq.UploadAsync(ct);
+        if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+        {
+            throw progress.Exception ?? new Exception($"Gagal mengunggah gambar {fileName} ke Google Drive.");
+        }
+    }
+
+    private async Task DownloadSingleImageFileAsync(DriveService service, string fileId, string targetLocalPath, CancellationToken ct)
+    {
+        var dir = Path.GetDirectoryName(targetLocalPath);
+        if (!string.IsNullOrEmpty(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        var tempTarget = targetLocalPath + ".tmp";
+        using (var stream = new FileStream(tempTarget, FileMode.Create, FileAccess.Write, FileShare.None))
+        {
+            await service.Files.Get(fileId).DownloadAsync(stream, ct);
+        }
+
+        if (File.Exists(targetLocalPath))
+        {
+            File.Delete(targetLocalPath);
+        }
+        File.Move(tempTarget, targetLocalPath);
+    }
+
+    public static List<ScreenshotItem> MergeScreenshots(IEnumerable<ScreenshotItem> local, IEnumerable<ScreenshotItem> remote, IEnumerable<string>? deletedIds = null)
+    {
+        var deletedSet = deletedIds != null ? new HashSet<string>(deletedIds) : new HashSet<string>();
+        var dict = new Dictionary<string, ScreenshotItem>();
+
+        foreach (var item in remote)
+        {
+            if (deletedSet.Contains(item.Id))
+            {
+                continue;
+            }
+            dict[item.Id] = item;
+        }
+
+        foreach (var localItem in local)
+        {
+            if (deletedSet.Contains(localItem.Id))
+            {
+                continue;
+            }
+
+            if (dict.TryGetValue(localItem.Id, out var remoteItem))
+            {
+                // Prefer local file path if valid
+                if (File.Exists(localItem.FilePath))
+                {
+                    remoteItem.FilePath = localItem.FilePath;
+                }
+                // Prefer local title/note if updated
+                dict[localItem.Id] = localItem;
+            }
+            else
+            {
+                dict[localItem.Id] = localItem;
+            }
+        }
+
+        return dict.Values
+            .OrderByDescending(s => s.CreatedAt)
+            .ToList();
+    }
+
+    public async Task<List<ScreenshotItem>?> SyncScreenshotsAsync(IEnumerable<ScreenshotItem> localScreenshots, IEnumerable<string>? deletedIds = null, string localFolder = "", CancellationToken ct = default)
+    {
+        if (!IsConnected) return null;
+
+        await _syncLock.WaitAsync(ct);
+        try
+        {
+            IsSyncing = true;
+            _syncStatus = "Menyinkronkan tangkapan layar dengan Google Drive...";
+            StatusChanged?.Invoke();
+
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null)
+            {
+                IsSyncing = false;
+                return null;
+            }
+
+            var screenshotsFolderId = await GetOrCreateScreenshotsFolderAsync(service, ct);
+            var driveFiles = await ListScreenshotsFolderFilesAsync(service, screenshotsFolderId, ct);
+
+            // Clean up deleted items from remote Drive
+            var deletedSet = deletedIds != null ? new HashSet<string>(deletedIds) : new HashSet<string>();
+            if (deletedSet.Count > 0)
+            {
+                foreach (var file in driveFiles.ToList())
+                {
+                    // If fileName starts with an ID or matches deleted items
+                    if (deletedSet.Any(id => file.Name.Contains(id, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        try
+                        {
+                            await service.Files.Delete(file.Id).ExecuteAsync(ct);
+                            driveFiles.Remove(file);
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            var remoteScreenshots = await DownloadScreenshotsMetadataInternalAsync(service, ct);
+            var merged = MergeScreenshots(localScreenshots, remoteScreenshots ?? new List<ScreenshotItem>(), deletedIds);
+
+            if (string.IsNullOrWhiteSpace(localFolder))
+            {
+                localFolder = Path.Combine(_settingsService.GetAppDataPath(), "Screenshots");
+            }
+            Directory.CreateDirectory(localFolder);
+
+            // Synchronize individual image files
+            var remoteFilesMap = driveFiles.ToDictionary(f => f.Name, f => f, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in merged)
+            {
+                var expectedLocalPath = Path.Combine(localFolder, item.FileName);
+                bool localExists = File.Exists(item.FilePath) || File.Exists(expectedLocalPath);
+
+                if (localExists)
+                {
+                    var sourcePath = File.Exists(item.FilePath) ? item.FilePath : expectedLocalPath;
+                    item.FilePath = sourcePath;
+
+                    // If not on Drive, upload
+                    if (!remoteFilesMap.ContainsKey(item.FileName))
+                    {
+                        try
+                        {
+                            await UploadSingleImageFileAsync(service, screenshotsFolderId, sourcePath, item.FileName, ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Upload screenshot {item.FileName} error: {ex.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    // Not found locally: download from Drive if present
+                    if (remoteFilesMap.TryGetValue(item.FileName, out var driveFile))
+                    {
+                        try
+                        {
+                            await DownloadSingleImageFileAsync(service, driveFile.Id, expectedLocalPath, ct);
+                            item.FilePath = expectedLocalPath;
+                            var fi = new FileInfo(expectedLocalPath);
+                            if (fi.Exists)
+                            {
+                                item.FileSize = fi.Length;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Download screenshot {item.FileName} error: {ex.Message}");
+                        }
+                    }
+                }
+            }
+
+            // Save updated metadata to Google Drive
+            await UploadScreenshotsMetadataInternalAsync(service, merged, ct);
+
+            _settingsService.CurrentSettings.GoogleDriveScreenshotLastSyncTime = DateTime.Now;
+            _settingsService.Save();
+
+            _syncStatus = $"Screenshot tersinkron ({DateTime.Now:HH:mm})";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+
+            ScreenshotsSynced?.Invoke(merged);
+            return merged;
+        }
+        catch (Exception ex)
+        {
+            _syncStatus = $"Gagal sinkronisasi screenshot: {ex.Message}";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+            return null;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public async Task<bool> UploadScreenshotsMetadataAsync(IEnumerable<ScreenshotItem> screenshots, CancellationToken ct = default)
+    {
+        await _syncLock.WaitAsync(ct);
+        try
+        {
+            IsSyncing = true;
+            _syncStatus = "Menyinkronkan metadata screenshot ke Google Drive...";
+            StatusChanged?.Invoke();
+
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null)
+            {
+                IsSyncing = false;
+                return false;
+            }
+
+            bool success = await UploadScreenshotsMetadataInternalAsync(service, screenshots, ct);
+            if (success)
+            {
+                _settingsService.CurrentSettings.GoogleDriveScreenshotLastSyncTime = DateTime.Now;
+                _settingsService.Save();
+                _syncStatus = $"Screenshot tersinkron ({DateTime.Now:HH:mm})";
+            }
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+            return success;
+        }
+        catch (Exception ex)
+        {
+            _syncStatus = $"Gagal unggah screenshot ke Google Drive: {ex.Message}";
+            IsSyncing = false;
+            StatusChanged?.Invoke();
+            return false;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public async Task<List<ScreenshotItem>?> DownloadScreenshotsMetadataAsync(CancellationToken ct = default)
+    {
+        await _syncLock.WaitAsync(ct);
+        try
+        {
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null) return null;
+            return await DownloadScreenshotsMetadataInternalAsync(service, ct);
+        }
+        catch (Exception ex)
+        {
+            _syncStatus = $"Gagal unduh screenshot dari Google Drive: {ex.Message}";
+            StatusChanged?.Invoke();
+            return null;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public async Task<List<ScreenshotItem>?> CheckForRemoteScreenshotsChangesAsync(string localFolder = "", CancellationToken ct = default)
+    {
+        if (!IsConnected) return null;
+        if (!await _syncLock.WaitAsync(0, ct)) return null;
+
+        try
+        {
+            var service = await CreateDriveServiceAsync(ct);
+            if (service == null) return null;
+
+            var folderId = await GetOrCreateScreenshotsFolderAsync(service, ct);
+            var file = await FindScreenshotsMetadataFileAsync(service, folderId, ct);
+            if (file == null) return null;
+
+            var remoteModTime = file.ModifiedTimeDateTimeOffset;
+            if (remoteModTime.HasValue && _lastKnownRemoteScreenshotsModifiedTime.HasValue && remoteModTime <= _lastKnownRemoteScreenshotsModifiedTime)
+            {
+                return null;
+            }
+
+            var remoteList = await DownloadScreenshotsMetadataInternalAsync(service, ct);
+            _lastKnownRemoteScreenshotsModifiedTime = remoteModTime;
+            _settingsService.CurrentSettings.GoogleDriveScreenshotLastSyncTime = DateTime.Now;
+            _settingsService.Save();
+
+            _syncStatus = $"Screenshot tersinkron otomatis ({DateTime.Now:HH:mm})";
+            StatusChanged?.Invoke();
+
+            if (remoteList != null)
+            {
+                ScreenshotsSynced?.Invoke(remoteList);
+            }
+
+            return remoteList;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CheckForRemoteScreenshotsChanges error: {ex.Message}");
+            return null;
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+    #endregion
 }

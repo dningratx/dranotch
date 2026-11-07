@@ -14,6 +14,7 @@ public interface ITrayIconService : IDisposable
     event Action? OpenBmkgRequested;
     event Action? OpenReminderRequested;
     event Action? OpenStickyNotesRequested;
+    event Action? OpenScreenshotHubRequested;
     event Action? OpenFloatingBrowserRequested;
     event Action<PanelMode>? ModeChangeRequested;
     event Action? OpenSettingsRequested;
@@ -35,6 +36,7 @@ public class TrayIconService : ITrayIconService
     public event Action? OpenBmkgRequested;
     public event Action? OpenReminderRequested;
     public event Action? OpenStickyNotesRequested;
+    public event Action? OpenScreenshotHubRequested;
     public event Action? OpenFloatingBrowserRequested;
     public event Action<PanelMode>? ModeChangeRequested;
     public event Action? OpenSettingsRequested;
@@ -131,6 +133,9 @@ public class TrayIconService : ITrayIconService
 
         var stickyNotesItem = new ToolStripMenuItem("Buka Catatan Tempel (Sticky Notes)", null, (s, e) => OpenStickyNotesRequested?.Invoke());
         contextMenu.Items.Add(stickyNotesItem);
+
+        var screenshotItem = new ToolStripMenuItem("Buka Tangkapan Layar (Snipping Tool)", null, (s, e) => OpenScreenshotHubRequested?.Invoke());
+        contextMenu.Items.Add(screenshotItem);
 
         var browserItem = new ToolStripMenuItem("Buka Browser Mengambang (Web / Video)", null, (s, e) => OpenFloatingBrowserRequested?.Invoke());
         contextMenu.Items.Add(browserItem);

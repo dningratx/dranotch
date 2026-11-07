@@ -69,6 +69,7 @@ public class StickyNotesTests
         public event Action? StatusChanged;
         public event Action<List<TodoItem>>? TodosSynced;
         public event Action<List<StickyNoteItem>>? StickyNotesSynced;
+        public event Action<List<ScreenshotItem>>? ScreenshotsSynced;
 
         public int UploadStickyNotesCallCount { get; private set; }
         public int SyncStickyNotesCallCount { get; private set; }
@@ -103,6 +104,11 @@ public class StickyNotesTests
             });
             return Task.FromResult<List<StickyNoteItem>?>(list);
         }
+
+        public Task<List<ScreenshotItem>?> SyncScreenshotsAsync(IEnumerable<ScreenshotItem> localScreenshots, IEnumerable<string>? deletedIds = null, string localFolder = "", CancellationToken ct = default) => Task.FromResult<List<ScreenshotItem>?>(localScreenshots.ToList());
+        public Task<bool> UploadScreenshotsMetadataAsync(IEnumerable<ScreenshotItem> screenshots, CancellationToken ct = default) => Task.FromResult(true);
+        public Task<List<ScreenshotItem>?> DownloadScreenshotsMetadataAsync(CancellationToken ct = default) => Task.FromResult<List<ScreenshotItem>?>(new List<ScreenshotItem>());
+        public Task<List<ScreenshotItem>?> CheckForRemoteScreenshotsChangesAsync(string localFolder = "", CancellationToken ct = default) => Task.FromResult<List<ScreenshotItem>?>(null);
 
         public bool ImportCredentialsFile(string filePath) => true;
     }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -6,6 +7,7 @@ using NotchMusic.Helpers;
 using NotchMusic.Models;
 using NotchMusic.Services.Lyrics;
 using NotchMusic.Services.Media;
+using NotchMusic.Services.Screenshot;
 using NotchMusic.Services.Settings;
 using NotchMusic.Services.Tray;
 using NotchMusic.ViewModels;
@@ -31,7 +33,11 @@ public partial class MainWindow : Window
     private ReminderWindow? _reminderWindow;
     private StickyNotesHubWindow? _stickyNotesHubWindow;
     private readonly Dictionary<string, StickyNoteWindow> _stickyNoteWindows = new();
+    private ScreenshotHubWindow? _screenshotHubWindow;
+    private SnippingOverlayWindow? _snippingOverlayWindow;
+    private readonly Dictionary<string, PinnedScreenshotWindow> _pinnedScreenshotWindows = new();
     private AboutWindow? _aboutWindow;
+    private NotificationToastWindow? _notificationToastWindow;
     private HotkeyManager? _hotkeyManager;
     private bool _isRealExit;
 
@@ -68,6 +74,12 @@ public partial class MainWindow : Window
         _viewModel.RequestOpenStickyNotesHub += OpenStickyNotesHub;
         _viewModel.RequestOpenStickyNote += note => Dispatcher.Invoke(() => OpenStickyNote(note));
         _viewModel.RequestCloseStickyNote += note => Dispatcher.Invoke(() => CloseStickyNote(note));
+        _viewModel.RequestOpenScreenshotHub += OpenScreenshotHub;
+        _viewModel.RequestStartSnipping += mode => Dispatcher.Invoke(() => StartSnipping(mode));
+        _viewModel.RequestCaptureFullScreen += CaptureFullScreen;
+        _viewModel.RequestCaptureActiveWindow += CaptureActiveWindow;
+        _viewModel.RequestPinScreenshot += item => Dispatcher.Invoke(() => PinScreenshot(item));
+        _viewModel.RequestOpenScreenshotFolder += OpenScreenshotFolder;
         _viewModel.RequestExit += () => Dispatcher.Invoke(ExitApplication);
         _viewModel.RequestComponentLayoutChanged += () => Dispatcher.Invoke(() =>
         {
@@ -76,6 +88,7 @@ public partial class MainWindow : Window
             UpdateBmkgWindowState();
             UpdateReminderWindowState();
             UpdateStickyNotesWindowState();
+            UpdateScreenshotWindowState();
             UpdateMusicWindowState();
             UpdateBrowserWindowState();
             UpdateRadioWindowState();
@@ -106,6 +119,14 @@ public partial class MainWindow : Window
                     _settingsService.CurrentSettings.PanelLeft = Left;
                     _settingsService.CurrentSettings.PanelTop = Top;
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+
+            if (ev.PropertyName == nameof(MainViewModel.HasActiveTodoNotification) ||
+                ev.PropertyName == nameof(MainViewModel.HasActivePrayerNotification) ||
+                ev.PropertyName == nameof(MainViewModel.HasActiveBmkgNotification) ||
+                ev.PropertyName == nameof(MainViewModel.HasActiveReminderNotification))
+            {
+                Dispatcher.Invoke(UpdateNotificationToastState);
             }
         };
 
@@ -284,6 +305,7 @@ public partial class MainWindow : Window
         _trayService.OpenBmkgRequested += () => Dispatcher.Invoke(OpenBmkg);
         _trayService.OpenReminderRequested += () => Dispatcher.Invoke(OpenReminder);
         _trayService.OpenStickyNotesRequested += () => Dispatcher.Invoke(OpenStickyNotesHub);
+        _trayService.OpenScreenshotHubRequested += () => Dispatcher.Invoke(OpenScreenshotHub);
         _trayService.OpenFloatingBrowserRequested += () => Dispatcher.Invoke(OpenFloatingBrowser);
         _trayService.OpenSettingsRequested += () => Dispatcher.Invoke(OpenSettings);
 
@@ -336,6 +358,14 @@ public partial class MainWindow : Window
             {
                 Show();
                 _viewModel.CurrentMode = _viewModel.CurrentMode == PanelMode.Lyrics ? PanelMode.Compact : PanelMode.Lyrics;
+            }, out _);
+        }
+
+        if (!string.IsNullOrEmpty(settings.ScreenshotHotkey) && settings.EnableScreenshotTool)
+        {
+            _hotkeyManager.Register(settings.ScreenshotHotkey, () =>
+            {
+                Dispatcher.Invoke(StartSnipping);
             }, out _);
         }
     }
@@ -651,6 +681,141 @@ public partial class MainWindow : Window
         catch { }
     }
 
+    private void UpdateScreenshotWindowState()
+    {
+        if (_viewModel.EnableScreenshotTool && _viewModel.IsScreenshotHubOpen)
+        {
+            OpenScreenshotHub();
+        }
+        else
+        {
+            _screenshotHubWindow?.Hide();
+        }
+    }
+
+    public void OpenScreenshotHub()
+    {
+        try
+        {
+            _viewModel.CurrentMode = PanelMode.Compact;
+            _viewModel.IsScreenshotHubOpen = true;
+
+            if (_screenshotHubWindow == null)
+            {
+                _screenshotHubWindow = new ScreenshotHubWindow(_viewModel, _viewModel.ScreenshotService, _settingsService);
+                _screenshotHubWindow.Closed += (s, e) => _screenshotHubWindow = null;
+            }
+
+            if (_screenshotHubWindow.WindowState == WindowState.Minimized)
+            {
+                _screenshotHubWindow.WindowState = WindowState.Normal;
+            }
+
+            _screenshotHubWindow.Show();
+            _screenshotHubWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Tidak dapat membuka Tangkapan Layar (Snipping Hub):\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    public void StartSnipping(SnipMode mode = SnipMode.Rectangular)
+    {
+        try
+        {
+            if (_snippingOverlayWindow != null)
+            {
+                _snippingOverlayWindow.Close();
+                _snippingOverlayWindow = null;
+            }
+
+            // Sembunyikan Galeri ScreenshotHub jika sedang terbuka agar tidak menghalangi/menutupi form yang akan dicapture
+            bool wasHubVisible = _screenshotHubWindow != null && _screenshotHubWindow.IsVisible;
+            if (wasHubVisible)
+            {
+                _screenshotHubWindow!.Hide();
+            }
+
+            _snippingOverlayWindow = new SnippingOverlayWindow(
+                _viewModel.ScreenshotService,
+                _settingsService,
+                mode,
+                onFinished: () =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        _snippingOverlayWindow = null;
+                        if (wasHubVisible || _viewModel.IsScreenshotHubOpen)
+                        {
+                            OpenScreenshotHub();
+                        }
+                    });
+                });
+
+            _snippingOverlayWindow.Show();
+            _snippingOverlayWindow.Activate();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show(
+                $"Gagal memulai Snipping Tool:\n{ex.Message}",
+                "DRANOTCH - Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    public void CaptureFullScreen()
+    {
+        StartSnipping(SnipMode.FullScreen);
+    }
+
+    public void CaptureActiveWindow()
+    {
+        StartSnipping(SnipMode.Window);
+    }
+
+    public void PinScreenshot(ScreenshotItem item)
+    {
+        try
+        {
+            if (!_pinnedScreenshotWindows.TryGetValue(item.Id, out var win) || win == null)
+            {
+                win = new PinnedScreenshotWindow(item);
+                win.Closed += (s, e) => _pinnedScreenshotWindows.Remove(item.Id);
+                _pinnedScreenshotWindows[item.Id] = win;
+            }
+
+            if (win.WindowState == WindowState.Minimized)
+            {
+                win.WindowState = WindowState.Normal;
+            }
+
+            win.Show();
+            win.Activate();
+        }
+        catch { }
+    }
+
+    public void OpenScreenshotFolder()
+    {
+        var folder = _viewModel.ScreenshotService.GetScreenshotsFolder();
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = folder,
+                UseShellExecute = true
+            });
+        }
+        catch { }
+    }
+
     public void OpenAbout()
     {
         if (_aboutWindow != null && _aboutWindow.IsVisible)
@@ -681,6 +846,28 @@ public partial class MainWindow : Window
         _aboutWindow.Top = notchBottom + 6;
         _aboutWindow.Show();
         _aboutWindow.Activate();
+    }
+
+    private void UpdateNotificationToastState()
+    {
+        bool hasAny = _viewModel.HasActiveTodoNotification ||
+                      _viewModel.HasActivePrayerNotification ||
+                      _viewModel.HasActiveBmkgNotification ||
+                      _viewModel.HasActiveReminderNotification;
+
+        if (hasAny)
+        {
+            if (_notificationToastWindow == null)
+            {
+                _notificationToastWindow = new NotificationToastWindow(_viewModel);
+                _notificationToastWindow.Closed += (s, e) => _notificationToastWindow = null;
+            }
+            _notificationToastWindow.ShowNotification();
+        }
+        else
+        {
+            _notificationToastWindow?.HideNotification();
+        }
     }
 
     private void OpenSettings()
@@ -1342,6 +1529,12 @@ public partial class MainWindow : Window
         _bmkgWindow?.ForceClose();
         _reminderWindow?.ForceClose();
         _stickyNotesHubWindow?.ForceClose();
+        _screenshotHubWindow?.ForceClose();
+        _snippingOverlayWindow?.Close();
+        foreach (var win in _pinnedScreenshotWindows.Values.ToList())
+        {
+            try { win.Close(); } catch { }
+        }
         foreach (var win in _stickyNoteWindows.Values.ToList())
         {
             try { win.Close(); } catch { }
@@ -1349,6 +1542,7 @@ public partial class MainWindow : Window
         _todoWindow?.ForceClose();
         _prayerWindow?.Close();
         _aboutWindow?.Close();
+        _notificationToastWindow?.Close();
         _hotkeyManager?.Dispose();
         _trayService.Dispose();
         base.OnClosing(e);

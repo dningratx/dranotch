@@ -12,9 +12,9 @@
 <br/>
 
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
-Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
+Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **Tangkapan Layar & Snipping Hub (Multi-Screenshot Tool dengan Direct Window Capture DWM & Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v1.9.0)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v2.0.0)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -253,14 +253,14 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - Setiap jenis pengingat ditampilkan dengan ikon vektor SVG tajam di dalam *badge* berwarna khusus: Tetesan Air Biru Cerah (`#38BDF8`), Kapsul Obat Rose (`#FB7185`), Mata Ungu Terang (`#C084FC`), Peregangan Hijau Zamrud (`#34D399`), Makan/Minum Amber (`#FBBF24`), Olahraga Teal (`#2DD4BF`), dan Alarm Biru (`#60A5FA`).
 - **Tata Letak Simetris Bar Bawah Saat Hover**:
   - Saat *hover*, bar informasi bawah tersusun simetris: **Cuaca & Gempa BMKG di sebelah kiri**, **Waktu Sholat tepat di tengah**, dan **Pengingat Pintar di sebelah kanan** yang menampilkan seluruh ikon pengingat aktif beserta sisa waktunya secara ringkas.
-- **Banner Notifikasi Melayang Dynamic Island & Suara Pengingat**:
-  - Menampilkan kartu notifikasi melayang otomatis beserta suara pengingat saat jadwal tiba, dilengkapi aksi cepat **`✓ Sudah`** dan **`💤 +10m`** langsung dari notch.
+- **Kartu Notifikasi Melayang di Tengah Layar (*Center-Screen Notification Toast*)**:
+  - Setiap notifikasi yang ada (Pengingat Pintar, Waktu Sholat & Adzan, Peringatan Gempa/Cuaca BMKG, dan Batas Waktu To-Do) kini tampil melayang tepat di tengah layar secara elegan dengan aksi cepat (**`✓ Sudah`**, **`💤 +10m`**, **`Selesai`**, **`Lihat Detail`**, **`✕`**).
 
 ### 🌟 32. Mode Cerdas Auto-Window, Animasi Transisi Halus & Koleksi Suara Alarm Baru *(Baru di v1.8.6)*
 - **Mode Pintar Deteksi Jendela Aktif (Auto-Window)**:
-  - **0 Jendela (Desktop Bersih)**: Notch secara otomatis membuka **Mode Expand** menampilkan seluruh tombol media, radio, TV, browser, BMKG, pengingat, to-do, dan info bar sholat/cuaca mekar penuh.
-  - **1 Jendela Terbuka**: Notch otomatis beralih ke **Mode Standby** ringkas (hanya kapsul elegan logo DRANOTCH "D" di tengah atas).
+  - **1 Jendela Terbuka atau Desktop Bersih (0 Jendela)**: Notch secara otomatis tetap berada dalam **Mode Idle** ringkas dan tenang (kapsul logo DRANOTCH "D" di tengah atas).
   - **≥ 2 Jendela Terbuka**: Notch otomatis beralih ke **Mode Minimize** (panah kecil `v` di atas bezel layar) agar tidak menutupi area multitasking pengguna.
+  - **Penghilangan Tombol Panah saat Idle**: Tombol panah ke-atas disembunyikan saat dalam mode idle agar tampilan notch tetap bersih dan minimalis.
 - **Animasi Transisi Halus (*Smooth Transitions*)**:
   - Seluruh transisi perbesaran notch (*Expand*), pengecilan (*Standby*), dan penyembunyian ke bezel (*Minimize*) menggunakan akselerasi kurva halus (*Cubic Ease-In-Out*).
   - Panel samping dan baris bawah otomatis di-*collapse* secara instan saat animasi selesai, menghilangkan glitch ruang kosong hitam.
@@ -297,6 +297,32 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Integrasi Notch & System Tray**:
   - Ikon Catatan Tempel tersemat di Notch bar sisi kanan, lengkap dengan titik indikator emas saat ada catatan aktif di layar, menu System Tray, serta tombol konfigurasi di Pengaturan.
 
+### ✂️ 34. Komponen ke-10: Tangkapan Layar & Snipping Hub, Direct Window Capture DWM & Auto-Sync Google Drive 2-Arah *(Baru di v2.0.0)*
+- **Tangkapan Layar & Snipping Hub Mandiri (`ScreenshotHubWindow`)**:
+  - Komponen produktivitas ke-10 di Dynamic Notch dengan ikon gunting cyan bergradien (`#00D2FF`) dan lencana jumlah gambar tersimpan.
+  - Akses cepat via pintasan keyboard global <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>S</kbd>, tombol bar notch, menu klik-kanan, dan system tray.
+  - **3 Mode Tangkapan Layar**:
+    - **Snip Area (Kotak)**: Seleksi area bebas berbentuk persegi/kotak dengan drag kursor dan indikator dimensi pixel real-time.
+    - **Layar Penuh (Full Screen)**: Menangkap seluruh monitor dengan satu klik instan.
+    - **Pilih Jendela / Form Aktif Interaktif**: Arahkan mouse ke jendela mana saja untuk melihat sorotan neon cyan beserta judul dan ukuran pixel, klik untuk langsung mengambil gambar.
+- **Direct Window Capture DWM (Form Lain di Atasnya Tidak Ikut Ter-capture)**:
+  - Menggunakan Win32 API `PrintWindow` dengan flag `PW_RENDERFULLCONTENT` (`0x00000002`) yang merender jendela target secara terisolasi langsung dari memori proses jendela tersebut.
+  - Jendela lain, dialog popup, atau jendela Snipping Hub yang sedang menutupi di atas jendela target **tidak akan pernah ikut masuk** ke dalam hasil screenshot.
+- **Mode Multi-Snip Tanpa Jeda**:
+  - Fitur toggle `⚡ Multi-Snip` pada overlay memungkinkan mengambil banyak screenshot berturut-turut tanpa menutup jendela snipping.
+- **Studio Pratinjau, Zoom & Alat Coretan (Markup Ink)**:
+  - Jendela galeri tangkapan layar yang dapat diubah ukurannya secara bebas dari **8 arah** (4 sisi dan 4 sudut) serta tombol Maximize/Restore (`🗖`/`🗗`).
+  - Fitur coretan langsung pada screenshot dengan mode **Pena (Pen)** dan **Stabilo (Highlighter)** dalam 6 pilihan warna kontras dan ketebalan dinamis, tombol `↶ Undo`, serta tombol `💾 Simpan Coretan`.
+  - Filter pencarian cepat instan judul dan tanggal, salin ke clipboard (`📋`), simpan ke file PNG/JPG (`💾`), ekspor semua (`📦`), dan buka folder penyimpanan (`📂`).
+- **Stiker Pin Melayang Desktop (*Pinned Screenshot Sticker*)**:
+  - Sematkan screenshot apa pun langsung ke layar desktop dengan tombol **`📌 Pin ke Desktop`**.
+  - Jendela melayang tanpa bingkai (*frameless*) yang selalu berada di atas aplikasi lain (*Always On Top*), dapat digeser bebas (*draggable*), diubah ukurannya (*resizable*), dan diatur transparansinya dengan roda mouse (*scroll-opacity*).
+- **Auto-Sync 2-Arah ke Google Drive (DRANOTCH/Screenshots)**:
+  - Sinkronisasi metadata (`screenshots.json`) dan berkas gambar `.png` secara otomatis ke folder cloud Google Drive pribadi.
+  - Dilengkapi sistem pelacakan penghapusan 2-arah (`deleted_screenshots.json`) dan background auto-sync non-blocking ber-debounce (3 detik).
+- **Reposisi Tombol Browser Mengambang**:
+  - Tombol Browser Mengambang kini diposisikan rapi di **sebelah kiri Logo DRANOTCH** baik pada Mode Expand maupun saat Notch melebar (*hover expand*).
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -308,6 +334,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 | **Detached To-Do** | Jendela To-Do mandiri dengan tema gelap OLED monokrom, kontrol minimize independen, drag & drop bebas, dan auto-save posisi. |
 | **Lyrics Overlay** | Tampilan lirik berukuran besar dengan scrolling halus otomatis mengikuti vokal lagu. |
 | **Prayer Card** | Kartu jadwal sholat harian lengkap, kalender Hijriah, hitung mundur real-time, dan status adzan. |
+| **Snipping Hub** | Galeri tangkapan layar multi-screenshot, studio zoom, anotasi pena & stabilo, dan sync Google Drive. |
 
 ---
 
@@ -317,6 +344,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 | :--- | :--- |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>N</kbd> | Tampilkan / Sembunyikan panel DRANOTCH |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>L</kbd> | Buka / Tutup Mode Lirik (*Lyrics Mode*) |
+| <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>S</kbd> | Ambil Tangkapan Layar / Snipping Tool |
 | <kbd>Enter</kbd> | Tambah tugas baru saat mengetik di input To-Do |
 
 *Pintasan keyboard dapat disesuaikan melalui menu **Pengaturan (`⚙`)**.*
@@ -325,7 +353,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-1.9.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

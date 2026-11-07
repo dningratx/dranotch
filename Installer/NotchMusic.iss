@@ -1,7 +1,7 @@
 ; Inno Setup Script for DRANOTCH
 #define MyAppName "DRANOTCH"
 #ifndef MyAppVersion
-#define MyAppVersion "1.9.0"
+#define MyAppVersion "2.0.0"
 #endif
 #define MyAppPublisher "DRANOTCH"
 #define MyAppURL "https://github.com/dningratx/dranotch"
