@@ -21,7 +21,7 @@ public partial class SnippingOverlayWindow : Window
 {
     private readonly IScreenshotService _screenshotService;
     private readonly ISettingsService _settingsService;
-    private readonly Action? _onFinished;
+    private readonly Action<bool>? _onFinished;
 
     private Bitmap? _frozenBitmap;
     private System.Windows.Media.Imaging.BitmapSource? _frozenBitmapSource;
@@ -41,7 +41,7 @@ public partial class SnippingOverlayWindow : Window
         IScreenshotService screenshotService,
         ISettingsService settingsService,
         SnipMode initialMode = SnipMode.Rectangular,
-        Action? onFinished = null)
+        Action<bool>? onFinished = null)
     {
         InitializeComponent();
         _screenshotService = screenshotService;
@@ -477,7 +477,7 @@ public partial class SnippingOverlayWindow : Window
     {
         _toastTimer?.Stop();
         Close();
-        _onFinished?.Invoke();
+        _onFinished?.Invoke(_capturedCount > 0);
     }
 
     private void BtnRectSnip_Click(object sender, RoutedEventArgs e)

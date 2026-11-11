@@ -389,4 +389,42 @@ public class ScreenshotTests : IDisposable
         Assert.Equal(2, vm.ScreenshotCount); // 1 local + 1 cloud snip merged
         Assert.Contains(screenshotService.LoadScreenshots(), s => s.Id == "cloud-snip-1");
     }
+
+    [Fact]
+    public void AppSettings_ScreenshotAlwaysOnTop_DefaultsToTrue()
+    {
+        var settings = new AppSettings();
+        Assert.True(settings.ScreenshotAlwaysOnTop);
+    }
+
+    [Fact]
+    public void SettingsViewModel_ScreenshotAlwaysOnTop_GetsAndSetsSettingsCorrectly()
+    {
+        var settingsService = new FakeSettingsService();
+        var vm = new SettingsViewModel(settingsService, _ => { });
+
+        Assert.True(vm.ScreenshotAlwaysOnTop);
+
+        vm.ScreenshotAlwaysOnTop = false;
+        Assert.False(vm.ScreenshotAlwaysOnTop);
+        Assert.False(settingsService.CurrentSettings.ScreenshotAlwaysOnTop);
+
+        vm.ScreenshotAlwaysOnTop = true;
+        Assert.True(vm.ScreenshotAlwaysOnTop);
+        Assert.True(settingsService.CurrentSettings.ScreenshotAlwaysOnTop);
+    }
+
+    [Fact]
+    public void WindowHelper_MoveCursorToElement_SafelyReturnsFalseOnNonVisibleElement()
+    {
+        var thread = new System.Threading.Thread(() =>
+        {
+            var element = new System.Windows.Controls.Border { Visibility = System.Windows.Visibility.Collapsed };
+            bool result = NotchMusic.Helpers.WindowHelper.MoveCursorToElement(element);
+            Assert.False(result);
+        });
+        thread.SetApartmentState(System.Threading.ApartmentState.STA);
+        thread.Start();
+        Assert.True(thread.Join(5000));
+    }
 }

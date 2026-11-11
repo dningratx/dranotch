@@ -190,6 +190,7 @@ public class AppSettings
 
     // Tangkapan Layar & Snipping Tool (Multi-Screenshot Hub)
     public bool EnableScreenshotTool { get; set; } = true;
+    public bool ScreenshotAlwaysOnTop { get; set; } = true;
     public bool IsScreenshotHubOpen { get; set; } = false;
     public double ScreenshotHubLeft { get; set; } = -1;
     public double ScreenshotHubTop { get; set; } = -1;

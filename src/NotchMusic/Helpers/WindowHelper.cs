@@ -16,6 +16,27 @@ public static class WindowHelper
     [DllImport("user32.dll")]
     private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetCursorPos(int x, int y);
+
+    public static bool MoveCursorToElement(FrameworkElement element)
+    {
+        try
+        {
+            if (!element.IsVisible || element.ActualWidth <= 0 || element.ActualHeight <= 0)
+                return false;
+
+            var center = new System.Windows.Point(element.ActualWidth / 2.0, element.ActualHeight / 2.0);
+            var screenPt = element.PointToScreen(center);
+            return SetCursorPos((int)Math.Round(screenPt.X), (int)Math.Round(screenPt.Y));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static void SetClickThrough(Window window, bool clickThrough)
     {
         var hwnd = new WindowInteropHelper(window).Handle;

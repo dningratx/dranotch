@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **Tangkapan Layar & Snipping Hub (Multi-Screenshot Tool dengan Direct Window Capture DWM & Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v2.0.0)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v2.0.1)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -323,6 +323,19 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Reposisi Tombol Browser Mengambang**:
   - Tombol Browser Mengambang kini diposisikan rapi di **sebelah kiri Logo DRANOTCH** baik pada Mode Expand maupun saat Notch melebar (*hover expand*).
 
+### ✂️ 35. Mode Selalu di Atas Default & Auto-Fokus Kursor Langsung Salin Tangkapan Layar *(Baru di v2.0.1)*
+- **Mode Selalu di Atas Default (*Default Always On Top*)**:
+  - Jendela Galeri Tangkapan Layar (**Screenshot Hub**) kini secara default selalu berada di atas jendela aplikasi lain (**`Topmost = true`**).
+  - Dilengkapi tombol pin **`📌`** di title bar untuk mengaktifkan/menonaktifkan mode selalu di atas secara instan, serta terhubung ke opsi pengaturan persistensi (`ScreenshotAlwaysOnTop`) di menu Pengaturan.
+- **Auto-Open & Auto-Fokus Kursor Mouse Langsung ke Gambar Baru**:
+  - Setiap kali tangkapan layar selesai diambil (baik snip persegi, layar penuh, maupun jendela aktif), jendela Galeri Tangkapan Layar seketika terbuka dan aktif di posisi terdepan.
+  - Melalui integrasi Win32 `SetCursorPos`, posisi kursor mouse secara otomatis diarahkan langsung ke tengah pratinjau gambar baru yang baru saja diambil.
+- **Kemudahan Salin Gambar Seketika (*Instant Copy & Drag-Drop*)**:
+  - **1x Klik Gambar**: Mengklik langsung pada gambar di area pratinjau studio akan menyalin gambar ke clipboard seketika dan memunculkan toast konfirmasi halus (*"📋 Gambar berhasil disalin ke Clipboard!"*).
+  - **Tombol Cepat Mengambang**: Tombol pill cyan mencolok *`📋 Salin Gambar (Ctrl+C)`* tersemat di sudut kanan bawah pratinjau gambar.
+  - **Menu Klik-Kanan (*Context Menu*)**: Klik kanan pada gambar pratinjau maupun item galeri menyediakan menu cepat *Salin Gambar*, *Pin Melayang ke Layar*, *Simpan Sebagai...*, *Buka di File Explorer*, dan *Hapus*.
+  - **Drag & Drop**: Mendukung klik tahan lalu seret (*drag and drop*) gambar langsung dari pratinjau ke aplikasi pihak ketiga (WhatsApp, Telegram, Discord, Photoshop, Word, dsb).
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -353,7 +366,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

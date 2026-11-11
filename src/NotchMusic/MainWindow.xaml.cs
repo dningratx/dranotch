@@ -695,6 +695,11 @@ public partial class MainWindow : Window
 
     public void OpenScreenshotHub()
     {
+        OpenScreenshotHub(false);
+    }
+
+    public void OpenScreenshotHub(bool moveToNewImage)
+    {
         try
         {
             _viewModel.CurrentMode = PanelMode.Compact;
@@ -713,6 +718,11 @@ public partial class MainWindow : Window
 
             _screenshotHubWindow.Show();
             _screenshotHubWindow.Activate();
+
+            if (moveToNewImage)
+            {
+                _screenshotHubWindow.FocusAndMoveCursorToNewImage();
+            }
         }
         catch (Exception ex)
         {
@@ -745,14 +755,14 @@ public partial class MainWindow : Window
                 _viewModel.ScreenshotService,
                 _settingsService,
                 mode,
-                onFinished: () =>
+                onFinished: (hasCaptured) =>
                 {
                     Dispatcher.Invoke(() =>
                     {
                         _snippingOverlayWindow = null;
-                        if (wasHubVisible || _viewModel.IsScreenshotHubOpen)
+                        if (hasCaptured || wasHubVisible || _viewModel.IsScreenshotHubOpen)
                         {
-                            OpenScreenshotHub();
+                            OpenScreenshotHub(moveToNewImage: hasCaptured);
                         }
                     });
                 });

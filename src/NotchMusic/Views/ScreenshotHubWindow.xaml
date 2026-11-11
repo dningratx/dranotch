@@ -6,7 +6,7 @@
         Width="960" Height="640"
         MinWidth="700" MinHeight="480"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        Topmost="{Binding Settings.AlwaysOnTop}"
+        Topmost="True"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen">
 
@@ -162,6 +162,7 @@
 
                         <!-- Window Controls (Minimize, Maximize/Restore, Close) -->
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="PinTopmostButton" Style="{StaticResource SmallPillButton}" Content="📌" Click="PinTopmostButton_Click" ToolTip="Selalu di Atas AKTIF (Klik untuk menonaktifkan)" Margin="0,0,4,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Content="🗕" Click="BtnMinimize_Click" ToolTip="Kecilkan" Margin="0,0,4,0"/>
                             <Button x:Name="BtnMaximize" Style="{StaticResource SmallPillButton}" Content="🗖" Click="BtnMaximize_Click" ToolTip="Perbesar / Kembalikan Ukuran" Margin="0,0,4,0"/>
                             <Button Style="{StaticResource SmallPillButton}" Content="✕" Click="BtnClose_Click" ToolTip="Tutup" Background="#261616" Foreground="#FF6666"/>
@@ -262,7 +263,17 @@
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid>
+                                    <Grid ToolTip="Klik untuk memilih gambar • Klik kanan untuk opsi salin / simpan">
+                                        <Grid.ContextMenu>
+                                            <ContextMenu Background="#1A1A24" Foreground="#FFFFFF" BorderBrush="#333348">
+                                                <MenuItem Header="📋 Salin Gambar (Ctrl+C)" Click="BtnCopySelected_Click"/>
+                                                <MenuItem Header="📌 Pin Melayang ke Layar" Click="BtnPinSelected_Click"/>
+                                                <MenuItem Header="💾 Simpan Sebagai... (Ctrl+S)" Click="BtnSaveAsSelected_Click"/>
+                                                <Separator Background="#2A2A38"/>
+                                                <MenuItem Header="📂 Buka di File Explorer" Click="BtnOpenFolder_Click"/>
+                                                <MenuItem Header="🗑️ Hapus" Click="BtnDeleteSelected_Click" Foreground="#FF6666"/>
+                                            </ContextMenu>
+                                        </Grid.ContextMenu>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="80"/>
                                             <ColumnDefinition Width="*"/>
@@ -412,9 +423,24 @@
                         </Border>
 
                         <!-- Interactive Image & InkCanvas Container -->
-                        <ScrollViewer Grid.Row="2" x:Name="ImageScrollViewer" HorizontalScrollBarVisibility="Auto"
+                        <Grid Grid.Row="2">
+                            <ScrollViewer x:Name="ImageScrollViewer" HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto" Background="#0B0B0E" Focusable="True">
-                            <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="14">
+                                <Grid x:Name="CanvasContainer" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="14"
+                                      Cursor="Hand" ToolTip="Klik untuk Menyalin Gambar ke Clipboard (Ctrl+C)"
+                                      PreviewMouseLeftButtonDown="CanvasContainer_PreviewMouseLeftButtonDown"
+                                      PreviewMouseMove="CanvasContainer_PreviewMouseMove"
+                                      MouseLeftButtonUp="CanvasContainer_MouseLeftButtonUp">
+                                    <Grid.ContextMenu>
+                                        <ContextMenu Background="#1A1A24" Foreground="#FFFFFF" BorderBrush="#333348">
+                                            <MenuItem Header="📋 Salin Gambar (Ctrl+C)" Click="BtnCopySelected_Click"/>
+                                            <MenuItem Header="📌 Pin Melayang ke Layar" Click="BtnPinSelected_Click"/>
+                                            <MenuItem Header="💾 Simpan Sebagai... (Ctrl+S)" Click="BtnSaveAsSelected_Click"/>
+                                            <Separator Background="#2A2A38"/>
+                                            <MenuItem Header="📂 Buka di File Explorer" Click="BtnOpenFolder_Click"/>
+                                            <MenuItem Header="🗑️ Hapus Tangkapan Layar (Del)" Click="BtnDeleteSelected_Click" Foreground="#FF6666"/>
+                                        </ContextMenu>
+                                    </Grid.ContextMenu>
                                 <Grid.LayoutTransform>
                                     <ScaleTransform x:Name="CanvasScaleTransform" ScaleX="1.0" ScaleY="1.0"/>
                                 </Grid.LayoutTransform>
@@ -434,6 +460,30 @@
                                 </Border>
                             </Grid>
                         </ScrollViewer>
+
+                            <!-- Floating Quick-Copy Pill on Image Viewport -->
+                            <Button x:Name="BtnQuickCopyFloating" Style="{StaticResource PrimaryCyanPillButton}"
+                                    Content="📋 Salin Gambar (Ctrl+C)" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Margin="0,0,24,24" Click="BtnCopySelected_Click"
+                                    ToolTip="Salin gambar aktif ke Clipboard (Ctrl+C)" Opacity="0.92">
+                                <Button.Effect>
+                                    <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.5" Color="#000000"/>
+                                </Button.Effect>
+                            </Button>
+
+                            <!-- Floating Toast Notification -->
+                            <Border x:Name="HubToastNotification" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                    Margin="0,0,0,24" Background="#F0101018" BorderBrush="#00D2FF" BorderThickness="1.2"
+                                    CornerRadius="20" Padding="18,9" Visibility="Collapsed" IsHitTestVisible="False">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.75" Color="#000000"/>
+                                </Border.Effect>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock x:Name="HubToastText" Text="📋 Gambar berhasil disalin ke Clipboard!" Foreground="#FFFFFF"
+                                               FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
 
                     <!-- Empty state when no screenshot is selected -->

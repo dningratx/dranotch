@@ -419,6 +419,7 @@
                             <TextBox Text="{Binding ScreenshotHotkey, UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Left" Margin="0,0,0,8"/>
 
                             <!-- Options -->
+                            <CheckBox Content="Jendela Tangkapan Layar selalu di atas (Always on Top)" IsChecked="{Binding ScreenshotAlwaysOnTop}" Margin="0,2,0,4"/>
                             <CheckBox Content="Salin otomatis ke Clipboard setelah snip diambil" IsChecked="{Binding ScreenshotAutoCopyToClipboard}" Margin="0,2,0,4"/>
                             <CheckBox Content="Putar suara efek kamera saat mengambil tangkapan layar" IsChecked="{Binding ScreenshotPlaySound}" Margin="0,2,0,8"/>
 

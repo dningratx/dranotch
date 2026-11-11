@@ -21,6 +21,7 @@ using MessageBox = System.Windows.MessageBox;
 using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Brushes = System.Windows.Media.Brushes;
+using Point = System.Windows.Point;
 
 namespace NotchMusic.Views;
 
@@ -85,6 +86,9 @@ public partial class ScreenshotHubWindow : Window
         if (s.ScreenshotHubHeight >= MinHeight) Height = s.ScreenshotHubHeight;
 
         WindowHelper.EnsureInVisibleScreen(this);
+
+        Topmost = _settingsService.CurrentSettings.ScreenshotAlwaysOnTop;
+        UpdatePinVisuals();
 
         StoragePathText.Text = $"📁 {_screenshotService.GetScreenshotsFolder()}";
 
@@ -421,6 +425,7 @@ public partial class ScreenshotHubWindow : Window
             {
                 var bmp = ScreenCaptureHelper.LoadBitmapImageWithoutLock(_selectedItem.FilePath);
                 ScreenCaptureHelper.CopyToClipboardSafely(bmp);
+                ShowToastOverlay("📋 Gambar berhasil disalin ke Clipboard!");
             }
             catch { }
         }
@@ -793,4 +798,129 @@ public partial class ScreenshotHubWindow : Window
     }
 
     #endregion
+    private void PinTopmostButton_Click(object sender, RoutedEventArgs e)
+    {
+        Topmost = !Topmost;
+        _settingsService.CurrentSettings.ScreenshotAlwaysOnTop = Topmost;
+        _settingsService.Save();
+        UpdatePinVisuals();
+    }
+
+    private void UpdatePinVisuals()
+    {
+        if (PinTopmostButton == null) return;
+        if (Topmost)
+        {
+            PinTopmostButton.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#1E3A2B"));
+            PinTopmostButton.BorderBrush = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#30D158"));
+            PinTopmostButton.ToolTip = "Selalu di Atas AKTIF (Klik untuk menonaktifkan)";
+        }
+        else
+        {
+            PinTopmostButton.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#1E1E26"));
+            PinTopmostButton.BorderBrush = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#303042"));
+            PinTopmostButton.ToolTip = "Selalu di Atas NONAKTIF (Klik untuk mengaktifkan)";
+        }
+    }
+
+    public void FocusAndMoveCursorToNewImage()
+    {
+        ReloadScreenshots();
+        if (_filteredScreenshots.Count > 0)
+        {
+            ScreenshotsListBox.SelectedIndex = 0;
+        }
+
+        Dispatcher.InvokeAsync(async () =>
+        {
+            await Task.Delay(80);
+
+            try
+            {
+                Point? targetScreenPt = null;
+
+                if (ImageScrollViewer != null && ImageScrollViewer.IsVisible && ImageScrollViewer.ActualWidth > 0 && ImageScrollViewer.ActualHeight > 0)
+                {
+                    var pt = new Point(ImageScrollViewer.ActualWidth / 2.0, ImageScrollViewer.ActualHeight / 2.0);
+                    targetScreenPt = ImageScrollViewer.PointToScreen(pt);
+                }
+                else if (BtnQuickCopyFloating != null && BtnQuickCopyFloating.IsVisible && BtnQuickCopyFloating.ActualWidth > 0)
+                {
+                    var pt = new Point(BtnQuickCopyFloating.ActualWidth / 2.0, BtnQuickCopyFloating.ActualHeight / 2.0);
+                    targetScreenPt = BtnQuickCopyFloating.PointToScreen(pt);
+                }
+
+                if (targetScreenPt.HasValue)
+                {
+                    WindowHelper.SetCursorPos((int)Math.Round(targetScreenPt.Value.X), (int)Math.Round(targetScreenPt.Value.Y));
+                    ShowToastOverlay("🎯 Posisi kursor pada gambar baru — Klik gambar atau tekan Ctrl+C untuk menyalin!");
+                }
+            }
+            catch
+            {
+            }
+        }, System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private Point _canvasMouseDownPoint;
+
+    private void CanvasContainer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _canvasMouseDownPoint = e.GetPosition(this);
+    }
+
+    private void CanvasContainer_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed && DetailInkCanvas.EditingMode == InkCanvasEditingMode.None && _selectedItem != null)
+        {
+            var cur = e.GetPosition(this);
+            var diff = _canvasMouseDownPoint - cur;
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                if (File.Exists(_selectedItem.FilePath))
+                {
+                    var data = new System.Windows.DataObject();
+                    data.SetData(System.Windows.DataFormats.FileDrop, new string[] { _selectedItem.FilePath });
+                    if (DetailImage.Source is BitmapSource bmp)
+                    {
+                        data.SetData(System.Windows.DataFormats.Bitmap, bmp);
+                    }
+                    DragDrop.DoDragDrop(CanvasContainer, data, System.Windows.DragDropEffects.Copy);
+                }
+            }
+        }
+    }
+
+    private void CanvasContainer_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (DetailInkCanvas.EditingMode == InkCanvasEditingMode.None && _selectedItem != null)
+        {
+            var cur = e.GetPosition(this);
+            var diff = _canvasMouseDownPoint - cur;
+            if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance)
+            {
+                CopySelectedItemToClipboard();
+            }
+        }
+    }
+
+    private System.Windows.Threading.DispatcherTimer? _hubToastTimer;
+
+    private void ShowToastOverlay(string message)
+    {
+        if (HubToastText == null || HubToastNotification == null) return;
+        HubToastText.Text = message;
+        HubToastNotification.Visibility = Visibility.Visible;
+
+        _hubToastTimer?.Stop();
+        _hubToastTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
+        _hubToastTimer.Tick += (s, e) =>
+        {
+            _hubToastTimer.Stop();
+            HubToastNotification.Visibility = Visibility.Collapsed;
+        };
+        _hubToastTimer.Start();
+    }
 }

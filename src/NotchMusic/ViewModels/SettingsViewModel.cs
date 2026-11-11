@@ -284,6 +284,20 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
+    public bool ScreenshotAlwaysOnTop
+    {
+        get => Settings.ScreenshotAlwaysOnTop;
+        set
+        {
+            if (Settings.ScreenshotAlwaysOnTop != value)
+            {
+                Settings.ScreenshotAlwaysOnTop = value;
+                _settingsService.Save();
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public bool ScreenshotAutoCopyToClipboard
     {
         get => Settings.ScreenshotAutoCopyToClipboard;
