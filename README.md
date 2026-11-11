@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **Tangkapan Layar & Snipping Hub (Multi-Screenshot Tool dengan Direct Window Capture DWM & Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v2.0.1)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v2.0.2)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -336,6 +336,11 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - **Menu Klik-Kanan (*Context Menu*)**: Klik kanan pada gambar pratinjau maupun item galeri menyediakan menu cepat *Salin Gambar*, *Pin Melayang ke Layar*, *Simpan Sebagai...*, *Buka di File Explorer*, dan *Hapus*.
   - **Drag & Drop**: Mendukung klik tahan lalu seret (*drag and drop*) gambar langsung dari pratinjau ke aplikasi pihak ketiga (WhatsApp, Telegram, Discord, Photoshop, Word, dsb).
 
+### 🛠️ 36. Perbaikan Kritis Crash Pengaturan (ModernButton Hotfix) *(Baru di v2.0.2)*
+- **Perbaikan Kritis Crash `StaticResource ModernButton`**:
+  - Menyelesaikan masalah crash runtime saat membuka jendela Pengaturan (**SettingsWindow**) yang disebabkan oleh pemanggilan style `ModernButton` pada tombol sinkronisasi Google Drive dan pemilihan folder tangkapan layar.
+  - Menambahkan definisi style `ModernButton` tema gelap modern secara global di `App.xaml` dan lokal di `SettingsWindow.xaml`.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -366,7 +371,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.1.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 
