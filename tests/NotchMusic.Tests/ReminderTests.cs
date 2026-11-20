@@ -225,4 +225,103 @@ public class ReminderTests
         Assert.Equal(initialActive, mainVm.ActiveReminders.Count);
         Assert.Contains(first, mainVm.ActiveReminders);
     }
+
+    [Fact]
+    public void TestIntervalReminder_WithFutureStartTime_StartsAtConfiguredDateAndTime()
+    {
+        var now = new DateTime(2026, 11, 20, 10, 0, 0);
+        var start = new DateTime(2026, 11, 22, 9, 30, 0);
+        var item = new ReminderItem
+        {
+            Title = "Minum Suplemen",
+            Icon = "💊",
+            Type = ReminderType.Interval,
+            IntervalMinutes = 60,
+            StartTime = start,
+            IsEnabled = true
+        };
+
+        // Before start time -> first trigger must be at StartTime (even with forceAdvance=true)
+        item.CalculateNextTrigger(now, forceAdvance: true);
+        Assert.True(item.HasStartTime);
+        Assert.Equal(start, item.NextTriggerTime);
+        Assert.Contains("Mulai:", item.StartTimeBadgeText);
+
+        // Once clock reaches StartTime -> next trigger advances by IntervalMinutes
+        item.CalculateNextTrigger(start, forceAdvance: true);
+        Assert.Equal(start.AddMinutes(60), item.NextTriggerTime);
+    }
+
+    [Fact]
+    public void TestDailyTimesReminder_WithFutureStartTime_WaitsUntilStartDateAndTime()
+    {
+        var now = new DateTime(2026, 11, 20, 9, 0, 0);
+        var item = new ReminderItem
+        {
+            Title = "Minum Obat",
+            Icon = "💊",
+            Type = ReminderType.DailyTime,
+            DailyTimes = new List<string> { "08:00", "13:00", "20:00" },
+            StartTime = new DateTime(2026, 11, 22, 10, 0, 0),
+            IsEnabled = true
+        };
+
+        // StartTime is 22 Nov 10:00 -> first eligible daily slot is 22 Nov 13:00
+        item.CalculateNextTrigger(now, forceAdvance: true);
+        Assert.Equal(new DateTime(2026, 11, 22, 13, 0, 0), item.NextTriggerTime);
+
+        // StartTime exact match on slot 08:00 -> picks 08:00 on that date
+        item.StartTime = new DateTime(2026, 11, 22, 8, 0, 0);
+        item.CalculateNextTrigger(now, forceAdvance: true);
+        Assert.Equal(new DateTime(2026, 11, 22, 8, 0, 0), item.NextTriggerTime);
+
+        // StartTime after last daily slot (21:00) -> picks next day's first slot (08:00)
+        item.StartTime = new DateTime(2026, 11, 22, 21, 0, 0);
+        item.CalculateNextTrigger(now, forceAdvance: true);
+        Assert.Equal(new DateTime(2026, 11, 23, 8, 0, 0), item.NextTriggerTime);
+    }
+
+    [Fact]
+    public void MainViewModel_ReminderForm_SavesEditsAndClearsStartTime()
+    {
+        var settings = new FakeSettingsService();
+        var mainVm = new MainViewModel(
+            new FakeMediaSessionService(),
+            new FakeLyricsService(),
+            settings);
+
+        var targetDate = DateTime.Today.AddDays(3);
+
+        mainVm.OpenAddReminderFormCommand.Execute(null);
+        Assert.False(mainVm.FormReminderUseStartTime);
+
+        mainVm.FormReminderTitle = "Pengingat Terjadwal";
+        mainVm.FormReminderType = ReminderType.Interval;
+        mainVm.FormReminderIntervalMinutes = 45;
+        mainVm.FormReminderStartDate = targetDate;
+        mainVm.FormReminderStartHour = "14";
+        mainVm.FormReminderStartMinute = "15";
+
+        Assert.True(mainVm.FormReminderUseStartTime);
+        mainVm.SaveReminderFormCommand.Execute(null);
+
+        var saved = mainVm.Reminders.FirstOrDefault(r => r.Title == "Pengingat Terjadwal");
+        Assert.NotNull(saved);
+        Assert.Equal(new DateTime(targetDate.Year, targetDate.Month, targetDate.Day, 14, 15, 0), saved!.StartTime);
+        Assert.Equal(saved.StartTime, saved.NextTriggerTime);
+
+        // Edit existing -> populates start time fields
+        mainVm.OpenEditReminderFormCommand.Execute(saved);
+        Assert.True(mainVm.FormReminderUseStartTime);
+        Assert.Equal(targetDate, mainVm.FormReminderStartDate);
+        Assert.Equal("14", mainVm.FormReminderStartHour);
+        Assert.Equal("15", mainVm.FormReminderStartMinute);
+
+        // Clear start time -> saves null StartTime
+        mainVm.ClearFormReminderStartTimeCommand.Execute(null);
+        Assert.False(mainVm.FormReminderUseStartTime);
+        mainVm.SaveReminderFormCommand.Execute(null);
+
+        Assert.Null(saved.StartTime);
+    }
 }

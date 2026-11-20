@@ -23,6 +23,7 @@ public class ReminderItem : ViewModelBase
     private int _intervalMinutes = 60;
     private List<string> _dailyTimes = new() { "08:00" };
     private bool _isEnabled = true;
+    private DateTime? _startTime;
     private DateTime? _nextTriggerTime;
     private DateTime? _lastTriggeredAt;
     private DateTime? _snoozedUntil;
@@ -147,6 +148,49 @@ public class ReminderItem : ViewModelBase
             }
         }
     }
+
+    public DateTime? StartTime
+    {
+        get => _startTime;
+        set
+        {
+            if (SetProperty(ref _startTime, value))
+            {
+                OnPropertyChanged(nameof(HasStartTime));
+                OnPropertyChanged(nameof(IsScheduledForFuture));
+                OnPropertyChanged(nameof(StartTimeFormatted));
+                OnPropertyChanged(nameof(StartTimeBadgeText));
+                OnPropertyChanged(nameof(ScheduleSummaryText));
+                OnPropertyChanged(nameof(NextTriggerFormatted));
+                OnPropertyChanged(nameof(CountdownText));
+                OnPropertyChanged(nameof(StatusBadgeText));
+            }
+        }
+    }
+
+    [JsonIgnore]
+    public bool HasStartTime => _startTime.HasValue;
+
+    [JsonIgnore]
+    public bool IsScheduledForFuture => _startTime.HasValue && _startTime.Value > DateTime.Now;
+
+    [JsonIgnore]
+    public string StartTimeFormatted
+    {
+        get
+        {
+            if (!_startTime.HasValue) return string.Empty;
+            var st = _startTime.Value;
+            if (st.Date == DateTime.Today)
+                return $"Hari ini {st:HH:mm}";
+            if (st.Date == DateTime.Today.AddDays(1))
+                return $"Besok {st:HH:mm}";
+            return st.ToString("dd/MM/yyyy HH:mm");
+        }
+    }
+
+    [JsonIgnore]
+    public string StartTimeBadgeText => _startTime.HasValue ? $"Mulai: {StartTimeFormatted}" : string.Empty;
 
     public DateTime? NextTriggerTime
     {
@@ -280,6 +324,13 @@ public class ReminderItem : ViewModelBase
             if (diff.TotalSeconds <= 0)
                 return "Sekarang!";
 
+            if (diff.TotalDays >= 1)
+            {
+                int d = (int)diff.TotalDays;
+                int h = diff.Hours;
+                return h > 0 ? $"{d}hr {h}j" : $"{d} hari";
+            }
+
             if (diff.TotalHours >= 1)
             {
                 int h = (int)diff.TotalHours;
@@ -383,6 +434,9 @@ public class ReminderItem : ViewModelBase
         }
 
         OnPropertyChanged(nameof(IsSnoozed));
+        OnPropertyChanged(nameof(IsScheduledForFuture));
+        OnPropertyChanged(nameof(StartTimeFormatted));
+        OnPropertyChanged(nameof(StartTimeBadgeText));
         OnPropertyChanged(nameof(EffectiveNextTriggerTime));
         OnPropertyChanged(nameof(NextTriggerFormatted));
         OnPropertyChanged(nameof(CountdownText));
@@ -397,8 +451,16 @@ public class ReminderItem : ViewModelBase
             return;
         }
 
+        bool isBeforeStartTime = StartTime.HasValue && StartTime.Value > fromTime;
+
         if (Type == ReminderType.Interval)
         {
+            if (isBeforeStartTime)
+            {
+                NextTriggerTime = StartTime!.Value;
+                return;
+            }
+
             int mins = Math.Max(1, IntervalMinutes);
             if (!forceAdvance && NextTriggerTime.HasValue && NextTriggerTime.Value > fromTime)
             {
@@ -426,6 +488,25 @@ public class ReminderItem : ViewModelBase
             }
 
             validTimes.Sort();
+
+            if (isBeforeStartTime)
+            {
+                var startAnchor = StartTime!.Value;
+                var startDay = startAnchor.Date;
+                foreach (var ts in validTimes)
+                {
+                    var candidate = startDay + ts;
+                    if (candidate >= startAnchor)
+                    {
+                        NextTriggerTime = candidate;
+                        return;
+                    }
+                }
+
+                // Next day after startAnchor first slot
+                NextTriggerTime = startDay.AddDays(1) + validTimes[0];
+                return;
+            }
 
             var today = fromTime.Date;
             foreach (var ts in validTimes)

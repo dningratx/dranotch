@@ -427,4 +427,50 @@ public class ScreenshotTests : IDisposable
         thread.Start();
         Assert.True(thread.Join(5000));
     }
+
+    [Fact]
+    public void ScreenshotHubWindow_ShowsInTaskbarWithComponentIcon()
+    {
+        Exception? caught = null;
+        bool showInTaskbar = false;
+        bool hasIcon = false;
+        int iconWidth = 0;
+        int iconHeight = 0;
+
+        var thread = new System.Threading.Thread(() =>
+        {
+            try
+            {
+                var settingsService = new FakeSettingsService();
+                var screenshotService = new ScreenshotService(_tempFolder);
+                var mainVm = new MainViewModel(
+                    new FakeMediaSessionService(),
+                    new FakeLyricsService(),
+                    settingsService,
+                    screenshotService: screenshotService);
+
+                var window = new Views.ScreenshotHubWindow(mainVm, screenshotService, settingsService);
+                showInTaskbar = window.ShowInTaskbar;
+                hasIcon = window.Icon != null;
+
+                var iconBitmap = Views.ScreenshotHubWindow.CreateComponentTaskbarIcon();
+                iconWidth = iconBitmap.PixelWidth;
+                iconHeight = iconBitmap.PixelHeight;
+            }
+            catch (Exception ex)
+            {
+                caught = ex;
+            }
+        });
+        thread.SetApartmentState(System.Threading.ApartmentState.STA);
+        thread.Start();
+        bool finished = thread.Join(5000);
+
+        Assert.True(finished);
+        Assert.Null(caught);
+        Assert.True(showInTaskbar);
+        Assert.True(hasIcon);
+        Assert.Equal(64, iconWidth);
+        Assert.Equal(64, iconHeight);
+    }
 }

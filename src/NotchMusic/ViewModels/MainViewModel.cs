@@ -59,6 +59,11 @@ public class MainViewModel : ViewModelBase
     private ReminderType _formReminderType = ReminderType.Interval;
     private int _formReminderIntervalMinutes = 60;
     private string _formReminderDailyTimesText = "08:00, 13:00, 20:00";
+    private bool _isPopulatingReminderForm;
+    private bool _formReminderUseStartTime;
+    private DateTime? _formReminderStartDate = DateTime.Today;
+    private string _formReminderStartHour = DateTime.Now.ToString("HH");
+    private string _formReminderStartMinute = DateTime.Now.ToString("mm");
 
     // Catatan Tempel (Sticky Notes) Fields
     private string _stickyNotesSearchQuery = string.Empty;
@@ -1477,6 +1482,96 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _formReminderDailyTimesText, value ?? "08:00");
     }
 
+    public bool FormReminderUseStartTime
+    {
+        get => _formReminderUseStartTime;
+        set
+        {
+            if (SetProperty(ref _formReminderUseStartTime, value))
+            {
+                OnPropertyChanged(nameof(FormReminderStartTimePreviewText));
+            }
+        }
+    }
+
+    public DateTime? FormReminderStartDate
+    {
+        get => _formReminderStartDate;
+        set
+        {
+            if (SetProperty(ref _formReminderStartDate, value))
+            {
+                if (value.HasValue && !_isPopulatingReminderForm)
+                {
+                    FormReminderUseStartTime = true;
+                }
+                OnPropertyChanged(nameof(FormReminderStartTimePreviewText));
+            }
+        }
+    }
+
+    public string FormReminderStartHour
+    {
+        get => _formReminderStartHour;
+        set
+        {
+            if (SetProperty(ref _formReminderStartHour, value ?? "00"))
+            {
+                if (!_isPopulatingReminderForm)
+                {
+                    FormReminderUseStartTime = true;
+                }
+                OnPropertyChanged(nameof(FormReminderStartTimePreviewText));
+            }
+        }
+    }
+
+    public string FormReminderStartMinute
+    {
+        get => _formReminderStartMinute;
+        set
+        {
+            if (SetProperty(ref _formReminderStartMinute, value ?? "00"))
+            {
+                if (!_isPopulatingReminderForm)
+                {
+                    FormReminderUseStartTime = true;
+                }
+                OnPropertyChanged(nameof(FormReminderStartTimePreviewText));
+            }
+        }
+    }
+
+    public string FormReminderStartTimePreviewText
+    {
+        get
+        {
+            if (!FormReminderUseStartTime)
+                return "Mulai segera setelah disimpan";
+            var dt = TryBuildFormReminderStartTime();
+            return dt.HasValue
+                ? $"Akan mulai: {dt.Value:dd/MM/yyyy HH:mm}"
+                : "Format jam/menit tidak valid (00-23 & 00-59)";
+        }
+    }
+
+    private DateTime? TryBuildFormReminderStartTime()
+    {
+        if (!FormReminderUseStartTime || !FormReminderStartDate.HasValue)
+            return null;
+
+        if (!int.TryParse(FormReminderStartHour?.Trim(), out int hour))
+            return null;
+        if (!int.TryParse(FormReminderStartMinute?.Trim(), out int minute))
+            return null;
+
+        hour = Math.Clamp(hour, 0, 23);
+        minute = Math.Clamp(minute, 0, 59);
+
+        var d = FormReminderStartDate.Value.Date;
+        return new DateTime(d.Year, d.Month, d.Day, hour, minute, 0);
+    }
+
     // Pilihan Suara Alarm Pengingat Pintar & To-Do
     public IReadOnlyList<AlarmSoundOption> AvailableAlarmSounds => PrayerAudioHelper.AvailableAlarmSounds;
 
@@ -2482,6 +2577,7 @@ public ICommand TogglePrayerPanelCommand { get; }
     public ICommand SetFormReminderTypeCommand { get; }
     public ICommand SetFormReminderIconCommand { get; }
     public ICommand SetFormIntervalPresetCommand { get; }
+    public ICommand ClearFormReminderStartTimeCommand { get; }
     public ICommand ToggleReminderItemCommand { get; }
     public ICommand DeleteReminderItemCommand { get; }
     public ICommand SnoozeReminderItemCommand { get; }
@@ -3335,33 +3431,71 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
         });
         OpenAddReminderFormCommand = new RelayCommand(() =>
         {
-            _editingReminderId = null;
-            FormReminderTitle = string.Empty;
-            FormReminderCategory = "Kesehatan";
-            FormReminderIcon = "💧";
-            FormReminderNotes = string.Empty;
-            FormReminderType = ReminderType.Interval;
-            FormReminderIntervalMinutes = 60;
-            FormReminderDailyTimesText = "08:00, 13:00, 20:00";
-            OnPropertyChanged(nameof(IsEditingExistingReminder));
-            IsAddingOrEditingReminder = true;
+            _isPopulatingReminderForm = true;
+            try
+            {
+                var now = DateTime.Now;
+                _editingReminderId = null;
+                FormReminderTitle = string.Empty;
+                FormReminderCategory = "Kesehatan";
+                FormReminderIcon = "💧";
+                FormReminderNotes = string.Empty;
+                FormReminderType = ReminderType.Interval;
+                FormReminderIntervalMinutes = 60;
+                FormReminderDailyTimesText = "08:00, 13:00, 20:00";
+                FormReminderUseStartTime = false;
+                FormReminderStartDate = now.Date;
+                FormReminderStartHour = now.ToString("HH");
+                FormReminderStartMinute = now.ToString("mm");
+                OnPropertyChanged(nameof(IsEditingExistingReminder));
+                IsAddingOrEditingReminder = true;
+            }
+            finally
+            {
+                _isPopulatingReminderForm = false;
+            }
         });
         OpenEditReminderFormCommand = new RelayCommand((itemObj) =>
         {
             if (itemObj is ReminderItem item)
             {
-                _editingReminderId = item.Id;
-                FormReminderTitle = item.Title;
-                FormReminderCategory = item.Category;
-                FormReminderIcon = item.Icon;
-                FormReminderNotes = item.Notes;
-                FormReminderType = item.Type;
-                FormReminderIntervalMinutes = item.IntervalMinutes;
-                FormReminderDailyTimesText = item.DailyTimes != null && item.DailyTimes.Count > 0
-                    ? string.Join(", ", item.DailyTimes)
-                    : "08:00";
-                OnPropertyChanged(nameof(IsEditingExistingReminder));
-                IsAddingOrEditingReminder = true;
+                _isPopulatingReminderForm = true;
+                try
+                {
+                    var now = DateTime.Now;
+                    _editingReminderId = item.Id;
+                    FormReminderTitle = item.Title;
+                    FormReminderCategory = item.Category;
+                    FormReminderIcon = item.Icon;
+                    FormReminderNotes = item.Notes;
+                    FormReminderType = item.Type;
+                    FormReminderIntervalMinutes = item.IntervalMinutes;
+                    FormReminderDailyTimesText = item.DailyTimes != null && item.DailyTimes.Count > 0
+                        ? string.Join(", ", item.DailyTimes)
+                        : "08:00";
+
+                    if (item.StartTime.HasValue)
+                    {
+                        FormReminderUseStartTime = true;
+                        FormReminderStartDate = item.StartTime.Value.Date;
+                        FormReminderStartHour = item.StartTime.Value.ToString("HH");
+                        FormReminderStartMinute = item.StartTime.Value.ToString("mm");
+                    }
+                    else
+                    {
+                        FormReminderUseStartTime = false;
+                        FormReminderStartDate = now.Date;
+                        FormReminderStartHour = now.ToString("HH");
+                        FormReminderStartMinute = now.ToString("mm");
+                    }
+
+                    OnPropertyChanged(nameof(IsEditingExistingReminder));
+                    IsAddingOrEditingReminder = true;
+                }
+                finally
+                {
+                    _isPopulatingReminderForm = false;
+                }
             }
         });
         CancelReminderFormCommand = new RelayCommand(() =>
@@ -3403,6 +3537,22 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
             else if (minObj is int mVal)
             {
                 FormReminderIntervalMinutes = mVal;
+            }
+        });
+        ClearFormReminderStartTimeCommand = new RelayCommand(() =>
+        {
+            _isPopulatingReminderForm = true;
+            try
+            {
+                var now = DateTime.Now;
+                FormReminderUseStartTime = false;
+                FormReminderStartDate = now.Date;
+                FormReminderStartHour = now.ToString("HH");
+                FormReminderStartMinute = now.ToString("mm");
+            }
+            finally
+            {
+                _isPopulatingReminderForm = false;
             }
         });
         ToggleReminderItemCommand = new RelayCommand((itemObj) =>
@@ -4667,6 +4817,8 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
             parsedTimes.Add("08:00");
         }
 
+        DateTime? startTime = TryBuildFormReminderStartTime();
+
         if (!string.IsNullOrEmpty(_editingReminderId))
         {
             var existing = Reminders.FirstOrDefault(r => r.Id == _editingReminderId);
@@ -4679,6 +4831,7 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
                 existing.Type = FormReminderType;
                 existing.IntervalMinutes = Math.Clamp(FormReminderIntervalMinutes, 1, 1440);
                 existing.DailyTimes = parsedTimes;
+                existing.StartTime = startTime;
                 existing.IsEnabled = true;
                 _reminderService.UpdateReminder(existing);
             }
@@ -4694,6 +4847,7 @@ ExpandPrayerWindowCommand = new RelayCommand(() => IsPrayerWindowCompact = false
                 Type = FormReminderType,
                 IntervalMinutes = Math.Clamp(FormReminderIntervalMinutes, 1, 1440),
                 DailyTimes = parsedTimes,
+                StartTime = startTime,
                 IsEnabled = true
             };
             _reminderService.AddReminder(newItem);

@@ -7,7 +7,7 @@
         MinWidth="700" MinHeight="480"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True"
-        ShowInTaskbar="False"
+        ShowInTaskbar="True"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>

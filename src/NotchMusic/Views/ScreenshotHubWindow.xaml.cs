@@ -50,6 +50,12 @@ public partial class ScreenshotHubWindow : Window
         _screenshotService = screenshotService;
         _settingsService = settingsService;
 
+        try
+        {
+            Icon = CreateComponentTaskbarIcon();
+        }
+        catch { }
+
         ScreenshotsListBox.ItemsSource = _filteredScreenshots;
 
         Loaded += ScreenshotHubWindow_Loaded;
@@ -61,10 +67,59 @@ public partial class ScreenshotHubWindow : Window
         _mainViewModel.ScreenshotsSyncedFromCloud += _ => Dispatcher.Invoke(ReloadScreenshots);
     }
 
+    public static BitmapSource CreateComponentTaskbarIcon()
+    {
+        const int size = 64;
+        const string snippingIconGeometry =
+            "M 4,4 H 9 V 6 H 6 V 9 H 4 V 4 Z M 15,4 H 20 V 9 H 18 V 6 H 15 V 4 Z " +
+            "M 4,15 H 6 V 18 H 9 V 20 H 4 V 15 Z M 18,15 H 20 V 20 H 15 V 18 H 18 V 15 Z " +
+            "M 9,11 H 15 V 13 H 9 Z M 11,9 H 13 V 15 H 11 Z";
+
+        var visual = new DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            var bgBrush = new LinearGradientBrush(
+                (Color)ColorConverter.ConvertFromString("#242434"),
+                (Color)ColorConverter.ConvertFromString("#101018"),
+                new Point(0, 0),
+                new Point(1, 1));
+            var borderPen = new System.Windows.Media.Pen(
+                new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00D2FF")),
+                2.4);
+
+            // Dark metallic squircle background
+            dc.DrawRoundedRectangle(bgBrush, borderPen, new Rect(3, 3, size - 6, size - 6), 14, 14);
+
+            // Render LuxurySnippingIconGeometry (24x24 viewbox) scaled to 38x38 centered
+            var geometry = Geometry.Parse(snippingIconGeometry);
+            var iconBrush = new LinearGradientBrush(
+                Colors.White,
+                (Color)ColorConverter.ConvertFromString("#C8D4E8"),
+                new Point(0, 0),
+                new Point(1, 1));
+
+            double scale = 38.0 / 24.0;
+            double offset = (size - 38.0) / 2.0;
+
+            dc.PushTransform(new TranslateTransform(offset, offset));
+            dc.PushTransform(new ScaleTransform(scale, scale));
+            dc.DrawGeometry(iconBrush, null, geometry);
+            dc.Pop();
+            dc.Pop();
+
+            // Cyan accent dot matching the notch component badge
+            var dotBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00D2FF"));
+            dc.DrawEllipse(dotBrush, null, new Point(size - 14, size - 14), 4.5, 4.5);
+        }
+
+        var rtb = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+        rtb.Render(visual);
+        rtb.Freeze();
+        return rtb;
+    }
+
     private void ScreenshotHubWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        WindowHelper.SetToolWindow(this);
-
         var s = _settingsService.CurrentSettings;
         if (s.ScreenshotHubLeft > 0 && s.ScreenshotHubTop > 0)
         {
@@ -137,6 +192,7 @@ public partial class ScreenshotHubWindow : Window
         else if (e.Key == Key.Escape)
         {
             Hide();
+            _mainViewModel.IsScreenshotHubOpen = false;
         }
     }
 

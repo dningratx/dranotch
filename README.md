@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **Tangkapan Layar & Snipping Hub (Multi-Screenshot Tool dengan Direct Window Capture DWM & Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v2.0.2)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v2.0.3)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -341,6 +341,14 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
   - Menyelesaikan masalah crash runtime saat membuka jendela Pengaturan (**SettingsWindow**) yang disebabkan oleh pemanggilan style `ModernButton` pada tombol sinkronisasi Google Drive dan pemilihan folder tangkapan layar.
   - Menambahkan definisi style `ModernButton` tema gelap modern secara global di `App.xaml` dan lokal di `SettingsWindow.xaml`.
 
+### ⏰ 37. Jadwal Waktu Mulai Pengingat Pintar & Ikon Taskbar Tangkapan Layar *(Baru di v2.0.3)*
+- **Waktu Mulai (Tanggal & Jam) pada Pengingat Pintar**:
+  - Kini Anda dapat menentukan **tanggal dan jam mulai** (`StartTime`) saat membuat atau mengedit pengingat pintar, baik untuk tipe **Interval Berulang** maupun **Jam Harian**.
+  - Pengingat yang dijadwalkan untuk waktu mendatang akan menunggu hingga tanggal & jam mulai tercapai sebelum berbunyi pertama kali, lalu melanjutkan siklus normal secara otomatis.
+  - Dilengkapi tombol cepat **Mulai Sekarang**, pratinjau jadwal mulai real-time di form, label `Mulai: <tanggal & jam>` pada kartu pengingat, serta dukungan format hitung mundur multi-hari.
+- **Ikon Komponen Tangkapan Layar di Taskbar Windows**:
+  - Jendela **Tangkapan Layar & Snipping Hub** (`ScreenshotHubWindow`) kini otomatis menampilkan **ikon komponen khusus Tangkapan Layar** di taskbar Windows saat dibuka (memudahkan perpindahan jendela & pemulihan setelah diminimize), dan otomatis menghilang dari taskbar saat ditutup.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -371,7 +379,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.2.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.3.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

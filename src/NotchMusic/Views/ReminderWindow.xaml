@@ -541,6 +541,45 @@
                                            FontSize="9.5" Foreground="#6E7890" Margin="0,3,0,0"/>
                             </StackPanel>
 
+                            <!-- Waktu Mulai (Tanggal & Jam) -->
+                            <StackPanel Margin="0,0,0,8">
+                                <DockPanel Margin="0,0,0,4">
+                                    <CheckBox IsChecked="{Binding FormReminderUseStartTime, Mode=TwoWay}"
+                                              Foreground="#98A2B8" FontSize="10.5" VerticalAlignment="Center" Cursor="Hand"
+                                              Content="Waktu Mulai (Tanggal &amp; Jam):"/>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource SmallPillButton}"
+                                            Command="{Binding ClearFormReminderStartTimeCommand}"
+                                            Visibility="{Binding FormReminderUseStartTime, Converter={StaticResource BoolToVis}}"
+                                            Content="Mulai Sekarang" Padding="7,2" FontSize="9.5" HorizontalAlignment="Right"
+                                            ToolTip="Kosongkan jadwal mulai agar pengingat aktif segera"/>
+                                </DockPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <DatePicker Grid.Column="0"
+                                                SelectedDate="{Binding FormReminderStartDate, Mode=TwoWay}"
+                                                Foreground="#121218" Background="#F4F6FA"
+                                                VerticalAlignment="Center" Margin="0,0,8,0"
+                                                ToolTip="Pilih tanggal mulai pengingat"/>
+                                    <TextBox Grid.Column="1" Style="{StaticResource ReminderInputBoxStyle}"
+                                             Text="{Binding FormReminderStartHour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="40" TextAlignment="Center" MaxLength="2"
+                                             ToolTip="Jam mulai (00-23)"/>
+                                    <TextBlock Grid.Column="2" Text=":" Foreground="#FFFFFF" FontWeight="Bold"
+                                               VerticalAlignment="Center" Margin="4,0"/>
+                                    <TextBox Grid.Column="3" Style="{StaticResource ReminderInputBoxStyle}"
+                                             Text="{Binding FormReminderStartMinute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="40" TextAlignment="Center" MaxLength="2"
+                                             ToolTip="Menit mulai (00-59)"/>
+                                </Grid>
+                                <TextBlock Text="{Binding FormReminderStartTimePreviewText}"
+                                           FontSize="9.5" Foreground="#7CC4FA" Margin="0,3,0,0"/>
+                            </StackPanel>
+
                             <!-- Catatan / Pesan -->
                             <TextBlock Text="Pesan / Catatan Dosis (Opsional):" FontSize="10.5" Foreground="#98A2B8" Margin="0,0,0,4"/>
                             <TextBox Style="{StaticResource ReminderInputBoxStyle}"
@@ -611,6 +650,9 @@
                                                                        FontSize="10.5" Foreground="#38BDF8" FontWeight="SemiBold"
                                                                        Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVis}}"/>
                                                         </StackPanel>
+                                                        <TextBlock Text="{Binding StartTimeBadgeText}" FontSize="10" Foreground="#FBBF24" FontWeight="SemiBold"
+                                                                   Margin="0,2,0,0"
+                                                                   Visibility="{Binding HasStartTime, Converter={StaticResource BoolToVis}}"/>
                                                         <TextBlock Text="{Binding Notes}" FontSize="10" Foreground="#77778E"
                                                                    TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
                                                                    Visibility="{Binding HasNotes, Converter={StaticResource BoolToVis}}"/>
