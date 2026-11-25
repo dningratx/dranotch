@@ -14,7 +14,7 @@
 **DRANOTCH** menghadirkan pengalaman *Dynamic Island* modern, ramping, dan elegan langsung di bagian atas desktop Windows Anda.  
 Menggabungkan **pemutar musik pintar (YouTube Music & Spotify bawaan)**, **Live TV Indonesia & Dunia**, **Radio Online Indonesia & Dunia**, **Cuaca & Gempa Bumi BMKG (Presisi Kelurahan/Desa)**, **Pengingat Pintar (Minum Air, Minum Obat, Istirahat Mata & Aktivitas)**, **Catatan Tempel (Sticky Notes melayang dengan Google Drive Sync)**, **Tangkapan Layar & Snipping Hub (Multi-Screenshot Tool dengan Direct Window Capture DWM & Google Drive Sync)**, **lirik sinkronisasi otomatis (Karaoke)**, **To-Do List produktif yang dapat dilepas (detachable)** dengan sinkronisasi Google Drive, **jadwal waktu sholat & pengingat adzan otomatis**, serta **Browser Mengambang**.
 
-[📥 **Unduh Versi Terbaru (v2.0.3)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
+[📥 **Unduh Versi Terbaru (v2.1.0)**](https://github.com/dningratx/dranotch/releases/latest) • [🌐 **Halaman Rilis Resmi**](https://dningratx.github.io/dranotch/) • [✨ Fitur Utama](#-fitur-utama) • [⌨️ Shortcut](#️-pintasan-keyboard-hotkeys) • [🛠️ Panduan Build](#️-cara-build-dari-source)
 
 </div>
 
@@ -349,6 +349,17 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 - **Ikon Komponen Tangkapan Layar di Taskbar Windows**:
   - Jendela **Tangkapan Layar & Snipping Hub** (`ScreenshotHubWindow`) kini otomatis menampilkan **ikon komponen khusus Tangkapan Layar** di taskbar Windows saat dibuka (memudahkan perpindahan jendela & pemulihan setelah diminimize), dan otomatis menghilang dari taskbar saat ditutup.
 
+### 🎨 38. Desain Compact Minimalis & Sistem Desain Terpusat Antislop-AI *(Baru di v2.1.0)*
+- **Antarmuka Lebih Compact & Matte Minimalis**:
+  - Merampingkan dimensi notch utama (`CornerRadius="0,0,16,16"`), memperkecil tile ikon hover (`42×42` → `32×32`), logo tengah (`44×44` → `34×34`), pill musik & to-do (`44px` → `34px`), baris status bawah (`30px` → `26px`), serta panggung lirik (`640×400` → `540×320`).
+  - Mengganti gradien metalik berulang dan glow berlebih dengan permukaan matte flat (`#09090C` / `#121216` / `#1A1A21`), garis tipis 1px (`#22222B`), serta satu aksen status aktif (`#30D158`).
+  - Merampingkan jendela fitur utama (`MusicWindow`, `PrayerWindow`, `TodoWindow`, `AboutWindow`, `NotificationToastWindow`, dan `SettingsWindow`) agar lebih hemat ruang layar dan konsisten.
+- **Sistem Desain Terpusat & Aksesibilitas WCAG AA**:
+  - Memusatkan token warna, tombol compact, tile notch, dan indikator fokus keyboard (`CompactFocusVisualStyle`) di `src/NotchMusic/Themes/DesignSystem.xaml`.
+  - Memverifikasi rasio kontras teks muted (`#9A9AA8`) dan utama (`#F4F4F8` / `#C8C8D4`) memenuhi standar WCAG AA (`>= 4.5:1`) serta membersihkan emoji dekoratif pada tombol kontrol.
+- **Standar Antislop-AI (Desain & Code)**:
+  - Memasang aturan Antislop-AI (`.agents/skills/antislop*`), `DESIGN.md`, dan `AGENTS.md` untuk menjaga konsistensi desain UI dan kebersihan komentar kode pada pengembangan berikutnya.
+
 ---
 
 ## 📸 Tampilan Antarmuka
@@ -379,7 +390,7 @@ Sesuaikan apa yang ingin Anda tampilkan melalui menu Pengaturan:
 
 ## 📥 Pemasangan (Instalasi)
 
-1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.0.3.exe`**](https://github.com/dningratx/dranotch/releases/latest).
+1. Unduh installer setup terbaru: [**`DRANOTCH-Setup-2.1.0.exe`**](https://github.com/dningratx/dranotch/releases/latest).
 2. Jalankan berkas installer dan ikuti petunjuk pemasangan.
 3. DRANOTCH akan muncul di bagian atas layar desktop Anda.
 

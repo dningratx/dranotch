@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
         Title="DRANOTCH - To-Do List"
-        Width="430" Height="520" MinWidth="360" MinHeight="320"
+        Width="376" Height="460" MinWidth="320" MinHeight="280"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"

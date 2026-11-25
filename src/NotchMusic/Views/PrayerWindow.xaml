@@ -3,69 +3,48 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
         Title="DRANOTCH - Waktu Sholat"
-        Width="360" MinWidth="300"
+        Width="312" MinWidth="280"
         SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        Foreground="#FFFFFF"
+        Foreground="#F4F4F8"
         Topmost="{Binding Settings.AlwaysOnTop}"
         ShowInTaskbar="False"
         WindowStartupLocation="Manual">
 
     <Window.Resources>
-        <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/NotchMusic;component/Themes/DesignSystem.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
+            <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
 
-        <LinearGradientBrush x:Key="MetallicSilverBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFFFFF" Offset="0.0"/>
-            <GradientStop Color="#E2E6F0" Offset="0.35"/>
-            <GradientStop Color="#949BA8" Offset="0.72"/>
-            <GradientStop Color="#D4D9E6" Offset="1.0"/>
-        </LinearGradientBrush>
+            <SolidColorBrush x:Key="MetallicSilverBrush" Color="#E4E4EC"/>
 
-        <Geometry x:Key="LuxuryPrayerIconGeometry">M 20.6,13.4 A 8.6,8.6 0 1 1 10.6,3.4 A 6.6,6.6 0 0 0 20.6,13.4 Z M 17.5,2.2 L 18.5,5.0 L 21.3,6.0 L 18.5,7.0 L 17.5,9.8 L 16.5,7.0 L 13.7,6.0 L 16.5,5.0 Z</Geometry>
+            <Geometry x:Key="LuxuryPrayerIconGeometry">M 20.6,13.4 A 8.6,8.6 0 1 1 10.6,3.4 A 6.6,6.6 0 0 0 20.6,13.4 Z M 17.5,2.2 L 18.5,5.0 L 21.3,6.0 L 18.5,7.0 L 17.5,9.8 L 16.5,7.0 L 13.7,6.0 L 16.5,5.0 Z</Geometry>
 
-        <!-- Small Pill Button Style -->
-        <Style x:Key="SmallPillButton" TargetType="Button">
-            <Setter Property="Background" Value="#1E1E24"/>
-            <Setter Property="Foreground" Value="#CCCCCC"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="7,3"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#2A2A34"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <Style x:Key="SmallPillButton" TargetType="Button" BasedOn="{StaticResource CompactButtonStyle}">
+                <Setter Property="Padding" Value="6,3"/>
+                <Setter Property="FontSize" Value="10.5"/>
+            </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
-    <Grid Margin="12">
+    <Grid Margin="8">
         <Border x:Name="PrayerContainerBorder"
-                Background="#0A0A0C"
-                BorderBrush="#24242A"
-                BorderThickness="1.2"
-                CornerRadius="20"
+                Background="{StaticResource SurfaceBaseBrush}"
+                BorderBrush="{StaticResource BorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="14"
                 MouseDown="Border_MouseDown">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="4" BlurRadius="16" Opacity="0.65"/>
+                <DropShadowEffect Color="#000000" Direction="270" ShadowDepth="3" BlurRadius="12" Opacity="0.45"/>
             </Border.Effect>
 
             <Grid>
-                <!-- ================= MODE 1: COMPACT PRAYER NOTCH ================= -->
                 <Grid x:Name="PrayerCompactView"
                       Visibility="{Binding IsPrayerWindowCompact, Converter={StaticResource BoolToVis}}"
-                      Height="48" Margin="8,0" VerticalAlignment="Center">
+                      Height="40" Margin="8,0" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>

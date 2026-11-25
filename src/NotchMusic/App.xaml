@@ -5,11 +5,16 @@
              ShutdownMode="OnExplicitShutdown"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <!-- Modern Theme ScrollBar Resources -->
-        <SolidColorBrush x:Key="ScrollBar.Thumb.Normal" Color="#33333E"/>
-        <SolidColorBrush x:Key="ScrollBar.Thumb.MouseOver" Color="#4E4E62"/>
-        <SolidColorBrush x:Key="ScrollBar.Thumb.Pressed" Color="#6C6C82"/>
-        <SolidColorBrush x:Key="ScrollBar.Track.Background" Color="#0D0D12"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/DesignSystem.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+        <!-- ScrollBar Resources -->
+        <SolidColorBrush x:Key="ScrollBar.Thumb.Normal" Color="#323240"/>
+        <SolidColorBrush x:Key="ScrollBar.Thumb.MouseOver" Color="#4A4A5E"/>
+        <SolidColorBrush x:Key="ScrollBar.Thumb.Pressed" Color="#686880"/>
+        <SolidColorBrush x:Key="ScrollBar.Track.Background" Color="#09090C"/>
 
         <!-- Transparent Page Scroll Buttons (Click above/below thumb to page-scroll) -->
         <Style x:Key="ScrollBarPageButtonStyle" TargetType="{x:Type RepeatButton}">
@@ -119,40 +124,11 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Modern Button Style -->
-        <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="#25252C"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="FontSize" Value="11.5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#323240"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1C1C24"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <!-- Shared Compact Action Button -->
+        <Style x:Key="ModernButton" TargetType="Button" BasedOn="{StaticResource CompactButtonStyle}">
+            <Setter Property="Padding" Value="9,4"/>
+            <Setter Property="FontSize" Value="11"/>
         </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

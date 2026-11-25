@@ -4,7 +4,7 @@
         xmlns:helpers="clr-namespace:NotchMusic.Helpers"
         Title="DRANOTCH - Notifikasi"
         SizeToContent="WidthAndHeight"
-        MinWidth="380" MaxWidth="540"
+        MinWidth="330" MaxWidth="440"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -18,65 +18,35 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
     <Window.Resources>
-        <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/NotchMusic;component/Themes/DesignSystem.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
+            <helpers:BoolToVisibilityConverter x:Key="InverseBoolToVis" Invert="True"/>
 
-        <!-- Geometries -->
-        <Geometry x:Key="LuxuryPrayerIconGeometry">M 20.6,13.4 A 8.6,8.6 0 1 1 10.6,3.4 A 6.6,6.6 0 0 0 20.6,13.4 Z M 17.5,2.2 L 18.5,5.0 L 21.3,6.0 L 18.5,7.0 L 17.5,9.8 L 16.5,7.0 L 13.7,6.0 L 16.5,5.0 Z</Geometry>
-        <Geometry x:Key="LuxuryBmkgIconGeometry">M 6.5,14.8 H 17.5 A 3.4,3.4 0 0 0 18.1,8.1 A 4.8,4.8 0 0 0 8.8,6.5 A 3.8,3.8 0 0 0 6.5,14.8 Z M 2.5,19.2 H 7.2 L 9.0,16.2 L 11.4,21.5 L 13.8,17.2 L 15.2,19.2 H 21.5</Geometry>
+            <Geometry x:Key="LuxuryPrayerIconGeometry">M 20.6,13.4 A 8.6,8.6 0 1 1 10.6,3.4 A 6.6,6.6 0 0 0 20.6,13.4 Z M 17.5,2.2 L 18.5,5.0 L 21.3,6.0 L 18.5,7.0 L 17.5,9.8 L 16.5,7.0 L 13.7,6.0 L 16.5,5.0 Z</Geometry>
+            <Geometry x:Key="LuxuryBmkgIconGeometry">M 6.5,14.8 H 17.5 A 3.4,3.4 0 0 0 18.1,8.1 A 4.8,4.8 0 0 0 8.8,6.5 A 3.8,3.8 0 0 0 6.5,14.8 Z M 2.5,19.2 H 7.2 L 9.0,16.2 L 11.4,21.5 L 13.8,17.2 L 15.2,19.2 H 21.5</Geometry>
 
-        <!-- Small Pill Button Style -->
-        <Style x:Key="SmallPillButton" TargetType="Button">
-            <Setter Property="Background" Value="#1E1E28"/>
-            <Setter Property="Foreground" Value="#D4D4E0"/>
-            <Setter Property="BorderBrush" Value="#2E2E3C"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="11.5"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Border" Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#2C2C3E"/>
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#4E4E68"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#383850"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <Style x:Key="SmallPillButton" TargetType="Button" BasedOn="{StaticResource CompactButtonStyle}"/>
+        </ResourceDictionary>
     </Window.Resources>
 
-    <Grid Margin="18">
+    <Grid Margin="10">
         <Border x:Name="ToastContainer"
-                CornerRadius="20"
-                Background="#0C0C12"
-                BorderBrush="#30FFFFFF"
-                BorderThickness="1.2"
-                Padding="6">
+                CornerRadius="14"
+                Background="{StaticResource SurfaceBaseBrush}"
+                BorderBrush="{StaticResource BorderSubtleBrush}"
+                BorderThickness="1"
+                Padding="4">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="28" ShadowDepth="4" Direction="270" Color="#000000" Opacity="0.65"/>
+                <DropShadowEffect BlurRadius="14" ShadowDepth="3" Direction="270" Color="#000000" Opacity="0.48"/>
             </Border.Effect>
 
             <StackPanel Orientation="Vertical">
-                <!-- 1. PENGINGAT PINTAR (MINUM AIR / OBAT / AKTIVITAS) NOTIFIKASI -->
                 <Border Visibility="{Binding HasActiveReminderNotification, Converter={StaticResource BoolToVis}}"
-                        Background="#0E1824" BorderBrush="#38BDF8" BorderThickness="1.5" CornerRadius="16"
-                        Padding="14,10" Margin="2">
+                        Background="#0F1822" BorderBrush="#38BDF8" BorderThickness="1" CornerRadius="10"
+                        Padding="10,8" Margin="2">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -86,44 +56,39 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Icon -->
-                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="19"
+                        <Border Grid.Column="0" Width="32" Height="32" CornerRadius="8"
                                 Background="{Binding ActiveReminderNotification.BadgeBackground, FallbackValue=#16283C}"
                                 BorderBrush="{Binding ActiveReminderNotification.BadgeBorder, FallbackValue=#284A6E}"
-                                BorderThickness="1" Margin="0,0,12,0">
+                                BorderThickness="1" Margin="0,0,10,0">
                             <Path Data="{Binding ActiveReminderNotification.IconGeometry}"
                                   Fill="{Binding ActiveReminderNotification.AccentColor, FallbackValue=#38BDF8}"
-                                  Width="18" Height="18" Stretch="Uniform"
+                                  Width="15" Height="15" Stretch="Uniform"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
 
-                        <!-- Info -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
                             <DockPanel LastChildFill="True">
-                                <Border DockPanel.Dock="Right" Background="#1A2C42" BorderBrush="#2E4E74" BorderThickness="1" CornerRadius="4" Padding="6,1.5" Margin="8,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding ActiveReminderNotification.TimeFormatted}" Foreground="#7CC4FA" FontSize="10.5" FontWeight="Bold"/>
+                                <Border DockPanel.Dock="Right" Background="#1A2C42" BorderBrush="#2E4E74" BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding ActiveReminderNotification.TimeFormatted}" Foreground="#7CC4FA" FontSize="10" FontWeight="SemiBold"/>
                                 </Border>
-                                <TextBlock Text="{Binding ActiveReminderNotification.Title}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding ActiveReminderNotification.Title}" Foreground="#F4F4F8" FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis"/>
                             </DockPanel>
-                            <TextBlock Text="{Binding ActiveReminderNotification.Message}" Foreground="#D4E4F4" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+                            <TextBlock Text="{Binding ActiveReminderNotification.Message}" Foreground="#C8C8D4" FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
                         </StackPanel>
 
-                        <!-- Sudah / Selesai Button -->
                         <Button Grid.Column="2" Command="{Binding CompleteActiveReminderNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="✓ Sudah" ToolTip="Tandai pengingat ini sudah dilakukan"
-                                Background="#143624" Foreground="#4CD964" BorderBrush="#265E3E"
-                                Height="28" Padding="12,0" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                Style="{StaticResource SmallPillButton}" Content="Sudah" ToolTip="Tandai selesai"
+                                Background="#143624" Foreground="#30D158" BorderBrush="#265E3E"
+                                Height="24" Padding="8,0" Margin="0,0,4,0" VerticalAlignment="Center"/>
 
-                        <!-- Tunda 10m Button -->
                         <Button Grid.Column="3" Command="{Binding SnoozeActiveReminderNotificationCommand}" CommandParameter="10"
-                                Style="{StaticResource SmallPillButton}" Content="💤 +10m" ToolTip="Tunda pengingat ini 10 menit"
-                                Background="#1C2838" Foreground="#98C0E8" BorderBrush="#2E4460"
-                                Height="28" Padding="10,0" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                Style="{StaticResource SmallPillButton}" Content="+10m" ToolTip="Tunda 10 menit"
+                                Background="#1A2636" Foreground="#98C0E8" BorderBrush="#2E4460"
+                                Height="24" Padding="8,0" Margin="0,0,4,0" VerticalAlignment="Center"/>
 
-                        <!-- Dismiss button -->
                         <Button Grid.Column="4" Command="{Binding DismissReminderNotificationCommand}"
-                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup Notifikasi"
-                                Width="28" Height="28" Padding="0" VerticalAlignment="Center"/>
+                                Style="{StaticResource SmallPillButton}" Content="&#x2715;" ToolTip="Tutup"
+                                Width="24" Height="24" Padding="0" VerticalAlignment="Center"/>
                     </Grid>
                 </Border>
 
